@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"backend/internal/pkg/auth"
 	"backend/internal/pkg/db"
 	"backend/internal/pkg/sms"
 	"backend/internal/pkg/t7Error"
@@ -76,7 +77,7 @@ func MobileSignInConfirm(c *gin.Context) {
 
 	// gen token
 	log.Debug("gen user token")
-	token, err := user.GenToken(data.Id.Hex())
+	token, err := auth.GenUserToken(data.Id.Hex())
 	if err != nil {
 		log.Error("fail")
 		c.JSON(err.GetStatus(), err)

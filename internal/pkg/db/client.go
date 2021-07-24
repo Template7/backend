@@ -11,9 +11,9 @@ import (
 )
 
 type client struct {
-	user      *mongo.Collection
-	order     *mongo.Collection
-	userToken *mongo.Collection
+	user  *mongo.Collection
+	order *mongo.Collection
+	token *mongo.Collection
 }
 
 type QueryOption struct {
@@ -64,8 +64,8 @@ func New() *client {
 		}
 		db := c.Database(config.New().Mongo.Db)
 		instance = &client{
-			user:      db.Collection("user"),
-			userToken: db.Collection("userToken"),
+			user:  db.Collection("user"),
+			token: db.Collection("token"),
 		}
 		if err := c.Ping(nil, nil); err != nil {
 			log.Fatal(err)

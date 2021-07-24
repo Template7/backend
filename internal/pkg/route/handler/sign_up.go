@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"backend/internal/pkg/auth"
 	"backend/internal/pkg/sms"
 	"backend/internal/pkg/t7Error"
 	"backend/internal/pkg/user"
@@ -60,7 +61,7 @@ func ConfirmVerifyCode(c *gin.Context) {
 
 	// gen token
 	log.Debug("gen user token")
-	token, err := user.GenToken(userData.Id.Hex())
+	token, err := auth.GenUserToken(userData.Id.Hex())
 	if err != nil {
 		log.Error("fail to gen user token: ", err.Error())
 		c.JSON(err.GetStatus(), err)

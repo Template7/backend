@@ -29,10 +29,10 @@ const (
 )
 
 type User struct {
-	Id          *primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"` // mongo default document id
+	Id          *primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty" swaggerignore:"true"` // mongo default document id
 	BasicInfo   UserInfo            `json:"basic_info" bson:"basic_info"`
-	Mobile      string              `json:"mobile" bson:"mobile"` // +886987654321
-	Email       string              `json:"email" bson:"email"`
+	Mobile      string              `json:"mobile" bson:"mobile" example:"+886987654321"` // +886987654321
+	Email       string              `json:"email" bson:"email" example:"username@mail.com"`
 	Status      userStatus          `json:"status" bson:"status"`
 	LoginClient LoginInfo           `json:"login_info" bson:"login_info"`
 	LastUpdate  int64               `json:"last_update" bson:"last_update"` // unix time in second
@@ -40,7 +40,7 @@ type User struct {
 
 // fields which allows user to change by themselves
 type UserInfo struct {
-	NickName        string   `json:"nick_name" bson:"nick_name"`
+	NickName        string   `json:"nick_name" bson:"nick_name" binding:"required"`
 	Avatar          string   `json:"Avatar" bson:"Avatar"` // s3 object url
 	ProfilePictures []string `json:"profile_pictures" bson:"profile_pictures"`
 	Birthday        int64    `json:"birthday" bson:"birthday"`

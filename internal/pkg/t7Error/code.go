@@ -77,6 +77,21 @@ var (
 		Message: "token sign fail",
 	}
 
+	TokenParseFail = &Error{
+		Code:    "T002",
+		Message: "token parse fail",
+	}
+
+	TokenAssertionFail = &Error{
+		Code:    "T003",
+		Message: "token assertion fail",
+	}
+
+	InvalidToken = &Error{
+		Code:    "T004",
+		Message: "invalid token",
+	}
+
 	DecodeFail = &Error{
 		Code:    "C001",
 		Message: "decode fail",
