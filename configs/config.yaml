@@ -8,11 +8,11 @@ gin:
 
 
 facebook:
-  app_id: 2882438808668187
-  secret: 4db88a2aeafa61d01582470a76fb8025
+  appId:
+  secret:
 
 mongo:
-  db: rentdate
+  db: template7
   host: 127.0.0.1
   port: 27017
   username:

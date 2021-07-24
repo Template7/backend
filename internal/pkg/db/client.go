@@ -11,8 +11,8 @@ import (
 )
 
 type client struct {
+	admin *mongo.Collection
 	user  *mongo.Collection
-	order *mongo.Collection
 	token *mongo.Collection
 }
 
@@ -64,6 +64,7 @@ func New() *client {
 		}
 		db := c.Database(config.New().Mongo.Db)
 		instance = &client{
+			admin: db.Collection("admin"),
 			user:  db.Collection("user"),
 			token: db.Collection("token"),
 		}

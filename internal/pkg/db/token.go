@@ -10,6 +10,7 @@ import (
 
 func (c client) SaveToken(token collection.Token) (tokenId *primitive.ObjectID, err error) {
 	log.Debug("save token")
+
 	res, err := c.token.InsertOne(context.Background(), token)
 	if err != nil {
 		log.Error("fail to insert document: ", err.Error())

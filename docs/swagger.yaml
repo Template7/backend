@@ -139,7 +139,54 @@ paths:
       - v1
       - user
       - admin
+  /admin/v1/users:
+    delete:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+      summary: Delete user
+      tags:
+      - user
   /api/v1/users/{UserId}:
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: UserId
+        required: true
+        type: string
+      - description: Access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/collection.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+      summary: Get user Info
+      tags:
+      - v1
+      - user
     put:
       parameters:
       - description: Access token
@@ -174,55 +221,7 @@ paths:
       summary: Update user
       tags:
       - user
-  /app/v1/users:
-    delete:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ""
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-      summary: Delete user
-      tags:
-      - user
-  /app/v1/users/{UserId}:
-    get:
-      parameters:
-      - description: User ID
-        in: path
-        name: UserId
-        required: true
-        type: string
-      - description: Access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/collection.User'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-      summary: Get user Info
-      tags:
-      - v1
-      - user
-  /app/v1/users/{UserId}/token:
+  /api/v1/users/{UserId}/token:
     put:
       parameters:
       - description: Token
