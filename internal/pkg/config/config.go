@@ -11,10 +11,11 @@ import (
 
 const (
 	configPath = "configs"
+	jwtSign = "45519f46c06c8340a34f9a32982860c1a8d6bb57eaeb338b7f0119062b8a3b67"
 )
 
 type config struct {
-	JwtSign string
+	JwtSign []byte
 	Log     struct {
 		Level string
 	}
@@ -34,7 +35,7 @@ type config struct {
 	Redis struct {
 		Host     string
 		Password string
-		PollSize int
+		//PollSize int
 		//ReadTimeout int
 	}
 	Facebook struct {
@@ -60,6 +61,7 @@ func New() *config {
 		if err := viper.Unmarshal(&instance); err != nil {
 			log.Fatal(err)
 		}
+		instance.JwtSign = []byte(jwtSign)
 		instance.initLog()
 
 		if instance.Mongo.Username != "" && instance.Mongo.Password != "" {

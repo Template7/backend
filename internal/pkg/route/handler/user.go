@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"backend/internal/pkg/auth"
 	"backend/internal/pkg/db/collection"
 	"backend/internal/pkg/t7Error"
 	"backend/internal/pkg/user"
@@ -13,19 +12,21 @@ import (
 
 // GetInfo
 // @Summary Get user Info
-// @Tags user
+// @Tags v1,user
 // @version 1.0
 // @Success 200 {object} collection.User
 // @failure 400 {object} t7Error.Error
 // @failure 401 {object} t7Error.Error
-// @Router /app/v1/users [get]
+// @Param UserId path string true "User ID"
+// @Param Authorization header string true "Access token"
+// @Router /app/v1/users/{UserId} [get]
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
 func GetInfo(c *gin.Context) {
 	log.Debug("handle get info")
 
-	userInfo, err := user.GetInfo(c.Param("userId"))
+	userInfo, err := user.GetInfo(c.Param("user-id"))
 	if err != nil {
 		c.JSON(err.GetStatus(), err)
 		return
@@ -34,35 +35,17 @@ func GetInfo(c *gin.Context) {
 	return
 }
 
-func RefreshToken(c *gin.Context) {
-	log.Debug("handle refresh token")
-
-	//userId := c.Param("user-id")
-	var token collection.Token
-	if err := c.BindJSON(&token); err != nil {
-		log.Warn("invalid body: ", err.Error())
-		c.JSON(http.StatusBadRequest, err)
-		return
-	}
-	newToken, err := auth.RefreshToken(token)
-	if err != nil {
-		c.JSON(err.GetStatus(), err)
-		return
-	}
-	c.JSON(http.StatusOK, newToken)
-	return
-}
-
 // CreateUser
 // @Summary Create user
-// @Tags user
+// @Tags v1,user,admin
 // @version 1.0
 // @produce json
-// @Param userData body collection.User true "The whole user data"
-// @Success 200
+// @Param Authorization header string true "Access token"
+// @Param userData body collection.User true "User data"
+// @Success 204
 // @failure 400 {object} t7Error.Error
 // @failure 401 {object} t7Error.Error
-// @Router /app/v1/users [put]
+// @Router /admin/v1/user [post]
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
@@ -89,18 +72,20 @@ func CreateUser(c *gin.Context) {
 // @Tags user
 // @version 1.0
 // @produce json
-// @Param user body collection.User true "The whole user data"
+// @Param Authorization header string true "Access token"
+// @Param user body collection.UserInfo true "User basic info"
 // @Success 200
 // @failure 400 {object} t7Error.Error
 // @failure 401 {object} t7Error.Error
-// @Router /app/v1/users [put]
+// @Param UserId path string true "User ID"
+// @Router /api/v1/users/{UserId} [put]
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
 func UpdateUser(c *gin.Context) {
 	log.Debug("handle update user")
 
-	userId := c.Param("userId")
+	userId := c.Param("user-id")
 
 	var userData collection.UserInfo
 	if err := c.BindJSON(&userData); err != nil {

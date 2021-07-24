@@ -8,8 +8,8 @@ import (
 )
 
 type hello struct {
-	Message   string    `json:"message"`
-	Timestamp time.Time `json:"timestamp"`
+	Message   string    `json:"message" example:"Hello"`
+	Timestamp time.Time `json:"timestamp" example:"2021-07-24T20:01:25.874565+08:00"`
 }
 
 // HelloPage

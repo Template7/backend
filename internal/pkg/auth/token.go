@@ -16,10 +16,6 @@ const (
 	userTokenTtl = 365 * 24 * time.Hour // 1 year
 )
 
-var (
-	secret = []byte(config.New().JwtSign)
-)
-
 func GenUserToken(userId string) (token collection.Token, err *t7Error.Error) {
 	log.Debug("gen token for user: ", userId)
 
@@ -31,12 +27,12 @@ func GenUserToken(userId string) (token collection.Token, err *t7Error.Error) {
 	}
 
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, utc)
-	tokenString, signErr := tokenClaims.SignedString(secret)
+	tokenString, signErr := tokenClaims.SignedString(config.New().JwtSign)
 	if signErr != nil {
 		err = t7Error.TokenSignFail.WithDetailAndStatus(signErr.Error(), http.StatusInternalServerError)
 		return
 	}
-	refreshToken, signErr := jwt.New(jwt.SigningMethodHS256).SignedString(secret)
+	refreshToken, signErr := jwt.New(jwt.SigningMethodHS256).SignedString(config.New().JwtSign)
 	if signErr != nil {
 		err = t7Error.TokenSignFail.WithDetailAndStatus(signErr.Error(), http.StatusInternalServerError)
 		return
@@ -44,6 +40,7 @@ func GenUserToken(userId string) (token collection.Token, err *t7Error.Error) {
 	token = collection.Token{
 		AccessToken:  tokenString,
 		RefreshToken: refreshToken,
+		ClaimType: collection.ClaimTypeUser,
 	}
 
 	tokenId, dbErr := db.New().SaveToken(token)

@@ -16,10 +16,10 @@ func AuthUserToken(c *gin.Context) {
 
 	userToken := util.ParseBearerToken(c.GetHeader("Authorization"))
 	token, err := jwt.ParseWithClaims(userToken, &user.TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.New().JwtSign), nil
+		return config.New().JwtSign, nil
 	})
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, t7Error.UnAuthorized)
+		c.JSON(http.StatusUnauthorized, t7Error.UnAuthorized.WithDetail(err.Error()))
 		c.Abort()
 		return
 	}

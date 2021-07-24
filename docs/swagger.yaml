@@ -15,14 +15,21 @@ definitions:
     - device
     - os
     type: object
+  collection.Token:
+    properties:
+      access_token:
+        type: string
+      id:
+        type: string
+      refresh_token:
+        type: string
+    type: object
   collection.User:
     properties:
-      _id:
-        description: mongo default document id
-        type: string
       basic_info:
         $ref: '#/definitions/collection.UserInfo'
       email:
+        example: username@mail.com
         type: string
       last_update:
         description: unix time in second
@@ -31,6 +38,7 @@ definitions:
         $ref: '#/definitions/collection.LoginInfo'
       mobile:
         description: "+886987654321"
+        example: "+886987654321"
         type: string
       status:
         type: integer
@@ -57,12 +65,16 @@ definitions:
         items:
           type: string
         type: array
+    required:
+    - nick_name
     type: object
   handler.hello:
     properties:
       message:
+        example: Hello
         type: string
       timestamp:
+        example: "2021-07-24T20:01:25.874565+08:00"
         type: string
     type: object
   t7Error.Error:
@@ -95,6 +107,73 @@ paths:
       summary: Hello Page
       tags:
       - Hello
+  /admin/v1/user:
+    post:
+      parameters:
+      - description: Access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: User data
+        in: body
+        name: userData
+        required: true
+        schema:
+          $ref: '#/definitions/collection.User'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+      summary: Create user
+      tags:
+      - v1
+      - user
+      - admin
+  /api/v1/users/{UserId}:
+    put:
+      parameters:
+      - description: Access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: User basic info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/collection.UserInfo'
+      - description: User ID
+        in: path
+        name: UserId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+      summary: Update user
+      tags:
+      - user
   /app/v1/users:
     delete:
       produces:
@@ -113,7 +192,19 @@ paths:
       summary: Delete user
       tags:
       - user
+  /app/v1/users/{UserId}:
     get:
+      parameters:
+      - description: User ID
+        in: path
+        name: UserId
+        required: true
+        type: string
+      - description: Access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       responses:
         "200":
           description: OK
@@ -129,20 +220,32 @@ paths:
             $ref: '#/definitions/t7Error.Error'
       summary: Get user Info
       tags:
+      - v1
       - user
+  /app/v1/users/{UserId}/token:
     put:
       parameters:
-      - description: The whole user data
+      - description: Token
         in: body
-        name: user
+        name: token
         required: true
         schema:
-          $ref: '#/definitions/collection.User'
-      produces:
-      - application/json
+          $ref: '#/definitions/collection.Token'
+      - description: User ID
+        in: path
+        name: UserId
+        required: true
+        type: string
+      - description: Access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       responses:
         "200":
-          description: ""
+          description: OK
+          schema:
+            $ref: '#/definitions/collection.Token'
         "400":
           description: Bad Request
           schema:
@@ -151,7 +254,8 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/t7Error.Error'
-      summary: Update user
+      summary: Refresh access token
       tags:
-      - user
+      - v1
+      - token
 swagger: "2.0"

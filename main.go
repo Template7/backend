@@ -3,7 +3,9 @@ package main
 import (
 	_ "backend/docs"
 	"backend/internal/pkg/config"
+	"backend/internal/pkg/db"
 	"backend/internal/pkg/route"
+	"backend/internal/pkg/t7Redis"
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -58,4 +60,10 @@ func main() {
 	}
 
 	log.Info("server exited properly")
+}
+
+func init() {
+	config.New()
+	db.New()
+	t7Redis.New()
 }

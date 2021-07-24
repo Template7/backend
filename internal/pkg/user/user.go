@@ -1,7 +1,6 @@
 package user
 
 import (
-	"backend/internal/pkg/config"
 	"backend/internal/pkg/db"
 	"backend/internal/pkg/db/collection"
 	"backend/internal/pkg/t7Error"
@@ -12,12 +11,6 @@ import (
 	"net/http"
 	"time"
 )
-
-const (
-	tokenTtl = 365 * 24 * time.Hour // 1 year
-)
-
-var secret = []byte(config.New().JwtSign)
 
 func Exist(filter db.GetUserFilter) (exist bool, err *t7Error.Error) {
 	log.Debug("check user exist")
