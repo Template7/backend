@@ -1,0 +1,157 @@
+definitions:
+  collection.LoginInfo:
+    properties:
+      channel:
+        type: integer
+      channel_user_id:
+        description: user id of the channel
+        type: string
+      device:
+        description: iPhoneN, PixelN, NoteN, ...
+        type: string
+      os:
+        type: integer
+    required:
+    - device
+    - os
+    type: object
+  collection.User:
+    properties:
+      _id:
+        description: mongo default document id
+        type: string
+      basic_info:
+        $ref: '#/definitions/collection.UserInfo'
+      email:
+        type: string
+      last_update:
+        description: unix time in second
+        type: integer
+      login_info:
+        $ref: '#/definitions/collection.LoginInfo'
+      mobile:
+        description: "+886987654321"
+        type: string
+      status:
+        type: integer
+    type: object
+  collection.UserInfo:
+    properties:
+      Avatar:
+        description: s3 object url
+        type: string
+      bio:
+        type: string
+      birthday:
+        type: integer
+      gender:
+        description: configable?
+        type: integer
+      hobbies:
+        items:
+          type: string
+        type: array
+      nick_name:
+        type: string
+      profile_pictures:
+        items:
+          type: string
+        type: array
+    type: object
+  handler.hello:
+    properties:
+      message:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  t7Error.Error:
+    properties:
+      code:
+        type: string
+      detail:
+        type: string
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: API Documentation
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Backend API
+  version: "1.0"
+paths:
+  /:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.hello'
+      summary: Hello Page
+      tags:
+      - Hello
+  /app/v1/users:
+    delete:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+      summary: Delete user
+      tags:
+      - user
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/collection.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+      summary: Get user Info
+      tags:
+      - user
+    put:
+      parameters:
+      - description: The whole user data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/collection.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+      summary: Update user
+      tags:
+      - user
+swagger: "2.0"

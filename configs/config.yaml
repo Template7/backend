@@ -1,0 +1,18 @@
+mode: debug
+port: 8080
+
+jwtSign: 45519f46c06c8340a34f9a32982860c1a8d6bb57eaeb338b7f0119062b8a3b67
+
+log:
+  level: DEBUG
+
+facebook:
+  app_id: 2882438808668187
+  secret: 4db88a2aeafa61d01582470a76fb8025
+
+mongo:
+  db: rentdate
+  host: 127.0.0.1
+  port: 27017
+  username:
+  password:
