@@ -3,6 +3,7 @@ package middle_ware
 import (
 	"backend/internal/pkg/config"
 	"backend/internal/pkg/t7Error"
+	"backend/internal/pkg/user"
 	"backend/internal/pkg/util"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -10,34 +11,32 @@ import (
 	"net/http"
 )
 
-type UserTokenClaims struct {
-	jwt.StandardClaims
-	UserId string `json:"userId"`
-}
-
-func AuthUser(c *gin.Context) {
+func AuthUserToken(c *gin.Context) {
 	log.Debug("auth user")
 
-	idToken := util.ParseBearerToken(c.GetHeader("Authorization"))
-	token, err := jwt.ParseWithClaims(idToken, &UserTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+	userToken := util.ParseBearerToken(c.GetHeader("Authorization"))
+	token, err := jwt.ParseWithClaims(userToken, &user.TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.New().JwtSign), nil
 	})
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, t7Error.UnAuthorized)
+		c.Abort()
 		return
 	}
 
-	_, ok := token.Claims.(*UserTokenClaims)
+	utc, ok := token.Claims.(*user.TokenClaims)
 	if !ok || !token.Valid {
 		c.JSON(http.StatusUnauthorized, t7Error.UnAuthorized)
+		c.Abort()
 		return
 	}
 
-	//c.Set("claims", claims)
-	//c.Keys = map[string]interface{}{
-	//	"userId": claims.UserId,
-	//	"claims": claims,
-	//}
+	if utc.UserId != c.Param("user-id") {
+		log.Warn("user id not match with claim")
+		c.JSON(http.StatusUnauthorized, t7Error.UnAuthorized)
+		c.Abort()
+		return
+	}
 }
 
 func AuthAdmin(c *gin.Context) {

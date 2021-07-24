@@ -1,12 +1,11 @@
 package handler
 
 import (
+	"backend/internal/pkg/auth"
 	"backend/internal/pkg/db/collection"
-	"backend/internal/pkg/route/middle_ware"
 	"backend/internal/pkg/t7Error"
 	"backend/internal/pkg/user"
 
-	"backend/internal/pkg/util"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -38,28 +37,19 @@ func GetInfo(c *gin.Context) {
 func RefreshToken(c *gin.Context) {
 	log.Debug("handle refresh token")
 
-	userId := c.Param("user-id")
-	token, err := user.GenToken(userId)
+	//userId := c.Param("user-id")
+	var token collection.Token
+	if err := c.BindJSON(&token); err != nil {
+		log.Warn("invalid body: ", err.Error())
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	newToken, err := auth.RefreshToken(token)
 	if err != nil {
 		c.JSON(err.GetStatus(), err)
 		return
 	}
-	c.JSON(http.StatusOK, token)
-	return
-}
-
-func SignOut(c *gin.Context) {
-	log.Debug("handle user sign out")
-
-	claims := c.Keys["claims"]
-	tokenClaims := claims.(*middle_ware.UserTokenClaims)
-
-	if err := user.SignOut(util.ParseBearerToken(c.GetHeader("Authorization")), tokenClaims.ExpiresAt); err != nil {
-		c.JSON(err.GetStatus(), err)
-		return
-	}
-
-	c.JSON(http.StatusNoContent, nil)
+	c.JSON(http.StatusOK, newToken)
 	return
 }
 
