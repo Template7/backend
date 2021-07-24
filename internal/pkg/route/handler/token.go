@@ -18,7 +18,7 @@ import (
 // @failure 401 {object} t7Error.Error
 // @Param UserId path string true "User ID"
 // @Param Authorization header string true "Access token"
-// @Router /app/v1/users/{UserId}/token [put]
+// @Router /api/v1/users/{UserId}/token [put]
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
