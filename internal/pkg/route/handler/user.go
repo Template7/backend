@@ -19,7 +19,7 @@ import (
 // @failure 401 {object} t7Error.Error
 // @Param UserId path string true "User ID"
 // @Param Authorization header string true "Access token"
-// @Router /app/v1/users/{UserId} [get]
+// @Router /api/v1/users/{UserId} [get]
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
@@ -128,7 +128,7 @@ func UpdateLoginClient(c *gin.Context) {
 // @Success 200
 // @failure 400 {object} t7Error.Error
 // @failure 401 {object} t7Error.Error
-// @Router /app/v1/users [delete]
+// @Router /admin/v1/users [delete]
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
