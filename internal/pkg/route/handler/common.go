@@ -29,6 +29,11 @@ func HelloPage(c *gin.Context) {
 	return
 }
 
-func parseDesc(desc string) bool {
-	return desc == "true"
+func TestGracefulShutdown(c *gin.Context) {
+	log.Debug("handle test graceful shutdown")
+
+	time.Sleep(10 * time.Second)
+
+	c.String(http.StatusOK, "response after 10 second")
+	return
 }

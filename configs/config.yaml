@@ -1,10 +1,13 @@
-mode: debug
-port: 8080
-
 jwtSign: 45519f46c06c8340a34f9a32982860c1a8d6bb57eaeb338b7f0119062b8a3b67
 
 log:
   level: DEBUG
+
+gin:
+  listenPort: 8080
+  mode: debug
+  shutdownTimeout: 10
+
 
 facebook:
   app_id: 2882438808668187

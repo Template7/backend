@@ -10,9 +10,10 @@ import (
 
 func Setup(r *gin.Engine) {
 	r.GET("", handler.HelloPage)
+	r.GET("/test/graceful-shutdown", handler.TestGracefulShutdown)
 
 	if gin.Mode() == gin.DebugMode {
-		//url := ginSwagger.URL(fmt.Sprintf("http://localhost:%d/swagger/index.html", config.New().Port))
+		//url := ginSwagger.URL(fmt.Sprintf("http://localhost:%d/swagger/index.html", config.New().ListenPort))
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 

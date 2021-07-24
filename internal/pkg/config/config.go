@@ -14,30 +14,33 @@ const (
 )
 
 type config struct {
-	Mode    string `yaml:"mode"`
-	Port    int    `yaml:"port"`
-	JwtSign string `yaml:"jwtSign"`
+	JwtSign string
 	Log     struct {
-		Level string `yaml:"level"`
-	} `yaml:"log"`
+		Level string
+	}
+	Gin struct {
+		ListenPort      int
+		Mode            string
+		ShutdownTimeout int
+	}
 	Mongo struct {
-		Db               string `yaml:"db"`
-		Host             string `yaml:"host"`
-		Port             int    `yaml:"port"`
-		Username         string `yaml:"username"`
-		Password         string `yaml:"password"`
+		Db               string
+		Host             string
+		Port             int
+		Username         string
+		Password         string
 		ConnectionString string
-	} `yaml:"mongo"`
+	}
 	Redis struct {
-		Host     string `yaml:"host"`
-		Password string `yaml:"password"`
-		PollSize int    `yaml:"poll_size"`
-		//ReadTimeout int    `yaml:"read_timeout"`
-	} `yaml:"redis"`
+		Host     string
+		Password string
+		PollSize int
+		//ReadTimeout int
+	}
 	Facebook struct {
-		AppId  string `yaml:"app_id"`
-		Secret string `yaml:"secret"`
-	} `yaml:"facebook"`
+		AppId  string
+		Secret string
+	}
 }
 
 var (
