@@ -47,5 +47,5 @@ func Setup(r *gin.Engine) {
 
 	// special case, skip auth token due to expired
 	apiV1.PUT("/users/:user-id/token", handler.RefreshToken)
-	adminV1.POST("/sign-in", handler.AdminSignIn)
+	r.POST("/admin/v1/sign-in", handler.AdminSignIn)
 }
