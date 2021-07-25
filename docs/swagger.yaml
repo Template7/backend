@@ -13,7 +13,6 @@ definitions:
         type: integer
     required:
     - device
-    - os
     type: object
   collection.Token:
     properties:

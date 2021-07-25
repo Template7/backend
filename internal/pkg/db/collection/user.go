@@ -50,7 +50,7 @@ type UserInfo struct {
 }
 
 type LoginInfo struct {
-	Os            loginClientOs `json:"os" bson:"os" binding:"required"`
+	Os            loginClientOs `json:"os" bson:"os"`
 	Device        string        `json:"device" bson:"device" binding:"required"` // iPhoneN, PixelN, NoteN, ...
 	Channel       LoginChannel  `json:"channel" bson:"channel"`
 	ChannelUserId string        `json:"channel_user_id" bson:"channel_user_id"` // user id of the channel
