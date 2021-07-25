@@ -281,8 +281,7 @@ var doc = `{
         "collection.LoginInfo": {
             "type": "object",
             "required": [
-                "device",
-                "os"
+                "device"
             ],
             "properties": {
                 "channel": {
