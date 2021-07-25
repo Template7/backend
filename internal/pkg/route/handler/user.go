@@ -42,9 +42,9 @@ func GetInfo(c *gin.Context) {
 // @produce json
 // @Param Authorization header string true "Access token"
 // @Param userData body collection.User true "User data"
-// @Success 204
-// @failure 400 {object} t7Error.Error
-// @failure 401 {object} t7Error.Error
+// @Success 200 {object} collection.User "User object"
+// @failure 400 {object} t7Error.Error "Error object"
+// @failure 401 {object} t7Error.Error "Error object"
 // @Router /admin/v1/user [post]
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
@@ -58,12 +58,14 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	if _, err := user.CreateUser(userData); err != nil {
+	userId, err := user.CreateUser(userData)
+	if err != nil {
 		c.JSON(err.GetStatus(), err)
 		return
 	}
+	userData.Id = userId
 
-	c.JSON(http.StatusNoContent, nil)
+	c.JSON(http.StatusOK, userData)
 	return
 }
 
