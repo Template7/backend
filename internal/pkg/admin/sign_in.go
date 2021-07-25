@@ -28,7 +28,7 @@ func SignIn(data collection.Admin) (token collection.Token, err *t7Error.Error) 
 	//	return
 	//}
 
-	if util.CheckPasswordHash(data.Password, adminData.Password)  || data.Username != adminData.Username {
+	if !util.CheckPasswordHash(data.Password, adminData.Password)  || data.Username != adminData.Username {
 		log.Warn("invalid admin username or password")
 		err = t7Error.SignInFail.WithStatus(http.StatusForbidden)
 		return

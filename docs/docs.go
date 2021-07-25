@@ -77,17 +77,20 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": ""
+                    "200": {
+                        "description": "User object",
+                        "schema": {
+                            "$ref": "#/definitions/collection.User"
+                        }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Error object",
                         "schema": {
                             "$ref": "#/definitions/t7Error.Error"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error object",
                         "schema": {
                             "$ref": "#/definitions/t7Error.Error"
                         }

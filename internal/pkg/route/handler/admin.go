@@ -14,7 +14,7 @@ func AdminSignIn(c *gin.Context) {
 
 	var data collection.Admin
 	if err := c.BindJSON(&data); err != nil {
-		c.JSON(http.StatusBadRequest, t7Error.InvalidBody)
+		c.JSON(http.StatusBadRequest, t7Error.InvalidBody.WithDetail(err.Error()))
 		return
 	}
 	token, err := admin.SignIn(data)
