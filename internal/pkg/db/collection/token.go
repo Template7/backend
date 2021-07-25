@@ -3,7 +3,8 @@ package collection
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 const (
-	ClaimTypeUser = "user"
+	ClaimTypeUser  = "user"
+	ClaimTypeAdmin = "admin"
 )
 
 type claimType string

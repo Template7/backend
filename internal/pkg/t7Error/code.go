@@ -35,6 +35,10 @@ var (
 		Code:    "H002",
 		Message: "http unexpected response code",
 	}
+	HashFail = &Error{
+		Code: "H003",
+		Message: "Hash fail",
+	}
 
 	UserNotfound = &Error{
 		Code:    "U001",
@@ -44,18 +48,9 @@ var (
 		Code:    "U002",
 		Message: "user already exist",
 	}
-	MultipleMatchedUser = &Error{
-		Code:    "U003",
-		Message: "multiple matched users",
-	}
-
-	OrderNotFound = &Error{
-		Code:    "O001",
-		Message: "order not found",
-	}
-	InvalidOrderId = &Error{
-		Code:    "O002",
-		Message: "invalid order id",
+	SignInFail = &Error{
+		Code: "I001",
+		Message: "Invalid user name or password",
 	}
 
 	VerifyCodeExpired = &Error{
@@ -76,17 +71,14 @@ var (
 		Code:    "T001",
 		Message: "token sign fail",
 	}
-
 	TokenParseFail = &Error{
 		Code:    "T002",
 		Message: "token parse fail",
 	}
-
 	TokenAssertionFail = &Error{
 		Code:    "T003",
 		Message: "token assertion fail",
 	}
-
 	InvalidToken = &Error{
 		Code:    "T004",
 		Message: "invalid token",

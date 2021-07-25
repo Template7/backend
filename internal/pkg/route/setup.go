@@ -25,8 +25,6 @@ func Setup(r *gin.Engine) {
 	user := apiV1.Group("/users", middle_ware.AuthUserToken)
 	user.GET("/:user-id", handler.GetInfo)
 	user.PUT("/:user-id", handler.UpdateUser)
-	// special case, skip auth token due to expired
-	apiV1.PUT("/users/:user-id/token", handler.RefreshToken)
 
 	// sign up
 	signUp := apiV1.Group("/sign-up")
@@ -41,8 +39,13 @@ func Setup(r *gin.Engine) {
 
 	// admin
 	adminV1 := r.Group("/admin/v1", middle_ware.AuthAdmin)
-	adminV1.POST("/login")
+
 	adminV1.POST("/user", handler.CreateUser)
 	adminV1.DELETE("/user", handler.DeleteUser)
 
+	// tokenless api
+
+	// special case, skip auth token due to expired
+	apiV1.PUT("/users/:user-id/token", handler.RefreshToken)
+	r.POST("/admin/v1/sign-in", handler.AdminSignIn)
 }

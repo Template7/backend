@@ -33,7 +33,7 @@ func GetUsers(filter db.GetUserFilter, option db.QueryOption) (users []collectio
 	switch dbErr {
 	case mongo.ErrNoDocuments:
 		log.Info("no matched user")
-		//err = t7Error.UserNotfound.WithStatus(http.StatusNoContent)
+		err = t7Error.UserNotfound.WithStatus(http.StatusNoContent)
 	default:
 		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
 	}

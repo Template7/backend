@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	userTokenTtl = 365 * 24 * time.Hour // 1 year
+	adminTokenTtl = 1 * time.Hour
+	userTokenTtl  = 7 * 24 * time.Hour // 1 week
 )
 
 func GenUserToken(userId string) (token collection.Token, err *t7Error.Error) {
@@ -32,17 +33,37 @@ func GenUserToken(userId string) (token collection.Token, err *t7Error.Error) {
 		err = t7Error.TokenSignFail.WithDetailAndStatus(signErr.Error(), http.StatusInternalServerError)
 		return
 	}
+	return genToken(tokenString)
+}
+
+func GenAdminToken() (token collection.Token, err *t7Error.Error) {
+	log.Debug("gen admin token")
+
+	claim := jwt.StandardClaims{
+		ExpiresAt: time.Now().Add(adminTokenTtl).Unix(),
+	}
+	tokenString, jwtErr := jwt.NewWithClaims(jwt.SigningMethodHS256, claim).SignedString(config.New().JwtSign)
+	if jwtErr != nil {
+		log.Error("fail to sign token: ", jwtErr.Error())
+		err = t7Error.TokenSignFail.WithDetailAndStatus(jwtErr.Error(), http.StatusInternalServerError)
+		return
+	}
+	return genToken(tokenString)
+}
+
+func genToken(accessToken string) (token collection.Token, err *t7Error.Error) {
+	log.Debug("gen token")
+
 	refreshToken, signErr := jwt.New(jwt.SigningMethodHS256).SignedString(config.New().JwtSign)
 	if signErr != nil {
 		err = t7Error.TokenSignFail.WithDetailAndStatus(signErr.Error(), http.StatusInternalServerError)
 		return
 	}
 	token = collection.Token{
-		AccessToken:  tokenString,
+		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		ClaimType: collection.ClaimTypeUser,
+		ClaimType:    collection.ClaimTypeUser,
 	}
-
 	tokenId, dbErr := db.New().SaveToken(token)
 	if dbErr != nil {
 		log.Error("fail to save user token: ", dbErr.Error())
