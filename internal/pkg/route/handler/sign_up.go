@@ -5,6 +5,7 @@ import (
 	"backend/internal/pkg/sms"
 	"backend/internal/pkg/t7Error"
 	"backend/internal/pkg/user"
+	"backend/internal/pkg/util"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -21,7 +22,7 @@ func SendVerifyCode(c *gin.Context) {
 	}
 
 	// send verify code
-	if err := sms.SendVerifyCode(user.SignUpPrefix, r.Mobile, sms.GenVerifyCode()); err != nil {
+	if err := sms.SendVerifyCode(user.SignUpPrefix, r.Mobile, util.GenVerifyCode()); err != nil {
 		c.JSON(err.GetStatus(), err)
 		return
 	}

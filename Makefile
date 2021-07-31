@@ -1,5 +1,5 @@
 
-.PHONY: build all
+.PHONY: build swagger all
 
 build:
 	go build
