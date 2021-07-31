@@ -1,4 +1,17 @@
 definitions:
+  collection.Admin:
+    properties:
+      password:
+        example: password
+        type: string
+      username:
+        description: Id       *primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+        example: username
+        type: string
+    required:
+    - password
+    - username
+    type: object
   collection.LoginInfo:
     properties:
       channel:
@@ -76,6 +89,26 @@ definitions:
         example: "2021-07-24T20:01:25.874565+08:00"
         type: string
     type: object
+  sms.Confirm:
+    properties:
+      code:
+        example: "1234567"
+        type: string
+      mobile:
+        example: "+886987654321"
+        type: string
+    required:
+    - code
+    - mobile
+    type: object
+  sms.Request:
+    properties:
+      mobile:
+        example: "+886987654321"
+        type: string
+    required:
+    - mobile
+    type: object
   t7Error.Error:
     properties:
       code:
@@ -112,6 +145,35 @@ paths:
       summary: Hello Page
       tags:
       - Hello
+  /admin/v1/sign-in:
+    post:
+      parameters:
+      - description: Admin object
+        in: body
+        name: smsRequest
+        required: true
+        schema:
+          $ref: '#/definitions/collection.Admin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token object
+          schema:
+            $ref: '#/definitions/collection.Token'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+      summary: Admin sign in
+      tags:
+      - v1
+      - SignIn
+      - Admin
   /admin/v1/user:
     post:
       parameters:
@@ -143,9 +205,9 @@ paths:
             $ref: '#/definitions/t7Error.Error'
       summary: Create user
       tags:
-      - v1
-      - user
-      - admin
+      - V1
+      - User
+      - Admin
   /admin/v1/users:
     delete:
       produces:
@@ -164,6 +226,56 @@ paths:
       summary: Delete user
       tags:
       - user
+  /api/v1/sign-up/confirmation:
+    post:
+      parameters:
+      - description: Sms confirm
+        in: body
+        name: smsConfirm
+        required: true
+        schema:
+          $ref: '#/definitions/sms.Confirm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token object
+          schema:
+            $ref: '#/definitions/collection.Token'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+      summary: Confirm verify code
+      tags:
+      - Sms
+      - SignUp
+  /api/v1/sign-up/verification:
+    post:
+      parameters:
+      - description: Sms request
+        in: body
+        name: smsRequest
+        required: true
+        schema:
+          $ref: '#/definitions/sms.Request'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+      summary: Send verify code to the user mobile
+      tags:
+      - Sms
+      - SignUp
   /api/v1/users/{UserId}:
     get:
       parameters:
@@ -192,8 +304,8 @@ paths:
             $ref: '#/definitions/t7Error.Error'
       summary: Get user Info
       tags:
-      - v1
-      - user
+      - V1
+      - User
     put:
       parameters:
       - description: Access token
@@ -227,11 +339,12 @@ paths:
             $ref: '#/definitions/t7Error.Error'
       summary: Update user
       tags:
-      - user
+      - V1
+      - User
   /api/v1/users/{UserId}/token:
     put:
       parameters:
-      - description: Token
+      - description: Token object
         in: body
         name: token
         required: true
@@ -249,7 +362,7 @@ paths:
         type: string
       responses:
         "200":
-          description: OK
+          description: Token object
           schema:
             $ref: '#/definitions/collection.Token'
         "400":
@@ -262,6 +375,6 @@ paths:
             $ref: '#/definitions/t7Error.Error'
       summary: Refresh access token
       tags:
-      - v1
-      - token
+      - V1
+      - Token
 swagger: "2.0"

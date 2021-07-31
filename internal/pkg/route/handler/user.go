@@ -12,7 +12,7 @@ import (
 
 // GetInfo
 // @Summary Get user Info
-// @Tags v1,user
+// @Tags V1,User
 // @version 1.0
 // @Success 200 {object} collection.User
 // @failure 400 {object} t7Error.Error
@@ -37,7 +37,7 @@ func GetInfo(c *gin.Context) {
 
 // CreateUser
 // @Summary Create user
-// @Tags v1,user,admin
+// @Tags V1,User,Admin
 // @version 1.0
 // @produce json
 // @Param Authorization header string true "Access token"
@@ -71,7 +71,7 @@ func CreateUser(c *gin.Context) {
 
 // UpdateUser
 // @Summary Update user
-// @Tags user
+// @Tags V1,User
 // @version 1.0
 // @produce json
 // @Param Authorization header string true "Access token"

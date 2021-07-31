@@ -11,6 +11,15 @@ import (
 	"net/http"
 )
 
+// SendVerifyCode
+// @Summary Send verify code to the user mobile
+// @Tags Sms,SignUp
+// @version 1.0
+// @Param smsRequest body sms.Request true "Sms request"
+// @produce json
+// @Success 204
+// @failure 400 {object} t7Error.Error
+// @Router /api/v1/sign-up/verification [post]
 func SendVerifyCode(c *gin.Context) {
 	log.Debug("handle send verify code")
 
@@ -31,7 +40,16 @@ func SendVerifyCode(c *gin.Context) {
 	return
 }
 
-// return token string if confirmed
+// ConfirmVerifyCode
+// @Summary Confirm verify code
+// @Tags Sms,SignUp
+// @version 1.0
+// @Param smsConfirm body sms.Confirm true "Sms confirm"
+// @produce json
+// @Success 200 {object} collection.Token "Token object"
+// @failure 400 {object} t7Error.Error
+// @failure 401 {object} t7Error.Error
+// @Router /api/v1/sign-up/confirmation [post]
 func ConfirmVerifyCode(c *gin.Context) {
 	log.Debug("handle confirm verify code")
 
@@ -49,7 +67,7 @@ func ConfirmVerifyCode(c *gin.Context) {
 		return
 	}
 	if !confirm {
-		c.JSON(http.StatusUnauthorized, nil)
+		c.JSON(http.StatusUnauthorized, t7Error.UnAuthorized)
 		return
 	}
 

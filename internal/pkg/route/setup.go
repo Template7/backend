@@ -12,11 +12,12 @@ import (
 
 func Setup(r *gin.Engine) {
 	r.GET("", handler.HelloPage)
-	r.GET("/test/graceful-shutdown", handler.TestGracefulShutdown)
+
 
 	if gin.Mode() == gin.DebugMode {
 		url := ginSwagger.URL(fmt.Sprintf("http://localhost:%d/swagger/doc.json", config.New().Gin.ListenPort))
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
+		r.GET("/test/graceful-shutdown", handler.TestGracefulShutdown)
 	}
 
 	apiV1 := r.Group("/api/v1")

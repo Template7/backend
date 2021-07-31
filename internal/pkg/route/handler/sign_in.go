@@ -12,6 +12,16 @@ import (
 	"net/http"
 )
 
+// MobileSignIn
+// @Summary Mobile sign in
+// @Tags v1,SignIn,Sms
+// @version 1.0
+// @Param smsRequest body sms.Request true "Sms request"
+// @produce json
+// @Success 204
+// @failure 400 {object} t7Error.Error
+// @failure 401 {object} t7Error.Error
+// @Router /api/v1/sign-up/confirmation [post]
 func MobileSignIn(c *gin.Context) {
 	log.Debug("handle user sign in")
 
@@ -47,6 +57,16 @@ func MobileSignIn(c *gin.Context) {
 	return
 }
 
+// MobileSignInConfirm
+// @Summary Mobile sign in confirm
+// @Tags v1,SignIn,Sms
+// @version 1.0
+// @Param smsConfirm body sms.Confirm true "Sms confirm"
+// @produce json
+// @Success 200 {object} collection.Token "Token object"
+// @failure 400 {object} t7Error.Error
+// @failure 401 {object} t7Error.Error
+// @Router /api/v1/sign-up/confirmation [post]
 func MobileSignInConfirm(c *gin.Context) {
 	log.Debug("handle mobile sign in confirm")
 
