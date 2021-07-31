@@ -127,7 +127,7 @@ func UpdateLoginClient(c *gin.Context) {
 // @Tags user
 // @version 1.0
 // @produce json
-// @Success 200
+// @Success 204
 // @failure 400 {object} t7Error.Error
 // @failure 401 {object} t7Error.Error
 // @Router /admin/v1/users [delete]

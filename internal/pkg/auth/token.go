@@ -103,7 +103,7 @@ func refreshUserToken(oriToken collection.Token) (refreshedToken collection.Toke
 
 	if tokenErr != nil {
 		log.Error("fail to parse token: ", tokenErr.Error())
-		err = t7Error.TokenParseFail.WithDetailAndStatus(tokenErr.Error(), http.StatusBadRequest)
+		err = t7Error.InvalidToken.WithDetailAndStatus(tokenErr.Error(), http.StatusBadRequest)
 		return
 	}
 

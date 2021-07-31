@@ -108,7 +108,7 @@ var doc = `{
                 ],
                 "summary": "Delete user",
                 "responses": {
-                    "200": {
+                    "204": {
                         "description": ""
                     },
                     "400": {
@@ -395,13 +395,20 @@ var doc = `{
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "string"
+                    "type": "integer",
+                    "example": 1024
                 },
                 "detail": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "empty token"
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "token unauthorized"
+                },
+                "type": {
+                    "type": "integer",
+                    "example": 32
                 }
             }
         }

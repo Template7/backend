@@ -5,15 +5,19 @@ import (
 	"net/http"
 )
 
+type Code int
+type Type int
+
 type Error struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
-	Detail  string `json:"detail"`
+	Code    Code   `json:"code" example:"1024"`
+	Message string `json:"message" example:"token unauthorized"`
+	Detail  string `json:"detail" example:"empty token"`
+	Type    Type   `json:"type" example:"32"`
 	status  int
 }
 
 func (e Error) Error() string {
-	return fmt.Sprintf("error code: %s, message: %s", e.Code, e.Message)
+	return fmt.Sprintf("error code: %d, message: %s", e.Code, e.Message)
 }
 
 func (e Error) WithDetail(d string) *Error {

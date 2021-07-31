@@ -79,11 +79,17 @@ definitions:
   t7Error.Error:
     properties:
       code:
-        type: string
+        example: 1024
+        type: integer
       detail:
+        example: empty token
         type: string
       message:
+        example: token unauthorized
         type: string
+      type:
+        example: 32
+        type: integer
     type: object
 info:
   contact: {}
@@ -145,7 +151,7 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
+        "204":
           description: ""
         "400":
           description: Bad Request

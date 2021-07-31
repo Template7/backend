@@ -3,6 +3,7 @@ package sms
 import (
 	"backend/internal/pkg/t7Error"
 	"backend/internal/pkg/t7Redis"
+	"backend/internal/pkg/util"
 	"fmt"
 	"github.com/spf13/viper"
 	"net/http"
@@ -14,7 +15,7 @@ import (
 
 func TestGenVerifyCode(t *testing.T) {
 	for i:=0; i < 10; i++ {
-		code := GenVerifyCode()
+		code := util.GenVerifyCode()
 		match, _ := regexp.MatchString(`^\d{7}$`, code)
 		if !match {
 			t.Error("fail")
@@ -28,7 +29,7 @@ func TestConfirmVerifyCode(t *testing.T) {
 	testPrefix := "test"
 	testMobile := "+886987654321"
 	testKey := fmt.Sprintf("%s:%s", testPrefix, testMobile)
-	testCode := GenVerifyCode()
+	testCode := util.GenVerifyCode()
 
 	type args struct {
 		prefix string
