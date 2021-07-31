@@ -9,6 +9,16 @@ import (
 	"net/http"
 )
 
+// AdminSignIn
+// @Summary Admin sign in
+// @Tags v1,SignIn,Admin
+// @version 1.0
+// @Param smsRequest body collection.Admin true "Admin object"
+// @produce json
+// @Success 200 {object} collection.Token "Token object"
+// @failure 400 {object} t7Error.Error
+// @failure 401 {object} t7Error.Error
+// @Router /admin/v1/sign-in [post]
 func AdminSignIn(c *gin.Context) {
 	log.Debug("handle admin sign in")
 

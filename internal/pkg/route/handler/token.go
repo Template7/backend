@@ -10,10 +10,10 @@ import (
 
 // RefreshToken
 // @Summary Refresh access token
-// @Tags v1,token
+// @Tags V1,Token
 // @version 1.0
-// @Param token body collection.Token true "Token"
-// @Success 200 {object} collection.Token
+// @Param token body collection.Token true "Token object"
+// @Success 200 {object} collection.Token "Token object"
 // @failure 400 {object} t7Error.Error
 // @failure 401 {object} t7Error.Error
 // @Param UserId path string true "User ID"

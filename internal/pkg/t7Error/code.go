@@ -1,91 +1,131 @@
 package t7Error
 
-type Code string
-type Message string
+const (
+	codeUnAuthorized Code = iota + 1024
+	codeInvalidBody
+	codeDbConnectionFail
+	codeDbOperationFail
+	codeInvalidDocumentId
+	codeHttpOperationFail
+	codeHttpUnexpectedResponseCode
+	codeHashFail
+	codeUserNotfound
+	codeUserAlreadyExist
+	codeSignInFail
+	codeVerifyCodeExpired
+	codeIncorrectVerifyCode
+	codeRedisOperationFail
+	codeTokenSignFail
+	codeTokenAssertionFail
+	codeInvalidToken
+	codeDecodeFail
+)
+
+const (
+	typeAuth Type = iota + 32
+	typeInvalidData
+	typeDb
+	typeRedis
+	typeNetwork
+)
 
 var (
 	UnAuthorized = &Error{
-		Code:    "A001",
+		Code:    codeUnAuthorized,
 		Message: "token unauthorized",
+		Type:    typeAuth,
 	}
 
 	InvalidBody = &Error{
-		Code:    "B001",
+		Code:    codeInvalidBody,
 		Message: "invalid body",
+		Type:    typeInvalidData,
 	}
 
 	DbConnectionFail = &Error{
-		Code:    "D001",
+		Code:    codeDbConnectionFail,
 		Message: "db connection fail",
+		Type:    typeDb,
 	}
 	DbOperationFail = &Error{
-		Code:    "D002",
+		Code:    codeDbOperationFail,
 		Message: "db operation fail",
+		Type:    typeDb,
 	}
 	InvalidDocumentId = &Error{
-		Code:    "D003",
+		Code:    codeInvalidDocumentId,
 		Message: "invalid document id",
+		Type:    typeInvalidData,
 	}
 
 	HttpOperationFail = &Error{
-		Code:    "H001",
+		Code:    codeHttpOperationFail,
 		Message: "http operation fail",
+		Type:    typeNetwork,
 	}
 	HttpUnexpectedResponseCode = &Error{
-		Code:    "H002",
+		Code:    codeHttpUnexpectedResponseCode,
 		Message: "http unexpected response code",
+		Type:    typeInvalidData,
 	}
 	HashFail = &Error{
-		Code: "H003",
+		Code:    codeHashFail,
 		Message: "Hash fail",
+		Type:    typeAuth,
 	}
 
 	UserNotfound = &Error{
-		Code:    "U001",
+		Code:    codeUserNotfound,
 		Message: "user not found",
+		Type:    typeInvalidData,
 	}
 	UserAlreadyExist = &Error{
-		Code:    "U002",
+		Code:    codeUserAlreadyExist,
 		Message: "user already exist",
+		Type:    typeInvalidData,
 	}
 	SignInFail = &Error{
-		Code: "I001",
+		Code:    codeSignInFail,
 		Message: "Invalid user name or password",
+		Type:    typeInvalidData,
 	}
 
 	VerifyCodeExpired = &Error{
-		Code:    "V001",
+		Code:    codeVerifyCodeExpired,
 		Message: "verify code expired",
+		Type:    typeInvalidData,
 	}
 	IncorrectVerifyCode = &Error{
-		Code:    "V002",
+		Code:    codeIncorrectVerifyCode,
 		Message: "incorrect verify code",
+		Type:    typeInvalidData,
 	}
 
 	RedisOperationFail = &Error{
-		Code:    "R001",
+		Code:    codeRedisOperationFail,
 		Message: "redis operation fail",
+		Type:    typeRedis,
 	}
 
 	TokenSignFail = &Error{
-		Code:    "T001",
+		Code:    codeTokenSignFail,
 		Message: "token sign fail",
-	}
-	TokenParseFail = &Error{
-		Code:    "T002",
-		Message: "token parse fail",
+		Type:    typeAuth,
 	}
 	TokenAssertionFail = &Error{
-		Code:    "T003",
+		Code:    codeTokenAssertionFail,
 		Message: "token assertion fail",
+		Type:    typeInvalidData,
 	}
 	InvalidToken = &Error{
-		Code:    "T004",
+		Code:    codeInvalidToken,
 		Message: "invalid token",
+		Type:    typeAuth,
 	}
 
 	DecodeFail = &Error{
-		Code:    "C001",
+		Code:    codeDecodeFail,
 		Message: "decode fail",
+		Type:    typeInvalidData,
 	}
 )

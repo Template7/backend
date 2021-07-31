@@ -47,15 +47,59 @@ var doc = `{
                 }
             }
         },
-        "/admin/v1/user": {
+        "/admin/v1/sign-in": {
             "post": {
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v1",
-                    "user",
-                    "admin"
+                    "SignIn",
+                    "Admin"
+                ],
+                "summary": "Admin sign in",
+                "parameters": [
+                    {
+                        "description": "Admin object",
+                        "name": "smsRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/collection.Admin"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Token object",
+                        "schema": {
+                            "$ref": "#/definitions/collection.Token"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/t7Error.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/t7Error.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/v1/user": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V1",
+                    "User",
+                    "Admin"
                 ],
                 "summary": "Create user",
                 "parameters": [
@@ -108,7 +152,7 @@ var doc = `{
                 ],
                 "summary": "Delete user",
                 "responses": {
-                    "200": {
+                    "204": {
                         "description": ""
                     },
                     "400": {
@@ -126,11 +170,88 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/sign-up/confirmation": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sms",
+                    "SignUp"
+                ],
+                "summary": "Confirm verify code",
+                "parameters": [
+                    {
+                        "description": "Sms confirm",
+                        "name": "smsConfirm",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/sms.Confirm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Token object",
+                        "schema": {
+                            "$ref": "#/definitions/collection.Token"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/t7Error.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/t7Error.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sign-up/verification": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sms",
+                    "SignUp"
+                ],
+                "summary": "Send verify code to the user mobile",
+                "parameters": [
+                    {
+                        "description": "Sms request",
+                        "name": "smsRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/sms.Request"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/t7Error.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/users/{UserId}": {
             "get": {
                 "tags": [
-                    "v1",
-                    "user"
+                    "V1",
+                    "User"
                 ],
                 "summary": "Get user Info",
                 "parameters": [
@@ -175,7 +296,8 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "V1",
+                    "User"
                 ],
                 "summary": "Update user",
                 "parameters": [
@@ -225,13 +347,13 @@ var doc = `{
         "/api/v1/users/{UserId}/token": {
             "put": {
                 "tags": [
-                    "v1",
-                    "token"
+                    "V1",
+                    "Token"
                 ],
                 "summary": "Refresh access token",
                 "parameters": [
                     {
-                        "description": "Token",
+                        "description": "Token object",
                         "name": "token",
                         "in": "body",
                         "required": true,
@@ -256,7 +378,7 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Token object",
                         "schema": {
                             "$ref": "#/definitions/collection.Token"
                         }
@@ -278,6 +400,24 @@ var doc = `{
         }
     },
     "definitions": {
+        "collection.Admin": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "password"
+                },
+                "username": {
+                    "description": "Id       *primitive.ObjectID ` + "`" + `json:\"id,omitempty\" bson:\"_id,omitempty\"` + "`" + `",
+                    "type": "string",
+                    "example": "username"
+                }
+            }
+        },
         "collection.LoginInfo": {
             "type": "object",
             "required": [
@@ -391,17 +531,53 @@ var doc = `{
                 }
             }
         },
+        "sms.Confirm": {
+            "type": "object",
+            "required": [
+                "code",
+                "mobile"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "1234567"
+                },
+                "mobile": {
+                    "type": "string",
+                    "example": "+886987654321"
+                }
+            }
+        },
+        "sms.Request": {
+            "type": "object",
+            "required": [
+                "mobile"
+            ],
+            "properties": {
+                "mobile": {
+                    "type": "string",
+                    "example": "+886987654321"
+                }
+            }
+        },
         "t7Error.Error": {
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "string"
+                    "type": "integer",
+                    "example": 1024
                 },
                 "detail": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "empty token"
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "token unauthorized"
+                },
+                "type": {
+                    "type": "integer",
+                    "example": 32
                 }
             }
         }

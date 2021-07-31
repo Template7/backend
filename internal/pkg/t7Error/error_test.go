@@ -8,7 +8,7 @@ import (
 
 func TestError_Error(t *testing.T) {
 	type fields struct {
-		Code    string
+		Code    Code
 		Message string
 		Detail  string
 		Status  int
@@ -21,11 +21,11 @@ func TestError_Error(t *testing.T) {
 		{
 			name: "normal",
 			fields: fields{
-				Code: "code",
+				Code: codeUnAuthorized,
 				Message: "message",
 				Detail: "",
 			},
-			want: "error code: code, message: message",
+			want: "error code: 1024, message: message",
 		},
 
 	}
@@ -46,7 +46,7 @@ func TestError_Error(t *testing.T) {
 
 func TestError_GetStatus(t *testing.T) {
 	type fields struct {
-		Code    string
+		Code    Code
 		Message string
 		Detail  string
 		Status  int
@@ -86,7 +86,7 @@ func TestError_GetStatus(t *testing.T) {
 
 func TestError_WithDetail(t *testing.T) {
 	type fields struct {
-		Code    string
+		Code    Code
 		Message string
 		Detail  string
 		Status  int
@@ -134,7 +134,7 @@ func TestError_WithDetail(t *testing.T) {
 
 func TestError_WithDetailAndStatus(t *testing.T) {
 	type fields struct {
-		Code    string
+		Code    Code
 		Message string
 		Detail  string
 		Status  int
@@ -156,14 +156,14 @@ func TestError_WithDetailAndStatus(t *testing.T) {
 		{
 			name: "normal error with default status",
 			fields: fields{
-				Code: "code",
+				Code: codeUnAuthorized,
 				Message: "message",
 			},
 			args: args{
 				d: "detail",
 			},
 			want: &Error{
-				Code: "code",
+				Code: codeUnAuthorized,
 				Message: "message",
 				Detail: "detail",
 			},
@@ -171,7 +171,7 @@ func TestError_WithDetailAndStatus(t *testing.T) {
 		{
 			name: "normal error with custom status",
 			fields: fields{
-				Code: "code",
+				Code: codeUnAuthorized,
 				Message: "message",
 			},
 			args: args{
@@ -179,7 +179,7 @@ func TestError_WithDetailAndStatus(t *testing.T) {
 				s: http.StatusInternalServerError,
 			},
 			want: &Error{
-				Code:    "code",
+				Code:    codeUnAuthorized,
 				Message: "message",
 				Detail:  "detail",
 				status:  http.StatusInternalServerError,
@@ -203,7 +203,7 @@ func TestError_WithDetailAndStatus(t *testing.T) {
 
 func TestError_WithStatus(t *testing.T) {
 	type fields struct {
-		Code    string
+		Code    Code
 		Message string
 		Detail  string
 		Status  int
@@ -224,25 +224,25 @@ func TestError_WithStatus(t *testing.T) {
 		{
 			name: "normal error with default status",
 			fields: fields{
-				Code: "code",
+				Code: codeUnAuthorized,
 				Message: "message",
 			},
 			want: &Error{
-				Code: "code",
+				Code: codeUnAuthorized,
 				Message: "message",
 			},
 		},
 		{
 			name: "normal error with custom status",
 			fields: fields{
-				Code: "code",
+				Code: codeUnAuthorized,
 				Message: "message",
 			},
 			args: args{
 				s: http.StatusInternalServerError,
 			},
 			want: &Error{
-				Code:    "code",
+				Code:    codeUnAuthorized,
 				Message: "message",
 				status:  http.StatusInternalServerError,
 			},

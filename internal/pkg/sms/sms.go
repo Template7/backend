@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/go-redis/redis"
 	log "github.com/sirupsen/logrus"
-	"math/rand"
 	"net/http"
 	"time"
 )
@@ -46,9 +45,4 @@ func ConfirmVerifyCode(prefix string, mobile string, code string) (confirm bool,
 	}
 	defer t7Redis.New().Del(k)
 	return
-}
-
-func GenVerifyCode() string {
-	rand.Seed(time.Now().UTC().UnixNano())
-	return fmt.Sprintf("%07d", rand.Int63n(1e7))
 }
