@@ -11,7 +11,7 @@ import (
 
 const (
 	configPath = "configs"
-	jwtSign = "45519f46c06c8340a34f9a32982860c1a8d6bb57eaeb338b7f0119062b8a3b67"
+	jwtSign    = "45519f46c06c8340a34f9a32982860c1a8d6bb57eaeb338b7f0119062b8a3b67"
 )
 
 type config struct {
@@ -39,8 +39,9 @@ type config struct {
 		//ReadTimeout int
 	}
 	Facebook struct {
-		AppId  string
-		Secret string
+		AppId    string
+		Secret   string
+		Callback string
 	}
 }
 

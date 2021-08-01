@@ -11,8 +11,9 @@ import (
 )
 
 func Setup(r *gin.Engine) {
-	r.GET("", handler.HelloPage)
+	r.LoadHTMLFiles("resource/template/facebook_login.html")
 
+	r.GET("", handler.HelloPage)
 
 	if gin.Mode() == gin.DebugMode {
 		url := ginSwagger.URL(fmt.Sprintf("http://localhost:%d/swagger/doc.json", config.New().Gin.ListenPort))
@@ -36,7 +37,9 @@ func Setup(r *gin.Engine) {
 	signIn := apiV1.Group("/sign-in")
 	signIn.POST("/mobile/verification", handler.MobileSignIn)
 	signIn.POST("/mobile/confirmation", handler.MobileSignInConfirm)
-	//signIn.POST("/facebook", handler.FacebookSignIn)
+	signIn.GET("/facebook/home", handler.FacebookSignInHome)
+	signIn.GET("/facebook", handler.FacebookSignIn)
+	signIn.GET("/facebook/callback", handler.FacebookSignInCallback)
 
 	// admin
 	adminV1 := r.Group("/admin/v1", middle_ware.AuthAdmin)

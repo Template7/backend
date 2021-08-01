@@ -7,17 +7,17 @@ import (
 )
 
 const (
-	baseUrl = "https://graph.facebook.com"
-	parseTokenUri = "/debug_token"
+	baseUrl        = "https://graph.facebook.com"
+	parseTokenUri  = "/debug_token"
 	accessTokenUri = "/v9.0/oauth/access_token"
-
-	// TODO: update after communicate with app
-	redirectUri = "http://localhost:8080/auth/facebook"
 )
 
 var (
 	once     sync.Once
 	instance *client
+	
+	// TODO: update after communicate with app
+	redirectUri = config.New().Facebook.Callback
 )
 
 type client struct {
