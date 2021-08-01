@@ -1,12 +1,15 @@
 package facebook
 
 import (
+	"backend/internal/pkg/config"
 	"backend/internal/pkg/db/collection"
 	"backend/internal/pkg/t7Error"
 	"backend/internal/pkg/util"
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/facebook"
 	"net/http"
 	"time"
 )
@@ -15,9 +18,15 @@ const (
 	birthdayLayout = "01/02/2006"
 )
 
-type Request struct {
-	Code string `json:"code" binding:"required"`
-}
+var (
+	OauthConf = &oauth2.Config{
+		ClientID: config.New().Facebook.AppId,
+		//ClientSecret: config.New().Facebook.Secret,
+		Scopes:      []string{"public_profile"},
+		RedirectURL: config.New().Facebook.Callback,
+		Endpoint:    facebook.Endpoint,
+	}
+)
 
 type accessToken struct {
 	AccessToken string `json:"access_token"`
@@ -45,6 +54,10 @@ type basicUserData struct {
 	Email    string `json:"email"`
 	Birthday string `json:"birthday"`
 	Gender   string `json:"gender"`
+}
+
+func (b basicUserData) String() string {
+	return fmt.Sprintf("id: %s, name: %s, email: %s, birthday: %s, gender: %s", b.Id, b.Name, b.Email, b.Birthday, b.Gender)
 }
 
 func (b basicUserData) GetBirthday() (birthday int64) {
@@ -163,6 +176,6 @@ func (c client) getUserData(token accessToken, data tokenData) (userDara basicUs
 		return
 	}
 
-	log.Debug("get user data successfully")
+	log.Debug("get user data successfully: ", userDara.String())
 	return
 }
