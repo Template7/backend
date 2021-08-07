@@ -53,7 +53,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "v1",
+                    "V1",
                     "SignIn",
                     "Admin"
                 ],
