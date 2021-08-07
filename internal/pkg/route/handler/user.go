@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"backend/internal/pkg/db/collection"
-	"backend/internal/pkg/t7Error"
-	"backend/internal/pkg/user"
+	"github.com/Template7/backend/internal/pkg/db/collection"
+	"github.com/Template7/backend/internal/pkg/t7Error"
+	"github.com/Template7/backend/internal/pkg/user"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"

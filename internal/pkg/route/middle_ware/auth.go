@@ -1,9 +1,9 @@
 package middle_ware
 
 import (
-	"backend/internal/pkg/config"
-	"backend/internal/pkg/t7Error"
-	"backend/internal/pkg/user"
+	"github.com/Template7/backend/internal/pkg/config"
+	"github.com/Template7/backend/internal/pkg/t7Error"
+	"github.com/Template7/backend/internal/pkg/user"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"

@@ -1,7 +1,7 @@
 package util
 
 import (
-	"backend/internal/pkg/t7Error"
+	"github.com/Template7/backend/internal/pkg/t7Error"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"

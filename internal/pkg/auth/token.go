@@ -1,11 +1,11 @@
 package auth
 
 import (
-	"backend/internal/pkg/config"
-	"backend/internal/pkg/db"
-	"backend/internal/pkg/db/collection"
-	"backend/internal/pkg/t7Error"
-	"backend/internal/pkg/user"
+	"github.com/Template7/backend/internal/pkg/config"
+	"github.com/Template7/backend/internal/pkg/db"
+	"github.com/Template7/backend/internal/pkg/db/collection"
+	"github.com/Template7/backend/internal/pkg/t7Error"
+	"github.com/Template7/backend/internal/pkg/user"
 	"github.com/dgrijalva/jwt-go"
 	log "github.com/sirupsen/logrus"
 	"net/http"

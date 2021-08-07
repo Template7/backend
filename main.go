@@ -1,11 +1,11 @@
 package main
 
 import (
-	_ "backend/docs"
-	"backend/internal/pkg/config"
-	"backend/internal/pkg/db"
-	"backend/internal/pkg/route"
-	"backend/internal/pkg/t7Redis"
+	_ "github.com/Template7/backend/docs"
+	"github.com/Template7/backend/internal/pkg/config"
+	"github.com/Template7/backend/internal/pkg/db"
+	"github.com/Template7/backend/internal/pkg/route"
+	"github.com/Template7/backend/internal/pkg/t7Redis"
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"

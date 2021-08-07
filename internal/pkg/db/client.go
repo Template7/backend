@@ -1,7 +1,7 @@
 package db
 
 import (
-	"backend/internal/pkg/config"
+	"github.com/Template7/backend/internal/pkg/config"
 	"context"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
