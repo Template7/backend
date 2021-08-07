@@ -28,6 +28,20 @@ import (
 func main() {
 
 	r := gin.Default()
+
+	//logger, _ := zap.NewProduction()
+	//r.Use(ginzap.Ginzap(logger, time.RFC3339, true))
+	//r.Use(ginzap.RecoveryWithZap(logger, true))
+	//
+	//r.GET("/ping", func(c *gin.Context) {
+	//	c.String(200, "pong "+fmt.Sprint(time.Now().Unix()))
+	//})
+	//
+	//// Example when panic happen.
+	//r.GET("/panic", func(c *gin.Context) {
+	//	panic("An unexpected error happen!")
+	//})
+
 	gin.SetMode(config.New().Gin.Mode)
 	route.Setup(r)
 

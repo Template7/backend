@@ -10,6 +10,7 @@ gin:
 facebook:
   appId:
   secret:
+  callback: "http://localhost:8080/api/v1/sign-in/facebook/callback"
 
 mongo:
   db: template7

@@ -11,7 +11,7 @@ import (
 
 // AdminSignIn
 // @Summary Admin sign in
-// @Tags v1,SignIn,Admin
+// @Tags V1,SignIn,Admin
 // @version 1.0
 // @Param smsRequest body collection.Admin true "Admin object"
 // @produce json

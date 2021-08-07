@@ -171,7 +171,7 @@ paths:
             $ref: '#/definitions/t7Error.Error'
       summary: Admin sign in
       tags:
-      - v1
+      - V1
       - SignIn
       - Admin
   /admin/v1/user:
