@@ -1,13 +1,13 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	_ "github.com/Template7/backend/docs"
 	"github.com/Template7/backend/internal/pkg/config"
 	"github.com/Template7/backend/internal/pkg/db"
 	"github.com/Template7/backend/internal/pkg/route"
 	"github.com/Template7/backend/internal/pkg/t7Redis"
-	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -28,19 +28,6 @@ import (
 func main() {
 
 	r := gin.Default()
-
-	//logger, _ := zap.NewProduction()
-	//r.Use(ginzap.Ginzap(logger, time.RFC3339, true))
-	//r.Use(ginzap.RecoveryWithZap(logger, true))
-	//
-	//r.GET("/ping", func(c *gin.Context) {
-	//	c.String(200, "pong "+fmt.Sprint(time.Now().Unix()))
-	//})
-	//
-	//// Example when panic happen.
-	//r.GET("/panic", func(c *gin.Context) {
-	//	panic("An unexpected error happen!")
-	//})
 
 	gin.SetMode(config.New().Gin.Mode)
 	route.Setup(r)
