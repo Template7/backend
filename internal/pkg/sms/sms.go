@@ -1,8 +1,8 @@
 package sms
 
 import (
-	"backend/internal/pkg/t7Error"
-	"backend/internal/pkg/t7Redis"
+	"github.com/Template7/backend/internal/pkg/t7Error"
+	"github.com/Template7/backend/internal/pkg/t7Redis"
 	"fmt"
 	"github.com/go-redis/redis"
 	log "github.com/sirupsen/logrus"

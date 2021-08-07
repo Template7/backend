@@ -1,4 +1,4 @@
-module backend
+module github.com/Template7/backend
 
 go 1.16
 

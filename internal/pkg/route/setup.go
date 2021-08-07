@@ -1,9 +1,9 @@
 package route
 
 import (
-	"backend/internal/pkg/config"
-	"backend/internal/pkg/route/handler"
-	"backend/internal/pkg/route/middle_ware"
+	"github.com/Template7/backend/internal/pkg/config"
+	"github.com/Template7/backend/internal/pkg/route/handler"
+	"github.com/Template7/backend/internal/pkg/route/middle_ware"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"

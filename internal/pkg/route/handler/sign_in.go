@@ -1,14 +1,14 @@
 package handler
 
 import (
-	"backend/internal/pkg/auth"
-	"backend/internal/pkg/config"
-	"backend/internal/pkg/db"
-	"backend/internal/pkg/sms"
-	"backend/internal/pkg/t7Error"
-	"backend/internal/pkg/thirdParty/facebook"
-	"backend/internal/pkg/user"
-	"backend/internal/pkg/util"
+	"github.com/Template7/backend/internal/pkg/auth"
+	"github.com/Template7/backend/internal/pkg/config"
+	"github.com/Template7/backend/internal/pkg/db"
+	"github.com/Template7/backend/internal/pkg/sms"
+	"github.com/Template7/backend/internal/pkg/t7Error"
+	"github.com/Template7/backend/internal/pkg/thirdParty/facebook"
+	"github.com/Template7/backend/internal/pkg/user"
+	"github.com/Template7/backend/internal/pkg/util"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"

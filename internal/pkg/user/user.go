@@ -1,10 +1,10 @@
 package user
 
 import (
-	"backend/internal/pkg/db"
-	"backend/internal/pkg/db/collection"
-	"backend/internal/pkg/t7Error"
-	"backend/internal/pkg/t7Redis"
+	"github.com/Template7/backend/internal/pkg/db"
+	"github.com/Template7/backend/internal/pkg/db/collection"
+	"github.com/Template7/backend/internal/pkg/t7Error"
+	"github.com/Template7/backend/internal/pkg/t7Redis"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

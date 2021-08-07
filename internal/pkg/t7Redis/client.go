@@ -1,7 +1,7 @@
 package t7Redis
 
 import (
-	"backend/internal/pkg/config"
+	"github.com/Template7/backend/internal/pkg/config"
 	"github.com/go-redis/redis"
 	log "github.com/sirupsen/logrus"
 	"sync"

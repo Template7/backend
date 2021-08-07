@@ -1,9 +1,9 @@
 package sms
 
 import (
-	"backend/internal/pkg/t7Error"
-	"backend/internal/pkg/t7Redis"
-	"backend/internal/pkg/util"
+	"github.com/Template7/backend/internal/pkg/t7Error"
+	"github.com/Template7/backend/internal/pkg/t7Redis"
+	"github.com/Template7/backend/internal/pkg/util"
 	"fmt"
 	"github.com/spf13/viper"
 	"net/http"
