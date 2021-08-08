@@ -8,7 +8,7 @@
 
 Template for REST API server write by go.
 
-[API Doc](./resource/api-documentation.pdf)
+[API Document](./resource/api-documentation.pdf)
 
 <br />
 
