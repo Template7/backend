@@ -33,6 +33,11 @@ For example: handler should not access db client directly, have to access by cor
 
 ## Build
 
+### All
+```
+$ make all 
+```
+
 ### Binary Only
 ```
 $ make build
@@ -48,9 +53,9 @@ $ make swagger
 $ make run
 ```
 
-### All
+### Docker
 ```
-$ make all 
+$ docker-compose build
 ```
 
 ## Docker Image
