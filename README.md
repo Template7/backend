@@ -6,7 +6,8 @@
 
 [![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
 
-<br />
+Template for REST API server write by go.
+
 <br />
 
 ## Architecture
