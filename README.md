@@ -10,8 +10,6 @@ Template for REST API server write by go.
 
 [API Document](./resource/api-documentation.pdf)
 
-<br />
-
 ## Architecture
 
 <p >
