@@ -9,6 +9,6 @@
 ## Architecture
 
 <p>
-  <img align="center" src="resource/readme/architecture.png.png">
+  <img align="center" src="resource/readme/architecture.png">
 </p>
 
