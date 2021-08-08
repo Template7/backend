@@ -29,7 +29,7 @@ For example: handler should not access db client directly, suggest to access by 
 | Component | Core business logic, include third-party client. |
 | DB Client | DB manipulation functions. |
 | Redis Client | Redis client. |
-| Document / Struct | Definition of DB documents / structs, it could be reference by any layer. |
+| Document / Struct | Definition of DB documents / structs, it could be referenced by any layer. |
 
 
 ## Run
