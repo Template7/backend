@@ -31,6 +31,12 @@ For example: handler should not access db client directly, have to access by cor
 | Redis Client | Redis client. |
 | Document / Struct | Definition of DB documents / structs, it could be reference by any layer. |
 
+
+## Run
+```
+$ make run
+```
+
 ## Build
 
 ### All
@@ -46,11 +52,6 @@ $ make build
 ### Swagger Document
 ```
 $ make swagger
-```
-
-### Run
-```
-$ make run
 ```
 
 ### Docker
