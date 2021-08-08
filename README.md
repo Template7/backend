@@ -8,6 +8,8 @@
 
 Template for REST API server write by go.
 
+[API Document](./resource/api-documentation.pdf)
+
 <br />
 
 ## Architecture
@@ -27,11 +29,16 @@ For example: handler should not access db client directly, have to access by cor
 | Middle ware | Common/routine functions such like token verification, body check, etc. |
 | Handler | Parse necessary variables from URI or body. |
 | Component | Core business logic, include third-party client. |
-| DB Client | DB access functions. |
+| DB Client | DB manipulation functions. |
 | Redis Client | Redis client. |
-| Document / Struct | Definition of DB documents / structs. |
+| Document / Struct | Definition of DB documents / structs, it could be reference by any layer. |
 
 ## Build
+
+### All
+```
+$ make all 
+```
 
 ### Binary Only
 ```
@@ -48,9 +55,9 @@ $ make swagger
 $ make run
 ```
 
-### All
+### Docker
 ```
-$ make all 
+$ docker-compose build
 ```
 
 ## Docker Image
