@@ -19,7 +19,7 @@ Template for REST API server write by go.
 For clean logic and easy-maintainable purpose, suggest each layer to access its next layer's function / method only,
 do not implement cross layer function call.
 
-For example: handler should not access db client directly, have to access by correspond component instead.  
+For example: handler should not access db client directly, suggest to access by correspond component instead.  
 
 | Layer | Function |
 | :--- | :--- |
@@ -29,7 +29,7 @@ For example: handler should not access db client directly, have to access by cor
 | Component | Core business logic, include third-party client. |
 | DB Client | DB manipulation functions. |
 | Redis Client | Redis client. |
-| Document / Struct | Definition of DB documents / structs, it could be reference by any layer. |
+| Document / Struct | Definition of DB documents / structs, it could be referenced by any layer. |
 
 
 ## Run
