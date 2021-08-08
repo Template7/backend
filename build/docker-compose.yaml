@@ -1,0 +1,8 @@
+version: '3'
+services:
+  backend:
+    build:
+      context: ../
+      dockerfile: ./build/Dockerfile
+    image: allensyk/template7-backend:latest
+    container_name: backend
