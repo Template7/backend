@@ -7,6 +7,7 @@ RUN go mod download
 RUN go build -o $PROJECT .
 
 FROM alpine
+ARG PROJECT=backend
 
 WORKDIR /$PROJECT
 COPY --from=builder /$PROJECT/$PROJECT ./
