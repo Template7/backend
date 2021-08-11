@@ -24,7 +24,7 @@ For example: handler should not access db client directly, suggest to access by 
 | Layer | Function |
 | :--- | :--- |
 | API / Route | Registered API endpoint. |
-| Middle ware | Common/routine functions such like token verification, body check, etc. |
+| Middle ware | Common / routine functions such like token verification, body check, etc. |
 | Handler | Parse necessary variables from URI or body. |
 | Component | Core business logic, include third-party client. |
 | DB Client | DB manipulation functions. |
