@@ -31,7 +31,6 @@ For example: handler should not access db client directly, suggest to access by 
 | Redis Client | Redis client. |
 | Document / Struct | Definition of DB documents / structs, it could be referenced by any layer. |
 
-
 ## Run
 ```
 $ make run
