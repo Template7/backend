@@ -65,7 +65,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/collection.Admin"
+                            "$ref": "#/definitions/structs.Admin"
                         }
                     }
                 ],
@@ -73,7 +73,7 @@ var doc = `{
                     "200": {
                         "description": "Token object",
                         "schema": {
-                            "$ref": "#/definitions/collection.Token"
+                            "$ref": "#/definitions/structs.Token"
                         }
                     },
                     "400": {
@@ -116,7 +116,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/collection.User"
+                            "$ref": "#/definitions/structs.User"
                         }
                     }
                 ],
@@ -124,7 +124,7 @@ var doc = `{
                     "200": {
                         "description": "User object",
                         "schema": {
-                            "$ref": "#/definitions/collection.User"
+                            "$ref": "#/definitions/structs.User"
                         }
                     },
                     "400": {
@@ -195,7 +195,7 @@ var doc = `{
                     "200": {
                         "description": "Token object",
                         "schema": {
-                            "$ref": "#/definitions/collection.Token"
+                            "$ref": "#/definitions/structs.Token"
                         }
                     },
                     "400": {
@@ -274,7 +274,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/collection.User"
+                            "$ref": "#/definitions/structs.User"
                         }
                     },
                     "400": {
@@ -314,7 +314,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/collection.UserInfo"
+                            "$ref": "#/definitions/structs.UserInfo"
                         }
                     },
                     {
@@ -358,7 +358,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/collection.Token"
+                            "$ref": "#/definitions/structs.Token"
                         }
                     },
                     {
@@ -380,7 +380,7 @@ var doc = `{
                     "200": {
                         "description": "Token object",
                         "schema": {
-                            "$ref": "#/definitions/collection.Token"
+                            "$ref": "#/definitions/structs.Token"
                         }
                     },
                     "400": {
@@ -400,124 +400,6 @@ var doc = `{
         }
     },
     "definitions": {
-        "collection.Admin": {
-            "type": "object",
-            "required": [
-                "password",
-                "username"
-            ],
-            "properties": {
-                "password": {
-                    "type": "string",
-                    "example": "password"
-                },
-                "username": {
-                    "description": "Id       *primitive.ObjectID ` + "`" + `json:\"id,omitempty\" bson:\"_id,omitempty\"` + "`" + `",
-                    "type": "string",
-                    "example": "username"
-                }
-            }
-        },
-        "collection.LoginInfo": {
-            "type": "object",
-            "required": [
-                "device"
-            ],
-            "properties": {
-                "channel": {
-                    "type": "integer"
-                },
-                "channel_user_id": {
-                    "description": "user id of the channel",
-                    "type": "string"
-                },
-                "device": {
-                    "description": "iPhoneN, PixelN, NoteN, ...",
-                    "type": "string"
-                },
-                "os": {
-                    "type": "integer"
-                }
-            }
-        },
-        "collection.Token": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "refresh_token": {
-                    "type": "string"
-                }
-            }
-        },
-        "collection.User": {
-            "type": "object",
-            "properties": {
-                "basic_info": {
-                    "$ref": "#/definitions/collection.UserInfo"
-                },
-                "email": {
-                    "type": "string",
-                    "example": "username@mail.com"
-                },
-                "last_update": {
-                    "description": "unix time in second",
-                    "type": "integer"
-                },
-                "login_info": {
-                    "$ref": "#/definitions/collection.LoginInfo"
-                },
-                "mobile": {
-                    "description": "+886987654321",
-                    "type": "string",
-                    "example": "+886987654321"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
-        "collection.UserInfo": {
-            "type": "object",
-            "required": [
-                "nick_name"
-            ],
-            "properties": {
-                "Avatar": {
-                    "description": "s3 object url",
-                    "type": "string"
-                },
-                "bio": {
-                    "type": "string"
-                },
-                "birthday": {
-                    "type": "integer"
-                },
-                "gender": {
-                    "description": "configable?",
-                    "type": "integer"
-                },
-                "hobbies": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "nick_name": {
-                    "type": "string"
-                },
-                "profile_pictures": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "handler.hello": {
             "type": "object",
             "properties": {
@@ -557,6 +439,124 @@ var doc = `{
                 "mobile": {
                     "type": "string",
                     "example": "+886987654321"
+                }
+            }
+        },
+        "structs.Admin": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "password"
+                },
+                "username": {
+                    "description": "Id       *primitive.ObjectID ` + "`" + `json:\"id,omitempty\" bson:\"_id,omitempty\"` + "`" + `",
+                    "type": "string",
+                    "example": "username"
+                }
+            }
+        },
+        "structs.LoginInfo": {
+            "type": "object",
+            "required": [
+                "device"
+            ],
+            "properties": {
+                "channel": {
+                    "type": "integer"
+                },
+                "channel_user_id": {
+                    "description": "user id of the channel",
+                    "type": "string"
+                },
+                "device": {
+                    "description": "iPhoneN, PixelN, NoteN, ...",
+                    "type": "string"
+                },
+                "os": {
+                    "type": "integer"
+                }
+            }
+        },
+        "structs.Token": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "structs.User": {
+            "type": "object",
+            "properties": {
+                "basic_info": {
+                    "$ref": "#/definitions/structs.UserInfo"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "username@mail.com"
+                },
+                "last_update": {
+                    "description": "unix time in second",
+                    "type": "integer"
+                },
+                "login_info": {
+                    "$ref": "#/definitions/structs.LoginInfo"
+                },
+                "mobile": {
+                    "description": "+886987654321",
+                    "type": "string",
+                    "example": "+886987654321"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "structs.UserInfo": {
+            "type": "object",
+            "required": [
+                "nick_name"
+            ],
+            "properties": {
+                "Avatar": {
+                    "description": "s3 object url",
+                    "type": "string"
+                },
+                "bio": {
+                    "type": "string"
+                },
+                "birthday": {
+                    "type": "integer"
+                },
+                "gender": {
+                    "description": "configable?",
+                    "type": "integer"
+                },
+                "hobbies": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "nick_name": {
+                    "type": "string"
+                },
+                "profile_pictures": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/Template7/backend/internal/pkg/auth"
-	"github.com/Template7/backend/internal/pkg/db/collection"
+	"github.com/Template7/common/structs"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -12,8 +12,8 @@ import (
 // @Summary Refresh access token
 // @Tags V1,Token
 // @version 1.0
-// @Param token body collection.Token true "Token object"
-// @Success 200 {object} collection.Token "Token object"
+// @Param token body structs.Token true "Token object"
+// @Success 200 {object} structs.Token "Token object"
 // @failure 400 {object} t7Error.Error
 // @failure 401 {object} t7Error.Error
 // @Param UserId path string true "User ID"
@@ -25,7 +25,7 @@ import (
 func RefreshToken(c *gin.Context) {
 	log.Debug("handle refresh token")
 
-	var token collection.Token
+	var token structs.Token
 	if err := c.BindJSON(&token); err != nil {
 		log.Warn("invalid body: ", err.Error())
 		c.JSON(http.StatusBadRequest, err)

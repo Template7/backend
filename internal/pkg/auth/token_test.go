@@ -2,7 +2,7 @@ package auth
 
 import (
 	"github.com/Template7/backend/internal/pkg/config"
-	"github.com/Template7/backend/internal/pkg/db/collection"
+	"github.com/Template7/common/structs"
 	"github.com/Template7/backend/internal/pkg/t7Error"
 	"github.com/Template7/backend/internal/pkg/user"
 	"context"
@@ -17,7 +17,7 @@ func TestRefreshToken(t *testing.T) {
 	viper.AddConfigPath("../../../configs")
 	viper.Set("Mongo.Db", "testDb")
 
-	testUser := collection.User{
+	testUser := structs.User{
 		Mobile: "+886987654321",
 	}
 	uId, err := user.CreateUser(testUser)
@@ -31,12 +31,12 @@ func TestRefreshToken(t *testing.T) {
 	//db.New().SaveToken()
 
 	type args struct {
-		oriToken collection.Token
+		oriToken structs.Token
 	}
 	tests := []struct {
 		name               string
 		args               args
-		wantRefreshedToken collection.Token
+		wantRefreshedToken structs.Token
 		wantErr            *t7Error.Error
 	}{
 		{

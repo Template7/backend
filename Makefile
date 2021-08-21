@@ -5,7 +5,7 @@ build:
 	go build
 
 swagger:
-	swag init
+	swag init --parseDependency --parseDepth 3
 
 run:
 	./backend

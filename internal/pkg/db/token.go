@@ -1,14 +1,14 @@
 package db
 
 import (
-	"github.com/Template7/backend/internal/pkg/db/collection"
+	"github.com/Template7/common/structs"
 	"context"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (c client) SaveToken(token collection.Token) (tokenId *primitive.ObjectID, err error) {
+func (c client) SaveToken(token structs.Token) (tokenId *primitive.ObjectID, err error) {
 	log.Debug("save token")
 
 	res, err := c.token.InsertOne(context.Background(), token)
@@ -31,7 +31,7 @@ func (c client) RemoveToken(id *primitive.ObjectID) (err error) {
 	return
 }
 
-func (c client) GetToken(id *primitive.ObjectID) (token collection.Token, err error) {
+func (c client) GetToken(id *primitive.ObjectID) (token structs.Token, err error) {
 	log.Debug("get token: ", id.Hex())
 
 	filter := bson.M{

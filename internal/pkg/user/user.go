@@ -2,9 +2,9 @@ package user
 
 import (
 	"github.com/Template7/backend/internal/pkg/db"
-	"github.com/Template7/backend/internal/pkg/db/collection"
 	"github.com/Template7/backend/internal/pkg/t7Error"
 	"github.com/Template7/backend/internal/pkg/t7Redis"
+	"github.com/Template7/common/structs"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,7 +21,7 @@ func Exist(filter db.GetUserFilter) (exist bool, err *t7Error.Error) {
 	return
 }
 
-func GetUsers(filter db.GetUserFilter, option db.QueryOption) (users []collection.User, err *t7Error.Error) {
+func GetUsers(filter db.GetUserFilter, option db.QueryOption) (users []structs.User, err *t7Error.Error) {
 	log.Debug("get user")
 
 	users, dbErr := db.New().GetUser(filter, option)
@@ -40,7 +40,7 @@ func GetUsers(filter db.GetUserFilter, option db.QueryOption) (users []collectio
 	return
 }
 
-func GetByChannel(channel collection.LoginChannel, id string) (data collection.User, err *t7Error.Error) {
+func GetByChannel(channel structs.LoginChannel, id string) (data structs.User, err *t7Error.Error) {
 	log.Debug("get user by channel")
 
 	data, dbErr := db.New().GetUserByChannel(channel, id)
@@ -59,7 +59,7 @@ func GetByChannel(channel collection.LoginChannel, id string) (data collection.U
 	return
 }
 
-func GetByMobile(mobile string) (data collection.User, err *t7Error.Error){
+func GetByMobile(mobile string) (data structs.User, err *t7Error.Error) {
 	data, dbErr := db.New().GetUserByMobile(mobile)
 	if dbErr != nil {
 		log.Error("fail to get user: ", dbErr.Error())
@@ -69,7 +69,7 @@ func GetByMobile(mobile string) (data collection.User, err *t7Error.Error){
 	return
 }
 
-func GetInfo(userId string) (data collection.User, err *t7Error.Error) {
+func GetInfo(userId string) (data structs.User, err *t7Error.Error) {
 	uId, idErr := primitive.ObjectIDFromHex(userId)
 	if idErr != nil {
 		err = t7Error.InvalidDocumentId.WithDetail(idErr.Error())
@@ -82,7 +82,7 @@ func GetInfo(userId string) (data collection.User, err *t7Error.Error) {
 	return
 }
 
-func CreateUser(user collection.User) (userId *primitive.ObjectID, err *t7Error.Error) {
+func CreateUser(user structs.User) (userId *primitive.ObjectID, err *t7Error.Error) {
 	userId, dbErr := db.New().CreateUser(user)
 
 	if dbErr == nil {
@@ -99,12 +99,12 @@ func CreateUser(user collection.User) (userId *primitive.ObjectID, err *t7Error.
 	return
 }
 
-func CreateNativeUser(mobile string) (u collection.User, err *t7Error.Error) {
+func CreateNativeUser(mobile string) (u structs.User, err *t7Error.Error) {
 	log.Debug("create native user")
 
-	u = collection.User{
+	u = structs.User{
 		Mobile: mobile,
-		Status: collection.UserStatusInitialized,
+		Status: structs.UserStatusInitialized,
 	}
 	uId, dbErr := db.New().CreateUser(u)
 	if dbErr != nil {
@@ -130,7 +130,7 @@ func DeleteUser(userId string) (err *t7Error.Error) {
 	return
 }
 
-func UpdateBasicInfo(userId string, data collection.UserInfo) (err *t7Error.Error) {
+func UpdateBasicInfo(userId string, data structs.UserInfo) (err *t7Error.Error) {
 	uId, idErr := primitive.ObjectIDFromHex(userId)
 	if idErr != nil {
 		log.Warn("invalid user id: ", userId)
@@ -144,7 +144,7 @@ func UpdateBasicInfo(userId string, data collection.UserInfo) (err *t7Error.Erro
 	return
 }
 
-func UpdateLoginClient(userId string, loginClient collection.LoginInfo) (err *t7Error.Error) {
+func UpdateLoginClient(userId string, loginClient structs.LoginInfo) (err *t7Error.Error) {
 	uId, idErr := primitive.ObjectIDFromHex(userId)
 	if idErr != nil {
 		log.Warn("invalid user id: ", userId)

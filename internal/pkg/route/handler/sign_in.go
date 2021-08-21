@@ -67,7 +67,7 @@ func MobileSignIn(c *gin.Context) {
 // @version 1.0
 // @Param smsConfirm body sms.Confirm true "Sms confirm"
 // @produce json
-// @Success 200 {object} collection.Token "Token object"
+// @Success 200 {object} structs.Token "Token object"
 // @failure 400 {object} t7Error.Error
 // @failure 401 {object} t7Error.Error
 // @Router /api/v1/sign-up/confirmation [post]
@@ -150,7 +150,7 @@ func FacebookSignInCallback(c *gin.Context) {
 
 	c.JSON(http.StatusOK, userData.String())
 
-	//data, err := user.GetByChannel(collection.LoginChannelFacebook, userData.Id)
+	//data, err := user.GetByChannel(structs.LoginChannelFacebook, userData.Id)
 	//
 	//// return user token if user exist
 	//if err == nil {
@@ -168,15 +168,15 @@ func FacebookSignInCallback(c *gin.Context) {
 	//if err.Code == t7Error.UserNotfound.Code {
 	//	log.Debug("new user sign up from facebook")
 	//
-	//	u := collection.User{
-	//		BasicInfo: collection.UserInfo{
+	//	u := structs.User{
+	//		BasicInfo: structs.UserInfo{
 	//			NickName: userData.Name,
 	//			Gender:   userData.GetGender(),
 	//			Birthday: userData.GetBirthday(),
 	//		},
 	//		Email: userData.Email,
-	//		LoginClient: collection.LoginInfo{
-	//			Channel:       collection.LoginChannelFacebook,
+	//		LoginClient: structs.LoginInfo{
+	//			Channel:       structs.LoginChannelFacebook,
 	//			ChannelUserId: userData.Id,
 	//		},
 	//	}

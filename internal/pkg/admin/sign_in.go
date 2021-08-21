@@ -3,14 +3,14 @@ package admin
 import (
 	"github.com/Template7/backend/internal/pkg/auth"
 	"github.com/Template7/backend/internal/pkg/db"
-	"github.com/Template7/backend/internal/pkg/db/collection"
+	"github.com/Template7/common/structs"
 	"github.com/Template7/backend/internal/pkg/t7Error"
 	"github.com/Template7/backend/internal/pkg/util"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
-func SignIn(data collection.Admin) (token collection.Token, err *t7Error.Error) {
+func SignIn(data structs.Admin) (token structs.Token, err *t7Error.Error) {
 	log.Debug("admin sign in")
 
 	adminData, dbErr := db.New().GetAdmin()
