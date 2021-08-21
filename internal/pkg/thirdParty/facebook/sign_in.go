@@ -1,12 +1,12 @@
 package facebook
 
 import (
-	"github.com/Template7/backend/internal/pkg/config"
-	"github.com/Template7/backend/internal/pkg/db/collection"
-	"github.com/Template7/backend/internal/pkg/t7Error"
-	"github.com/Template7/backend/internal/pkg/util"
 	"encoding/json"
 	"fmt"
+	"github.com/Template7/backend/internal/pkg/config"
+	"github.com/Template7/backend/internal/pkg/t7Error"
+	"github.com/Template7/backend/internal/pkg/util"
+	"github.com/Template7/common/structs"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
@@ -70,14 +70,14 @@ func (b basicUserData) GetBirthday() (birthday int64) {
 	return
 }
 
-func (b basicUserData) GetGender() (gender collection.Gender) {
+func (b basicUserData) GetGender() (gender structs.Gender) {
 	switch b.Gender {
 	case "male":
-		gender = collection.GenderMale
+		gender = structs.GenderMale
 	case "female":
-		gender = collection.GenderFemale
+		gender = structs.GenderFemale
 	default:
-		gender = collection.GenderUnknown
+		gender = structs.GenderUnknown
 	}
 	return
 }

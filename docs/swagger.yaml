@@ -1,85 +1,4 @@
 definitions:
-  collection.Admin:
-    properties:
-      password:
-        example: password
-        type: string
-      username:
-        description: Id       *primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-        example: username
-        type: string
-    required:
-    - password
-    - username
-    type: object
-  collection.LoginInfo:
-    properties:
-      channel:
-        type: integer
-      channel_user_id:
-        description: user id of the channel
-        type: string
-      device:
-        description: iPhoneN, PixelN, NoteN, ...
-        type: string
-      os:
-        type: integer
-    required:
-    - device
-    type: object
-  collection.Token:
-    properties:
-      access_token:
-        type: string
-      id:
-        type: string
-      refresh_token:
-        type: string
-    type: object
-  collection.User:
-    properties:
-      basic_info:
-        $ref: '#/definitions/collection.UserInfo'
-      email:
-        example: username@mail.com
-        type: string
-      last_update:
-        description: unix time in second
-        type: integer
-      login_info:
-        $ref: '#/definitions/collection.LoginInfo'
-      mobile:
-        description: "+886987654321"
-        example: "+886987654321"
-        type: string
-      status:
-        type: integer
-    type: object
-  collection.UserInfo:
-    properties:
-      Avatar:
-        description: s3 object url
-        type: string
-      bio:
-        type: string
-      birthday:
-        type: integer
-      gender:
-        description: configable?
-        type: integer
-      hobbies:
-        items:
-          type: string
-        type: array
-      nick_name:
-        type: string
-      profile_pictures:
-        items:
-          type: string
-        type: array
-    required:
-    - nick_name
-    type: object
   handler.hello:
     properties:
       message:
@@ -108,6 +27,87 @@ definitions:
         type: string
     required:
     - mobile
+    type: object
+  structs.Admin:
+    properties:
+      password:
+        example: password
+        type: string
+      username:
+        description: Id       *primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+        example: username
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  structs.LoginInfo:
+    properties:
+      channel:
+        type: integer
+      channel_user_id:
+        description: user id of the channel
+        type: string
+      device:
+        description: iPhoneN, PixelN, NoteN, ...
+        type: string
+      os:
+        type: integer
+    required:
+    - device
+    type: object
+  structs.Token:
+    properties:
+      access_token:
+        type: string
+      id:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  structs.User:
+    properties:
+      basic_info:
+        $ref: '#/definitions/structs.UserInfo'
+      email:
+        example: username@mail.com
+        type: string
+      last_update:
+        description: unix time in second
+        type: integer
+      login_info:
+        $ref: '#/definitions/structs.LoginInfo'
+      mobile:
+        description: "+886987654321"
+        example: "+886987654321"
+        type: string
+      status:
+        type: integer
+    type: object
+  structs.UserInfo:
+    properties:
+      Avatar:
+        description: s3 object url
+        type: string
+      bio:
+        type: string
+      birthday:
+        type: integer
+      gender:
+        description: configable?
+        type: integer
+      hobbies:
+        items:
+          type: string
+        type: array
+      nick_name:
+        type: string
+      profile_pictures:
+        items:
+          type: string
+        type: array
+    required:
+    - nick_name
     type: object
   t7Error.Error:
     properties:
@@ -153,14 +153,14 @@ paths:
         name: smsRequest
         required: true
         schema:
-          $ref: '#/definitions/collection.Admin'
+          $ref: '#/definitions/structs.Admin'
       produces:
       - application/json
       responses:
         "200":
           description: Token object
           schema:
-            $ref: '#/definitions/collection.Token'
+            $ref: '#/definitions/structs.Token'
         "400":
           description: Bad Request
           schema:
@@ -187,14 +187,14 @@ paths:
         name: userData
         required: true
         schema:
-          $ref: '#/definitions/collection.User'
+          $ref: '#/definitions/structs.User'
       produces:
       - application/json
       responses:
         "200":
           description: User object
           schema:
-            $ref: '#/definitions/collection.User'
+            $ref: '#/definitions/structs.User'
         "400":
           description: Error object
           schema:
@@ -241,7 +241,7 @@ paths:
         "200":
           description: Token object
           schema:
-            $ref: '#/definitions/collection.Token'
+            $ref: '#/definitions/structs.Token'
         "400":
           description: Bad Request
           schema:
@@ -293,7 +293,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/collection.User'
+            $ref: '#/definitions/structs.User'
         "400":
           description: Bad Request
           schema:
@@ -318,7 +318,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/collection.UserInfo'
+          $ref: '#/definitions/structs.UserInfo'
       - description: User ID
         in: path
         name: UserId
@@ -349,7 +349,7 @@ paths:
         name: token
         required: true
         schema:
-          $ref: '#/definitions/collection.Token'
+          $ref: '#/definitions/structs.Token'
       - description: User ID
         in: path
         name: UserId
@@ -364,7 +364,7 @@ paths:
         "200":
           description: Token object
           schema:
-            $ref: '#/definitions/collection.Token'
+            $ref: '#/definitions/structs.Token'
         "400":
           description: Bad Request
           schema:

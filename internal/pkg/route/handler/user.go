@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"github.com/Template7/backend/internal/pkg/db/collection"
 	"github.com/Template7/backend/internal/pkg/t7Error"
 	"github.com/Template7/backend/internal/pkg/user"
+	"github.com/Template7/common/structs"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -14,7 +14,7 @@ import (
 // @Summary Get user Info
 // @Tags V1,User
 // @version 1.0
-// @Success 200 {object} collection.User
+// @Success 200 {object} structs.User
 // @failure 400 {object} t7Error.Error
 // @failure 401 {object} t7Error.Error
 // @Param UserId path string true "User ID"
@@ -41,8 +41,8 @@ func GetInfo(c *gin.Context) {
 // @version 1.0
 // @produce json
 // @Param Authorization header string true "Access token"
-// @Param userData body collection.User true "User data"
-// @Success 200 {object} collection.User "User object"
+// @Param userData body structs.User true "User data"
+// @Success 200 {object} structs.User "User object"
 // @failure 400 {object} t7Error.Error "Error object"
 // @failure 401 {object} t7Error.Error "Error object"
 // @Router /admin/v1/user [post]
@@ -52,7 +52,7 @@ func GetInfo(c *gin.Context) {
 func CreateUser(c *gin.Context) {
 	log.Debug("handle create user")
 
-	var userData collection.User
+	var userData structs.User
 	if err := c.BindJSON(&userData); err != nil {
 		c.JSON(http.StatusBadRequest, t7Error.InvalidBody.WithDetail(err.Error()))
 		return
@@ -75,7 +75,7 @@ func CreateUser(c *gin.Context) {
 // @version 1.0
 // @produce json
 // @Param Authorization header string true "Access token"
-// @Param user body collection.UserInfo true "User basic info"
+// @Param user body structs.UserInfo true "User basic info"
 // @Success 200
 // @failure 400 {object} t7Error.Error
 // @failure 401 {object} t7Error.Error
@@ -89,7 +89,7 @@ func UpdateUser(c *gin.Context) {
 
 	userId := c.Param("user-id")
 
-	var userData collection.UserInfo
+	var userData structs.UserInfo
 	if err := c.BindJSON(&userData); err != nil {
 		c.JSON(http.StatusBadRequest, t7Error.InvalidBody.WithDetail(err.Error()))
 		return
@@ -108,7 +108,7 @@ func UpdateUser(c *gin.Context) {
 func UpdateLoginClient(c *gin.Context) {
 	log.Error("handle update login client")
 
-	var loginClient collection.LoginInfo
+	var loginClient structs.LoginInfo
 	if err := c.BindJSON(&loginClient); err != nil {
 		c.JSON(http.StatusBadRequest, t7Error.InvalidBody.WithDetail(err.Error()))
 		return

@@ -1,7 +1,7 @@
 package db
 
 import (
-	"github.com/Template7/backend/internal/pkg/db/collection"
+	"github.com/Template7/common/structs"
 	"context"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,10 +20,10 @@ type GetUserFilter struct {
 	Status     string `json:"status" bson:"status,omitempty"`             // initialized | activate | block
 }
 
-func (c client) CreateUser(user collection.User) (userId *primitive.ObjectID, err error) {
+func (c client) CreateUser(user structs.User) (userId *primitive.ObjectID, err error) {
 	log.Debug("create user")
 
-	user.Status = collection.UserStatusInitialized
+	user.Status = structs.UserStatusInitialized
 	user.LastUpdate = time.Now().Unix()
 	if len(user.BasicInfo.ProfilePictures) == 0 {
 		user.BasicInfo.ProfilePictures = []string{}
@@ -43,7 +43,7 @@ func (c client) CreateUser(user collection.User) (userId *primitive.ObjectID, er
 	return
 }
 
-func (c client) GetUser(filter GetUserFilter, option QueryOption) (users []collection.User, err error) {
+func (c client) GetUser(filter GetUserFilter, option QueryOption) (users []structs.User, err error) {
 	log.Debug("get user")
 
 	opt := option.ToMongoOption()
@@ -60,7 +60,7 @@ func (c client) GetUser(filter GetUserFilter, option QueryOption) (users []colle
 	return
 }
 
-func (c client) GetUserByChannel(channel collection.LoginChannel, id string) (data collection.User, err error) {
+func (c client) GetUserByChannel(channel structs.LoginChannel, id string) (data structs.User, err error) {
 	log.Debug("get user by channel")
 
 	filter := bson.M{
@@ -71,7 +71,7 @@ func (c client) GetUserByChannel(channel collection.LoginChannel, id string) (da
 	return
 }
 
-func (c client) GetUserByMobile(mobile string) (data collection.User, err error) {
+func (c client) GetUserByMobile(mobile string) (data structs.User, err error) {
 	log.Debug("get user by mobile: ", mobile)
 
 	filter := bson.M{
@@ -81,7 +81,7 @@ func (c client) GetUserByMobile(mobile string) (data collection.User, err error)
 	return
 }
 
-func (c client) GetUserInfo(userId primitive.ObjectID) (data collection.User, err error) {
+func (c client) GetUserInfo(userId primitive.ObjectID) (data structs.User, err error) {
 	log.Debug("get user info: ", userId.Hex())
 
 	filter := bson.M{
@@ -100,7 +100,7 @@ func (c client) GetUserInfo(userId primitive.ObjectID) (data collection.User, er
 	return
 }
 
-func (c client) UpdateBasicInfo(userId primitive.ObjectID, data collection.UserInfo) (err error) {
+func (c client) UpdateBasicInfo(userId primitive.ObjectID, data structs.UserInfo) (err error) {
 	log.Debug("update user basic info: ", userId.Hex())
 
 	filter := bson.M{
@@ -116,7 +116,7 @@ func (c client) UpdateBasicInfo(userId primitive.ObjectID, data collection.UserI
 	return
 }
 
-func (c client) UpdateLoginClient(userId primitive.ObjectID, loginClient collection.LoginInfo) (err error) {
+func (c client) UpdateLoginClient(userId primitive.ObjectID, loginClient structs.LoginInfo) (err error) {
 	log.Debug("update user login client: ", userId.Hex())
 
 	filter := bson.M{
@@ -139,7 +139,7 @@ func (c client) DeleteUser(userId primitive.ObjectID) (err error) {
 	}
 	update := bson.M{
 		"last_update": time.Now().Unix(),
-		"status":      collection.UserStatusBlock,
+		"status":      structs.UserStatusBlock,
 	}
 	_, err = c.user.UpdateOne(nil, filter, update)
 	return

@@ -46,7 +46,7 @@ func SendVerifyCode(c *gin.Context) {
 // @version 1.0
 // @Param smsConfirm body sms.Confirm true "Sms confirm"
 // @produce json
-// @Success 200 {object} collection.Token "Token object"
+// @Success 200 {object} structs.Token "Token object"
 // @failure 400 {object} t7Error.Error
 // @failure 401 {object} t7Error.Error
 // @Router /api/v1/sign-up/confirmation [post]

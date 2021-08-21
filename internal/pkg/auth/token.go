@@ -3,9 +3,9 @@ package auth
 import (
 	"github.com/Template7/backend/internal/pkg/config"
 	"github.com/Template7/backend/internal/pkg/db"
-	"github.com/Template7/backend/internal/pkg/db/collection"
 	"github.com/Template7/backend/internal/pkg/t7Error"
 	"github.com/Template7/backend/internal/pkg/user"
+	"github.com/Template7/common/structs"
 	"github.com/dgrijalva/jwt-go"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -17,7 +17,7 @@ const (
 	userTokenTtl  = 7 * 24 * time.Hour // 1 week
 )
 
-func GenUserToken(userId string) (token collection.Token, err *t7Error.Error) {
+func GenUserToken(userId string) (token structs.Token, err *t7Error.Error) {
 	log.Debug("gen token for user: ", userId)
 
 	utc := user.TokenClaims{
@@ -36,7 +36,7 @@ func GenUserToken(userId string) (token collection.Token, err *t7Error.Error) {
 	return genToken(tokenString)
 }
 
-func GenAdminToken() (token collection.Token, err *t7Error.Error) {
+func GenAdminToken() (token structs.Token, err *t7Error.Error) {
 	log.Debug("gen admin token")
 
 	claim := jwt.StandardClaims{
@@ -51,7 +51,7 @@ func GenAdminToken() (token collection.Token, err *t7Error.Error) {
 	return genToken(tokenString)
 }
 
-func genToken(accessToken string) (token collection.Token, err *t7Error.Error) {
+func genToken(accessToken string) (token structs.Token, err *t7Error.Error) {
 	log.Debug("gen token")
 
 	refreshToken, signErr := jwt.New(jwt.SigningMethodHS256).SignedString(config.New().JwtSign)
@@ -59,10 +59,10 @@ func genToken(accessToken string) (token collection.Token, err *t7Error.Error) {
 		err = t7Error.TokenSignFail.WithDetailAndStatus(signErr.Error(), http.StatusInternalServerError)
 		return
 	}
-	token = collection.Token{
+	token = structs.Token{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		ClaimType:    collection.ClaimTypeUser,
+		ClaimType:    structs.ClaimTypeUser,
 	}
 	tokenId, dbErr := db.New().SaveToken(token)
 	if dbErr != nil {
@@ -73,7 +73,7 @@ func genToken(accessToken string) (token collection.Token, err *t7Error.Error) {
 	return
 }
 
-func RefreshToken(oriToken collection.Token) (refreshedToken collection.Token, err *t7Error.Error) {
+func RefreshToken(oriToken structs.Token) (refreshedToken structs.Token, err *t7Error.Error) {
 	log.Debug("refresh token: ", oriToken.Id.Hex())
 
 	ot, dbErr := db.New().GetToken(oriToken.Id)
@@ -84,7 +84,7 @@ func RefreshToken(oriToken collection.Token) (refreshedToken collection.Token, e
 	}
 
 	switch ot.ClaimType {
-	case collection.ClaimTypeUser:
+	case structs.ClaimTypeUser:
 		return refreshUserToken(oriToken)
 
 	default:
@@ -94,7 +94,7 @@ func RefreshToken(oriToken collection.Token) (refreshedToken collection.Token, e
 	}
 }
 
-func refreshUserToken(oriToken collection.Token) (refreshedToken collection.Token, err *t7Error.Error) {
+func refreshUserToken(oriToken structs.Token) (refreshedToken structs.Token, err *t7Error.Error) {
 	log.Debug("refresh user token: ", oriToken.Id.Hex())
 
 	token, tokenErr := jwt.ParseWithClaims(oriToken.AccessToken, &user.TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
