@@ -38,7 +38,7 @@ $ make run
 
 ## Build
 
-### All
+### All (Swagger -> Binary -> Run)
 ```
 $ make all 
 ```
