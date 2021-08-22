@@ -4,6 +4,9 @@
 build:
 	go build
 
+image:
+	docker-compose -f ./build/docker-compose.yaml build
+
 swagger:
 	swag init --parseDependency --parseDepth 3
 
