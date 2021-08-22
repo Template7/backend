@@ -11,6 +11,6 @@ ARG PROJECT=backend
 
 WORKDIR /$PROJECT
 COPY --from=builder /$PROJECT/$PROJECT ./
-COPY ./resource/template ./resorce/template
+COPY ./resource/template ./resource/template
 
 CMD ["./$PROJECT"]
