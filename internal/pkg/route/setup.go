@@ -1,10 +1,8 @@
 package route
 
 import (
-	"github.com/Template7/backend/internal/pkg/config"
 	"github.com/Template7/backend/internal/pkg/route/handler"
 	"github.com/Template7/backend/internal/pkg/route/middle_ware"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -16,8 +14,7 @@ func Setup(r *gin.Engine) {
 	r.GET("", handler.HelloPage)
 
 	if gin.Mode() == gin.DebugMode {
-		url := ginSwagger.URL(fmt.Sprintf("http://localhost:%d/swagger/doc.json", config.New().Gin.ListenPort))
-		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 		r.GET("/test/graceful-shutdown", handler.TestGracefulShutdown)
 	}
 
