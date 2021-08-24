@@ -176,10 +176,11 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Sms",
-                    "SignUp"
+                    "v1",
+                    "SignIn",
+                    "Sms"
                 ],
-                "summary": "Confirm verify code",
+                "summary": "Mobile sign in confirm",
                 "parameters": [
                     {
                         "description": "Sms confirm",
