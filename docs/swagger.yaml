@@ -250,10 +250,11 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/t7Error.Error'
-      summary: Confirm verify code
+      summary: Mobile sign in confirm
       tags:
+      - v1
+      - SignIn
       - Sms
-      - SignUp
   /api/v1/sign-up/verification:
     post:
       parameters:
