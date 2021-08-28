@@ -18,4 +18,4 @@ WORKDIR /$PROJECT
 COPY --from=builder /$PROJECT/$PROJECT ./
 COPY ./resource/template ./resource/template
 
-CMD ["./$PROJECT"]
+CMD ["sh", "-c", "./$PROJECT"]
