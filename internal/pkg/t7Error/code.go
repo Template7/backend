@@ -19,6 +19,7 @@ const (
 	codeTokenAssertionFail
 	codeInvalidToken
 	codeDecodeFail
+	codeWalletNotFound
 )
 
 const (
@@ -127,5 +128,11 @@ var (
 		Code:    codeDecodeFail,
 		Message: "decode fail",
 		Type:    typeInvalidData,
+	}
+
+	WalletNotFound = &Error{
+		Code:    codeWalletNotFound,
+		Message: "wallet not found",
+		Type:    typeDb,
 	}
 )

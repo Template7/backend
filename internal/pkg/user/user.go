@@ -75,7 +75,7 @@ func GetInfo(userId string) (data structs.User, err *t7Error.Error) {
 		err = t7Error.InvalidDocumentId.WithDetail(idErr.Error())
 		return
 	}
-	data, dbErr := db.New().GetUserInfo(uId)
+	data, dbErr := db.New().GetUserBasicInfo(uId)
 	if dbErr != nil {
 		err = t7Error.InvalidDocumentId.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
 	}
@@ -138,7 +138,7 @@ func UpdateBasicInfo(userId string, data structs.UserInfo) (err *t7Error.Error) 
 		return
 	}
 
-	if dbErr := db.New().UpdateBasicInfo(uId, data); dbErr != nil {
+	if dbErr := db.New().UpdateUserBasicInfo(uId, data); dbErr != nil {
 		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
 	}
 	return
