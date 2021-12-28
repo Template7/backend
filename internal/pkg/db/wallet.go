@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"github.com/Template7/backend/internal/pkg/t7Error"
 	"github.com/Template7/common/structs"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,10 +12,8 @@ import (
 
 func (c client) GetWallet(userId string) (data structs.WalletData, err error) {
 	var wallet structs.Wallet
-	c.mysql.db.Model(&structs.Wallet{}).Where("userId = ?", userId).Take(&wallet)
-	if wallet.Id == "" {
-		log.Warn("no related wallet for the user: ", userId)
-		err = t7Error.WalletNotFound
+	if err = c.mysql.db.Model(&structs.Wallet{}).Where("userId = ?", userId).Take(&wallet).Error; err != nil {
+		log.Error("fail to get wallet for user: ", userId, ". ", err.Error())
 		return
 	}
 
@@ -70,18 +67,17 @@ func (c client) Transfer(data TransactionData) (err error) {
 // TODO: add paging and some query filter
 func (c client) GetTransactions(userId string) (data []TransactionData, err error) {
 	var wallet structs.Wallet
-	c.mysql.db.Model(&structs.Wallet{}).Where("userId = ?", userId).Take(&wallet)
-	if wallet.Id == "" {
-		log.Warn("no related wallet for the user: ", userId)
-		err = t7Error.WalletNotFound
+	if err = c.mysql.db.Model(&structs.Wallet{}).Where("userId = ?", userId).Take(&wallet).Error; err != nil {
+		log.Error("fail to get wallet for user: ", userId, ". ", err.Error())
 		return
 	}
+
 	filter := bson.M{
 		"$or": []bson.M{
 			{
-				"from_wallet_id": wallet.Id,
+				"request_data.from_wallet_id": wallet.Id,
 			}, {
-				"to_wallet_id": wallet.Id,
+				"request_data.to_wallet_id": wallet.Id,
 			},
 		},
 	}

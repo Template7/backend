@@ -24,14 +24,14 @@ type ClientInterface interface {
 	Deposit(walletId string, money structs.Money) (err error)
 	Withdraw(walletId string, money structs.Money) (err error)
 	Transfer(t TransactionData) (err error)
-	GetTransactions(userId string) (data []string, err error)
+	GetTransactions(userId string) (data []TransactionData, err error)
 
 	// transactionHistory
 	//GetTransactions(filter string) (data []string, err error)
 }
 
 type TransactionData struct {
-	transaction.RequestData
-	TransactionId string    `json:"transaction_id" bson:"transaction_id"`
-	CreatedAt     time.Time `json:"created_at" bson:"created_at"`
+	transaction.RequestData `json:"request_data" bson:"request_data"`
+	TransactionId           string    `json:"transaction_id" bson:"transaction_id"`
+	CreatedAt               time.Time `json:"created_at" bson:"created_at"`
 }

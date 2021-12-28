@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"github.com/Template7/backend/internal/pkg/config"
 	"github.com/Template7/backend/internal/pkg/transaction"
@@ -76,6 +77,7 @@ func TestMain(m *testing.M) {
 	viper.AddConfigPath("../../../configs")
 	c := config.New()
 	db := fmt.Sprintf("test_%d", time.Now().Unix())
+	//db = fmt.Sprintf("test_1640341063")
 	c.Mongo.Db = db
 	//c.MySql.Db = db
 	//c.MySql.ConnectionString = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", c.MySql.Username, c.MySql.Password, c.MySql.Host, c.MySql.Port, c.MySql.Db)
@@ -253,8 +255,8 @@ func Test_dbClient(t *testing.T) {
 	testTransferData := TransactionData{
 		RequestData: transaction.RequestData{
 			FromWalletId: senderWalletData.Id,
-			ToWalletId: receiverWalletData.Id,
-			Money: testMoneyNtd,
+			ToWalletId:   receiverWalletData.Id,
+			Money:        testMoneyNtd,
 		},
 		TransactionId: "testTransactionId",
 	}
@@ -322,10 +324,21 @@ func Test_dbClient(t *testing.T) {
 	})
 
 	t.Run("getTransactions", func(t *testing.T) {
-
+		data, err := New().GetTransactions(testSender.UserId)
+		if err != nil {
+			t.Errorf("GetTransactions() error = %v", err)
+			return
+		}
+		if data == nil {
+			t.Errorf("GetTransactions() empty data")
+			return
+		}
+		t.Log(data)
 	})
 }
 
-//func teardown(db string) {
-//	_ = New().mongo.client.Database(db).Drop(context.Background())
-//}
+func teardown(db string) {
+	_ = instance.mongo.client.Database(db).Drop(context.Background())
+	instance.mysql.db.Delete(&structs.Wallet{})
+	instance.mysql.db.Delete(&structs.Balance{})
+}
