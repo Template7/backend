@@ -2,10 +2,8 @@ package config
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
+	"github.com/Template7/common/logger"
 	"github.com/spf13/viper"
-	"runtime"
-	"strings"
 	"sync"
 )
 
@@ -14,10 +12,13 @@ const (
 	jwtSign    = "45519f46c06c8340a34f9a32982860c1a8d6bb57eaeb338b7f0119062b8a3b67"
 )
 
+var log = logger.GetLogger()
+
 type config struct {
 	JwtSign []byte
 	Log     struct {
-		Level string
+		Formatter string
+		Level     string
 	}
 	Gin struct {
 		ListenPort      int
@@ -25,6 +26,14 @@ type config struct {
 		ShutdownTimeout int
 	}
 	Mongo struct {
+		Db               string
+		Host             string
+		Port             int
+		Username         string
+		Password         string
+		ConnectionString string
+	}
+	MySql struct {
 		Db               string
 		Host             string
 		Port             int
@@ -70,6 +79,7 @@ func New() *config {
 		} else {
 			instance.Mongo.ConnectionString = fmt.Sprintf("mongodb://%s:%d", instance.Mongo.Host, instance.Mongo.Port)
 		}
+		instance.MySql.ConnectionString = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", instance.MySql.Username, instance.MySql.Password, instance.MySql.Host, instance.MySql.Port, instance.MySql.Db)
 
 		log.Debug("config initialized")
 	})
@@ -77,29 +87,7 @@ func New() *config {
 }
 
 func (c *config) initLog() {
-	logLevel := map[string]log.Level{
-		"DEBUG": log.DebugLevel,
-		"INFO":  log.InfoLevel,
-		"WARN":  log.WarnLevel,
-		"ERROR": log.ErrorLevel,
-		"FATAL": log.FatalLevel,
-	}
-
-	callerFormatter := func(path string) string {
-		arr := strings.Split(path, "/")
-		return arr[len(arr)-1]
-	}
-	customFormatter := &log.TextFormatter{
-		TimestampFormat: "2006-01-02 15:04:05.000",
-		FullTimestamp:   true,
-		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
-			return "", fmt.Sprintf("%s:%d", callerFormatter(f.File), f.Line)
-		},
-		//PrettyPrint: true,
-	}
-
-	log.SetLevel(logLevel[c.Log.Level])
-	log.SetFormatter(customFormatter)
-	log.SetReportCaller(true)
+	logger.SetLevel(c.Log.Level)
+	logger.SetFormatter(c.Log.Formatter)
 	log.Debug("logger initialized")
 }
