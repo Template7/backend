@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"github.com/Template7/backend/internal/pkg/config"
-	"github.com/Template7/common/structs"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,9 +20,7 @@ type client struct {
 		transactionHistory *mongo.Collection
 	}
 	mysql struct {
-		db      *gorm.DB
-		//wallet  *gorm.Model
-		//balance *gorm.Model
+		db *gorm.DB
 	}
 }
 
@@ -89,9 +86,7 @@ func New() ClientInterface {
 			log.Fatal(err)
 		}
 		instance.mysql.db = sqlDb
-		//instance.mysql.wallet = sqlDb.Model(&structs.Wallet{})
-		instance.initDb()
-		log.Debug("mongo client initialized")
+		log.Debug("db client initialized")
 	})
 	return instance
 }
@@ -107,19 +102,4 @@ func (c client) initIndex(db *mongo.Database) (err error) {
 		}
 	}
 	return
-}
-
-func (c client) initTable() error {
-	return instance.mysql.db.AutoMigrate(&structs.Wallet{}, &structs.Balance{})
-}
-
-func (c client) initDb() {
-	if err := c.initIndex(c.mongo.client.Database(config.New().Mongo.Db)); err != nil {
-		log.Error("fail to init index: ", err.Error())
-		panic(err)
-	}
-	if err := c.initTable(); err != nil {
-		log.Error("fail to init table: ", err.Error())
-		panic(err)
-	}
 }

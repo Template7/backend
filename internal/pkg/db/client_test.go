@@ -13,24 +13,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
-	"time"
 )
-
-//func TestNew(t *testing.T) {
-//	tests := []struct {
-//		name string
-//		want *client
-//	}{
-//		// TODO: Add test cases.
-//	}
-//	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
-//			if got := New(); !reflect.DeepEqual(got, tt.want) {
-//				t.Errorf("New() = %v, want %v", got, tt.want)
-//			}
-//		})
-//	}
-//}
 
 var (
 	testUser = structs.User{
@@ -76,20 +59,19 @@ var (
 func TestMain(m *testing.M) {
 	viper.AddConfigPath("../../../configs")
 	c := config.New()
-	db := fmt.Sprintf("test_%d", time.Now().Unix())
-	//db = fmt.Sprintf("test_1640341063")
+	db := fmt.Sprintf("temp_test")
 	c.Mongo.Db = db
-	//c.MySql.Db = db
-	//c.MySql.ConnectionString = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", c.MySql.Username, c.MySql.Password, c.MySql.Host, c.MySql.Port, c.MySql.Db)
+	c.MySql.Db = db
+	c.MySql.ConnectionString = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", c.MySql.Username, c.MySql.Password, c.MySql.Host, c.MySql.Port, c.MySql.Db)
 	code := m.Run()
 
-	//teardown(db)
+	teardown(db)
 	os.Exit(code)
 }
 
-func Test_New(t *testing.T) {
-	New()
-}
+//func Test_New(t *testing.T) {
+//	New()
+//}
 
 func Test_dbClient(t *testing.T) {
 	t.Run("createUser", func(t *testing.T) {
@@ -339,6 +321,6 @@ func Test_dbClient(t *testing.T) {
 
 func teardown(db string) {
 	_ = instance.mongo.client.Database(db).Drop(context.Background())
-	instance.mysql.db.Delete(&structs.Wallet{})
-	instance.mysql.db.Delete(&structs.Balance{})
+	instance.mysql.db.Model(&structs.Wallet{}).Exec(fmt.Sprintf("DROP DATABASE IF EXISTS `%s`", db))
+	//instance.mysql.db.Delete(&structs.Balance{})
 }

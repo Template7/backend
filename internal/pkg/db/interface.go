@@ -7,10 +7,6 @@ import (
 )
 
 type ClientInterface interface {
-	// admin
-	//GetAdmin() (data structs.Admin, err error)
-	//GetUser(filter GetUserFilter) (users []structs.User, err error)
-	initDb()
 
 	// user
 	GetUserById(userId string) (data structs.User, err error)
@@ -25,9 +21,6 @@ type ClientInterface interface {
 	Withdraw(walletId string, money structs.Money) (err error)
 	Transfer(t TransactionData) (err error)
 	GetTransactions(userId string) (data []TransactionData, err error)
-
-	// transactionHistory
-	//GetTransactions(filter string) (data []string, err error)
 }
 
 type TransactionData struct {

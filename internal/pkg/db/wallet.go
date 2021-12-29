@@ -33,7 +33,7 @@ func (c client) Deposit(walletId string, money structs.Money) (err error) {
 }
 
 func (c client) Withdraw(walletId string, money structs.Money) (err error) {
-	err = c.mysql.db.
+	err = c.mysql.db.Model(&structs.Balance{}).
 		Take(&structs.Balance{}, "walletId = ? AND currency = ? AND amount >= ?", walletId, money.Currency, money.Amount).
 		Update("amount", gorm.Expr("amount - ?", money.Amount)).Error
 	return
@@ -47,14 +47,13 @@ func (c client) Transfer(data TransactionData) (err error) {
 		return err
 	}
 
-	return c.mysql.db.Transaction(func(tx *gorm.DB) error {
+	return c.mysql.db.Model(&structs.Balance{}).Transaction(func(tx *gorm.DB) error {
 		// reduce from the source wallet
-		tx.Model(&structs.Balance{}).
-			Where("walletId = ? AND currency = ? AND amount >= ?", data.FromWalletId, data.Currency, data.Amount).
+		tx.Where("walletId = ? AND currency = ? AND amount >= ?", data.FromWalletId, data.Currency, data.Amount).
 			Update("amount", gorm.Expr("amount - ?", data.Amount))
 
 		// increment to the target wallet
-		tx.Model(&structs.Balance{}).Clauses(
+		tx.Clauses(
 			clause.OnConflict{
 				Columns:   []clause.Column{{Name: "walletId"}, {Name: "currency"}},
 				DoUpdates: clause.Assignments(map[string]interface{}{"amount": gorm.Expr("amount + ?", data.Amount)}),
