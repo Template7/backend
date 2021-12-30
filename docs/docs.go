@@ -47,50 +47,6 @@ var doc = `{
                 }
             }
         },
-        "/admin/v1/sign-in": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "V1",
-                    "SignIn",
-                    "Admin"
-                ],
-                "summary": "Admin sign in",
-                "parameters": [
-                    {
-                        "description": "Admin object",
-                        "name": "smsRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/structs.Admin"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Token object",
-                        "schema": {
-                            "$ref": "#/definitions/structs.Token"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
-                        }
-                    }
-                }
-            }
-        },
         "/admin/v1/user": {
             "post": {
                 "produces": [
@@ -116,7 +72,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/structs.User"
+                            "$ref": "#/definitions/user.CreateUserReq"
                         }
                     }
                 ],
@@ -124,7 +80,7 @@ var doc = `{
                     "200": {
                         "description": "User object",
                         "schema": {
-                            "$ref": "#/definitions/structs.User"
+                            "$ref": "#/definitions/handler.createUserResp"
                         }
                     },
                     "400": {
@@ -142,18 +98,34 @@ var doc = `{
                 }
             }
         },
-        "/admin/v1/users": {
-            "delete": {
+        "/api/v1/sign-in/mobile": {
+            "post": {
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "v1",
+                    "SignIn",
+                    "Sms"
                 ],
-                "summary": "Delete user",
+                "summary": "Mobile sign in",
+                "parameters": [
+                    {
+                        "description": "Sms confirm",
+                        "name": "smsConfirm",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/sms.Confirm"
+                        }
+                    }
+                ],
                 "responses": {
-                    "204": {
-                        "description": ""
+                    "200": {
+                        "description": "Token object",
+                        "schema": {
+                            "$ref": "#/definitions/structs.Token"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -176,11 +148,10 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "v1",
-                    "SignIn",
-                    "Sms"
+                    "Sms",
+                    "SignUp"
                 ],
-                "summary": "Mobile sign in confirm",
+                "summary": "Confirm verify code",
                 "parameters": [
                     {
                         "description": "Sms confirm",
@@ -401,6 +372,14 @@ var doc = `{
         }
     },
     "definitions": {
+        "handler.createUserResp": {
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.hello": {
             "type": "object",
             "properties": {
@@ -440,24 +419,6 @@ var doc = `{
                 "mobile": {
                     "type": "string",
                     "example": "+886987654321"
-                }
-            }
-        },
-        "structs.Admin": {
-            "type": "object",
-            "required": [
-                "password",
-                "username"
-            ],
-            "properties": {
-                "password": {
-                    "type": "string",
-                    "example": "password"
-                },
-                "username": {
-                    "description": "Id       *primitive.ObjectID ` + "`" + `json:\"id,omitempty\" bson:\"_id,omitempty\"` + "`" + `",
-                    "type": "string",
-                    "example": "username"
                 }
             }
         },
@@ -521,6 +482,9 @@ var doc = `{
                 },
                 "status": {
                     "type": "integer"
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },
@@ -579,6 +543,20 @@ var doc = `{
                 "type": {
                     "type": "integer",
                     "example": 32
+                }
+            }
+        },
+        "user.CreateUserReq": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "username@mail.com"
+                },
+                "mobile": {
+                    "description": "+886987654321",
+                    "type": "string",
+                    "example": "+886987654321"
                 }
             }
         }

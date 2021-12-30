@@ -80,7 +80,7 @@ func ConfirmVerifyCode(c *gin.Context) {
 
 	// gen token
 	log.Debug("gen user token")
-	token, err := auth.GenUserToken(userData.Id.Hex())
+	token, err := auth.GenUserToken(userData)
 	if err != nil {
 		log.Error("fail to gen user token: ", err.Error())
 		c.JSON(err.GetStatus(), err)

@@ -3,168 +3,69 @@ package user
 import (
 	"github.com/Template7/backend/internal/pkg/db"
 	"github.com/Template7/backend/internal/pkg/t7Error"
-	"github.com/Template7/backend/internal/pkg/t7Redis"
+	"github.com/Template7/common/logger"
 	"github.com/Template7/common/structs"
-	log "github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/google/uuid"
 	"net/http"
-	"time"
 )
 
-func Exist(filter db.GetUserFilter) (exist bool, err *t7Error.Error) {
-	log.Debug("check user exist")
+var (
+	log = logger.GetLogger()
+)
 
-	users, err := GetUsers(filter, db.QueryOption{})
-	exist = len(users) > 0
-	log.Debug("matched count: ", len(users))
-	return
-}
-
-func GetUsers(filter db.GetUserFilter, option db.QueryOption) (users []structs.User, err *t7Error.Error) {
-	log.Debug("get user")
-
-	users, dbErr := db.New().GetUser(filter, option)
-	if dbErr == nil {
-		return
-	}
-
-	log.Warn("fail to get user: ", dbErr.Error())
-	switch dbErr {
-	case mongo.ErrNoDocuments:
-		log.Info("no matched user")
-		err = t7Error.UserNotfound.WithStatus(http.StatusNoContent)
-	default:
-		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
-	}
-	return
-}
-
-func GetByChannel(channel structs.LoginChannel, id string) (data structs.User, err *t7Error.Error) {
-	log.Debug("get user by channel")
-
-	data, dbErr := db.New().GetUserByChannel(channel, id)
-	if dbErr == nil {
-		return
-	}
-
-	log.Warn("fail to get user: ", dbErr.Error())
-	switch dbErr {
-	case mongo.ErrNoDocuments:
-		log.Info("no matched user")
-		err = t7Error.UserNotfound.WithStatus(http.StatusNoContent)
-	default:
-		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
-	}
-	return
-}
-
-func GetByMobile(mobile string) (data structs.User, err *t7Error.Error) {
-	data, dbErr := db.New().GetUserByMobile(mobile)
-	if dbErr != nil {
-		log.Error("fail to get user: ", dbErr.Error())
-		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
-		return
-	}
-	return
-}
-
-func GetInfo(userId string) (data structs.User, err *t7Error.Error) {
-	uId, idErr := primitive.ObjectIDFromHex(userId)
-	if idErr != nil {
-		err = t7Error.InvalidDocumentId.WithDetail(idErr.Error())
-		return
-	}
-	data, dbErr := db.New().GetUserBasicInfo(uId)
+func GetInfo(userId string) (data structs.UserInfo, err *t7Error.Error) {
+	data, dbErr := db.New().GetUserBasicInfo(userId)
 	if dbErr != nil {
 		err = t7Error.InvalidDocumentId.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
 	}
 	return
 }
 
-func CreateUser(user structs.User) (userId *primitive.ObjectID, err *t7Error.Error) {
-	userId, dbErr := db.New().CreateUser(user)
-
-	if dbErr == nil {
-		return
-	}
-
-	// check user exist
-	switch dbErr.(type) {
-	case mongo.WriteException:
-		err = t7Error.UserAlreadyExist
-	default:
-		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
-	}
-	return
+type CreateUserReq struct {
+	Mobile string `json:"mobile" bson:"mobile" example:"+886987654321"` // +886987654321
+	Email  string `json:"email" bson:"email" example:"username@mail.com"`
 }
 
-func CreateNativeUser(mobile string) (u structs.User, err *t7Error.Error) {
+func CreateUser(req CreateUserReq) (userId string, err *t7Error.Error) {
+	log.Debug("create user")
+
+	data := structs.User{
+		UserId: uuid.New().String(),
+		Mobile: req.Mobile,
+		Email:  req.Email,
+	}
+	if err = createUser(data); err != nil {
+		return
+	}
+	return data.UserId, nil
+}
+
+func CreateNativeUser(mobile string) (userId string, err *t7Error.Error) {
 	log.Debug("create native user")
 
-	u = structs.User{
+	data := structs.User{
+		UserId: uuid.New().String(),
 		Mobile: mobile,
 		Status: structs.UserStatusInitialized,
 	}
-	uId, dbErr := db.New().CreateUser(u)
-	if dbErr != nil {
-		// TODO: bad request for duplicated mobile
-		log.Error("fail to create native user: ", dbErr.Error())
-		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
+	if err = createUser(data); err != nil {
 		return
 	}
-	u.Id = uId
-	return
+	return data.UserId, nil
 }
 
-func DeleteUser(userId string) (err *t7Error.Error) {
-	uId, idErr := primitive.ObjectIDFromHex(userId)
-	if idErr != nil {
-		err = t7Error.InvalidDocumentId.WithDetail(idErr.Error())
-		return
-	}
-
-	if dbErr := db.New().DeleteUser(uId); dbErr != nil {
+func createUser(data structs.User) (err *t7Error.Error) {
+	dbErr := db.New().CreateUser(data)
+	if dbErr != nil {
+		log.Error("fail to create user: ", err.Error())
 		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
 	}
 	return
 }
 
 func UpdateBasicInfo(userId string, data structs.UserInfo) (err *t7Error.Error) {
-	uId, idErr := primitive.ObjectIDFromHex(userId)
-	if idErr != nil {
-		log.Warn("invalid user id: ", userId)
-		err = t7Error.InvalidDocumentId.WithDetail(idErr.Error())
-		return
-	}
-
-	if dbErr := db.New().UpdateUserBasicInfo(uId, data); dbErr != nil {
+	if dbErr := db.New().UpdateUserBasicInfo(userId, data); dbErr != nil {
 		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
-	}
-	return
-}
-
-func UpdateLoginClient(userId string, loginClient structs.LoginInfo) (err *t7Error.Error) {
-	uId, idErr := primitive.ObjectIDFromHex(userId)
-	if idErr != nil {
-		log.Warn("invalid user id: ", userId)
-		err = t7Error.InvalidDocumentId.WithDetail(idErr.Error())
-		return
-	}
-	if dbErr := db.New().UpdateLoginClient(uId, loginClient); dbErr != nil {
-		log.Error("fail to update login client: ", dbErr.Error())
-		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
-	}
-	return
-}
-
-func SignOut(token string, expiresAt int64) (err *t7Error.Error) {
-	log.Debug("user logout")
-
-	life := time.Duration(expiresAt-time.Now().Unix()) * time.Second
-	r := t7Redis.New().Set(token, nil, life)
-	if r.Err() != nil {
-		err = t7Error.RedisOperationFail.WithDetailAndStatus(r.Err().Error(), http.StatusInternalServerError)
 	}
 	return
 }

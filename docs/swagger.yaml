@@ -1,4 +1,9 @@
 definitions:
+  handler.createUserResp:
+    properties:
+      user_id:
+        type: string
+    type: object
   handler.hello:
     properties:
       message:
@@ -27,19 +32,6 @@ definitions:
         type: string
     required:
     - mobile
-    type: object
-  structs.Admin:
-    properties:
-      password:
-        example: password
-        type: string
-      username:
-        description: Id       *primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-        example: username
-        type: string
-    required:
-    - password
-    - username
     type: object
   structs.LoginInfo:
     properties:
@@ -83,6 +75,8 @@ definitions:
         type: string
       status:
         type: integer
+      user_id:
+        type: string
     type: object
   structs.UserInfo:
     properties:
@@ -124,6 +118,16 @@ definitions:
         example: 32
         type: integer
     type: object
+  user.CreateUserReq:
+    properties:
+      email:
+        example: username@mail.com
+        type: string
+      mobile:
+        description: "+886987654321"
+        example: "+886987654321"
+        type: string
+    type: object
 info:
   contact: {}
   description: API Documentation
@@ -145,15 +149,49 @@ paths:
       summary: Hello Page
       tags:
       - Hello
-  /admin/v1/sign-in:
+  /admin/v1/user:
     post:
       parameters:
-      - description: Admin object
+      - description: Access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: User data
         in: body
-        name: smsRequest
+        name: userData
         required: true
         schema:
-          $ref: '#/definitions/structs.Admin'
+          $ref: '#/definitions/user.CreateUserReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User object
+          schema:
+            $ref: '#/definitions/handler.createUserResp'
+        "400":
+          description: Error object
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+        "401":
+          description: Error object
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+      summary: Create user
+      tags:
+      - V1
+      - User
+      - Admin
+  /api/v1/sign-in/mobile:
+    post:
+      parameters:
+      - description: Sms confirm
+        in: body
+        name: smsConfirm
+        required: true
+        schema:
+          $ref: '#/definitions/sms.Confirm'
       produces:
       - application/json
       responses:
@@ -169,63 +207,11 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/t7Error.Error'
-      summary: Admin sign in
+      summary: Mobile sign in
       tags:
-      - V1
+      - v1
       - SignIn
-      - Admin
-  /admin/v1/user:
-    post:
-      parameters:
-      - description: Access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: User data
-        in: body
-        name: userData
-        required: true
-        schema:
-          $ref: '#/definitions/structs.User'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User object
-          schema:
-            $ref: '#/definitions/structs.User'
-        "400":
-          description: Error object
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-        "401":
-          description: Error object
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-      summary: Create user
-      tags:
-      - V1
-      - User
-      - Admin
-  /admin/v1/users:
-    delete:
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: ""
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-      summary: Delete user
-      tags:
-      - user
+      - Sms
   /api/v1/sign-up/confirmation:
     post:
       parameters:
@@ -250,11 +236,10 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/t7Error.Error'
-      summary: Mobile sign in confirm
+      summary: Confirm verify code
       tags:
-      - v1
-      - SignIn
       - Sms
+      - SignUp
   /api/v1/sign-up/verification:
     post:
       parameters:

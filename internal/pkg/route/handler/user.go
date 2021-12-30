@@ -3,8 +3,6 @@ package handler
 import (
 	"github.com/Template7/backend/internal/pkg/t7Error"
 	"github.com/Template7/backend/internal/pkg/user"
-	"github.com/Template7/common/structs"
-
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -26,7 +24,7 @@ import (
 func GetInfo(c *gin.Context) {
 	log.Debug("handle get info")
 
-	userInfo, err := user.GetInfo(c.Param("user-id"))
+	userInfo, err := user.GetInfo(c.Param("userId"))
 	if err != nil {
 		c.JSON(err.GetStatus(), err)
 		return
@@ -35,14 +33,18 @@ func GetInfo(c *gin.Context) {
 	return
 }
 
+type createUserResp struct {
+	UserId string `json:"user_id"`
+}
+
 // CreateUser
 // @Summary Create user
 // @Tags V1,User,Admin
 // @version 1.0
 // @produce json
 // @Param Authorization header string true "Access token"
-// @Param userData body structs.User true "User data"
-// @Success 200 {object} structs.User "User object"
+// @Param userData body user.CreateUserReq true "User data"
+// @Success 200 {object} createUserResp "User object"
 // @failure 400 {object} t7Error.Error "Error object"
 // @failure 401 {object} t7Error.Error "Error object"
 // @Router /admin/v1/user [post]
@@ -52,20 +54,21 @@ func GetInfo(c *gin.Context) {
 func CreateUser(c *gin.Context) {
 	log.Debug("handle create user")
 
-	var userData structs.User
-	if err := c.BindJSON(&userData); err != nil {
+	var data user.CreateUserReq
+	if err := c.BindJSON(&data); err != nil {
 		c.JSON(http.StatusBadRequest, t7Error.InvalidBody.WithDetail(err.Error()))
 		return
 	}
 
-	userId, err := user.CreateUser(userData)
+	userId, err := user.CreateUser(data)
 	if err != nil {
 		c.JSON(err.GetStatus(), err)
 		return
 	}
-	userData.Id = userId
 
-	c.JSON(http.StatusOK, userData)
+	c.JSON(http.StatusOK, createUserResp{
+		UserId: userId,
+	})
 	return
 }
 
@@ -87,61 +90,37 @@ func CreateUser(c *gin.Context) {
 func UpdateUser(c *gin.Context) {
 	log.Debug("handle update user")
 
-	userId := c.Param("user-id")
-
-	var userData structs.UserInfo
-	if err := c.BindJSON(&userData); err != nil {
-		c.JSON(http.StatusBadRequest, t7Error.InvalidBody.WithDetail(err.Error()))
-		return
-	}
-
-	if err := user.UpdateBasicInfo(userId, userData); err != nil {
-		c.JSON(err.GetStatus(), err)
-		return
-	}
-
-	log.Debug("user updated: ", userId)
-	c.JSON(http.StatusNoContent, nil)
+	//userId := c.Param("user-id")
+	//
+	//var userData structs.UserInfo
+	//if err := c.BindJSON(&userData); err != nil {
+	//	c.JSON(http.StatusBadRequest, t7Error.InvalidBody.WithDetail(err.Error()))
+	//	return
+	//}
+	//
+	//if err := user.UpdateBasicInfo(userId, userData); err != nil {
+	//	c.JSON(err.GetStatus(), err)
+	//	return
+	//}
+	//
+	//log.Debug("user updated: ", userId)
+	//c.JSON(http.StatusNoContent, nil)
 	return
 }
 
 func UpdateLoginClient(c *gin.Context) {
 	log.Error("handle update login client")
 
-	var loginClient structs.LoginInfo
-	if err := c.BindJSON(&loginClient); err != nil {
-		c.JSON(http.StatusBadRequest, t7Error.InvalidBody.WithDetail(err.Error()))
-		return
-	}
-	if err := user.UpdateLoginClient(c.Param("userId"), loginClient); err != nil {
-		c.JSON(err.GetStatus(), err)
-		return
-	}
-
-	c.JSON(http.StatusNoContent, nil)
-	return
-}
-
-// DeleteUser
-// @Summary Delete user
-// @Tags user
-// @version 1.0
-// @produce json
-// @Success 204
-// @failure 400 {object} t7Error.Error
-// @failure 401 {object} t7Error.Error
-// @Router /admin/v1/users [delete]
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
-func DeleteUser(c *gin.Context) {
-	log.Debug("handle delete user")
-	userId := c.Param("userId")
-
-	if err := user.DeleteUser(userId); err != nil {
-		c.JSON(err.GetStatus(), err)
-		return
-	}
-	c.JSON(http.StatusNoContent, nil)
+	//var loginClient structs.LoginInfo
+	//if err := c.BindJSON(&loginClient); err != nil {
+	//	c.JSON(http.StatusBadRequest, t7Error.InvalidBody.WithDetail(err.Error()))
+	//	return
+	//}
+	//if err := user.UpdateLoginClient(c.Param("userId"), loginClient); err != nil {
+	//	c.JSON(err.GetStatus(), err)
+	//	return
+	//}
+	//
+	//c.JSON(http.StatusNoContent, nil)
 	return
 }
