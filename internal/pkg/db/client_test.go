@@ -69,10 +69,6 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-//func Test_New(t *testing.T) {
-//	New()
-//}
-
 func Test_dbClient(t *testing.T) {
 	t.Run("createUser", func(t *testing.T) {
 		if err := New().CreateUser(testUser); err != nil {

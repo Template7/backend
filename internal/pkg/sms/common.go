@@ -1,7 +1,7 @@
 package sms
 
 type Request struct {
-	Mobile string `json:"mobile" binding:"required" example:"+886987654321"`
+	Mobile   string `json:"mobile" binding:"required" example:"+886987654321"`
 }
 
 type Confirm struct {

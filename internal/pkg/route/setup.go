@@ -22,7 +22,7 @@ func Setup(r *gin.Engine) {
 
 	// user
 	user := apiV1.Group("/users", middle_ware.AuthUserToken)
-	user.GET("/:user-id", handler.GetInfo)
+	user.GET("/:userId", handler.GetInfo)
 	user.PUT("/:user-id", handler.UpdateUser)
 
 	// sign up
@@ -32,8 +32,7 @@ func Setup(r *gin.Engine) {
 
 	// sign in
 	signIn := apiV1.Group("/sign-in")
-	signIn.POST("/mobile/verification", handler.MobileSignIn)
-	signIn.POST("/mobile/confirmation", handler.MobileSignInConfirm)
+	signIn.POST("/mobile", handler.MobileSignIn)
 	signIn.GET("/facebook/home", handler.FacebookSignInHome)
 	signIn.GET("/facebook", handler.FacebookSignIn)
 	signIn.GET("/facebook/callback", handler.FacebookSignInCallback)
@@ -42,11 +41,10 @@ func Setup(r *gin.Engine) {
 	adminV1 := r.Group("/admin/v1", middle_ware.AuthAdmin)
 
 	adminV1.POST("/user", handler.CreateUser)
-	adminV1.DELETE("/user", handler.DeleteUser)
+	//adminV1.DELETE("/user", handler.DeleteUser)
 
 	// tokenless api
 
 	// special case, skip auth token due to expired
 	apiV1.PUT("/users/:user-id/token", handler.RefreshToken)
-	r.POST("/admin/v1/sign-in", handler.AdminSignIn)
 }

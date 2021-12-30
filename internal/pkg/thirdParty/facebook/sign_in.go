@@ -3,11 +3,15 @@ package facebook
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Template7/backend/internal/pkg/auth"
 	"github.com/Template7/backend/internal/pkg/config"
+	"github.com/Template7/backend/internal/pkg/db"
 	"github.com/Template7/backend/internal/pkg/t7Error"
 	"github.com/Template7/backend/internal/pkg/util"
 	"github.com/Template7/common/structs"
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
 	"net/http"
@@ -82,7 +86,7 @@ func (b basicUserData) GetGender() (gender structs.Gender) {
 	return
 }
 
-func (c client) SignIn(code string) (userData basicUserData, err *t7Error.Error) {
+func (c client) SignIn(code string) (userToken structs.Token, err *t7Error.Error) {
 	log.Debug("sign in facebook user")
 
 	token, err := c.getAccessToken(code)
@@ -95,11 +99,27 @@ func (c client) SignIn(code string) (userData basicUserData, err *t7Error.Error)
 		return
 	}
 
-	userData, err = c.getUserData(token, tokenData)
+	fbUserData, err := c.getUserData(token, tokenData)
 	if err != nil {
 		return
 	}
-	return
+
+
+	// sign up fb user if user not exist
+	fbUser, dbErr := db.New().GetFbUser(fbUserData.Id)
+	// TODO: decouple from db implementation
+	if dbErr == mongo.ErrNoDocuments {
+		log.Debug("user not found, sign up new fb user: ", fbUserData.Id)
+		return signUpFbUser(fbUserData)
+
+	}
+	if dbErr != nil {
+		log.Error("fail to get user data: ", dbErr.Error())
+		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	return auth.GenUserToken(fbUser.UserId)
 }
 
 func (c client) getAccessToken(code string) (token accessToken, err *t7Error.Error) {
@@ -178,4 +198,27 @@ func (c client) getUserData(token accessToken, data tokenData) (userDara basicUs
 
 	log.Debug("get user data successfully: ", userDara.String())
 	return
+}
+
+func signUpFbUser(fbUserData basicUserData) (userToken structs.Token, err *t7Error.Error) {
+	log.Debug("sign up fb user: ", fbUserData.Id)
+
+	userData := structs.User{
+		UserId: uuid.New().String(),
+		Email: fbUserData.Email,
+		BasicInfo: structs.UserInfo{
+			NickName: fbUserData.Name,
+			//Birthday: fbUserData.Birthday,
+		},
+		LoginClient: structs.LoginInfo{
+			Channel: structs.LoginChannelFacebook,
+			ChannelUserId: fbUserData.Id,
+		},
+	}
+	if dbErr := db.New().CreateUser(userData); dbErr != nil {
+		log.Error("fail to create user: ", dbErr.Error())
+		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
+	}
+
+	return auth.GenUserToken(userData.UserId)
 }

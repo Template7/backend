@@ -29,7 +29,7 @@ func (c client) CreateUser(user structs.User) (err error) {
 
 	// create user wallet
 	err = c.mysql.db.Model(&structs.Wallet{}).Create(&structs.Wallet{
-		Id: uuid.New().String(),
+		Id:     uuid.New().String(),
 		UserId: user.UserId,
 	}).Error
 	return
@@ -39,6 +39,25 @@ func (c client) GetUserById(userId string) (data structs.User, err error) {
 	filter := bson.M{
 		"user_id": userId,
 	}
+	return c.getUser(filter)
+}
+
+func (c client) GetFbUser(fbUserId string) (data structs.User, err error) {
+	filter := bson.M{
+		"login_info.channel":         structs.LoginChannelFacebook,
+		"login_info.channel_user_id": fbUserId,
+	}
+	return c.getUser(filter)
+}
+
+func (c client) GetUserByMobile(mobile string) (data structs.User, err error) {
+	filter := bson.M{
+		"mobile": mobile,
+	}
+	return c.getUser(filter)
+}
+
+func (c client) getUser(filter bson.M) (data structs.User, err error) {
 	err = c.mongo.user.FindOne(context.Background(), filter).Decode(&data)
 	return
 }
@@ -52,8 +71,8 @@ func (c client) GetUserBasicInfo(userId string) (data structs.UserInfo, err erro
 	}
 	opt := options.FindOne().SetProjection(
 		bson.M{
-			"_id":          0,
-			"basic_info":   1,
+			"_id":        0,
+			"basic_info": 1,
 		},
 	)
 

@@ -10,7 +10,9 @@ type ClientInterface interface {
 
 	// user
 	GetUserById(userId string) (data structs.User, err error)
+	GetUserByMobile(mobile string) (data structs.User, err error)
 	GetUserBasicInfo(userId string) (data structs.UserInfo, err error)
+	GetFbUser(fbUserId string) (data structs.User, err error)
 
 	CreateUser(user structs.User) (err error)
 	UpdateUserBasicInfo(userId string, info structs.UserInfo) (err error)

@@ -1,9 +1,9 @@
 package middle_ware
 
 import (
+	"github.com/Template7/backend/internal/pkg/auth"
 	"github.com/Template7/backend/internal/pkg/config"
 	"github.com/Template7/backend/internal/pkg/t7Error"
-	"github.com/Template7/backend/internal/pkg/user"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -14,7 +14,7 @@ func AuthUserToken(c *gin.Context) {
 	log.Debug("auth user")
 
 	userToken := c.GetHeader("Authorization")
-	token, err := jwt.ParseWithClaims(userToken, &user.TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(userToken, &auth.UserTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return config.New().JwtSign, nil
 	})
 	if err != nil {
@@ -23,7 +23,7 @@ func AuthUserToken(c *gin.Context) {
 		return
 	}
 
-	utc, ok := token.Claims.(*user.TokenClaims)
+	utc, ok := token.Claims.(*auth.UserTokenClaims)
 	if !ok || !token.Valid {
 		c.JSON(http.StatusUnauthorized, t7Error.UnAuthorized)
 		c.Abort()

@@ -2,9 +2,7 @@ package auth
 
 import (
 	"github.com/Template7/backend/internal/pkg/config"
-	"github.com/Template7/backend/internal/pkg/db"
 	"github.com/Template7/backend/internal/pkg/t7Error"
-	"github.com/Template7/backend/internal/pkg/user"
 	"github.com/Template7/common/structs"
 	"github.com/dgrijalva/jwt-go"
 	log "github.com/sirupsen/logrus"
@@ -17,10 +15,15 @@ const (
 	userTokenTtl  = 7 * 24 * time.Hour // 1 week
 )
 
+type UserTokenClaims struct {
+	jwt.StandardClaims
+	UserId string `json:"userId"`
+}
+
 func GenUserToken(userId string) (token structs.Token, err *t7Error.Error) {
 	log.Debug("gen token for user: ", userId)
 
-	utc := user.TokenClaims{
+	utc := UserTokenClaims{
 		UserId: userId,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(userTokenTtl).Unix(),
@@ -64,31 +67,18 @@ func genToken(accessToken string) (token structs.Token, err *t7Error.Error) {
 		RefreshToken: refreshToken,
 		ClaimType:    structs.ClaimTypeUser,
 	}
-	tokenId, dbErr := db.New().SaveToken(token)
-	if dbErr != nil {
-		log.Error("fail to save user token: ", dbErr.Error())
-		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
-	}
-	token.Id = tokenId
 	return
 }
 
 func RefreshToken(oriToken structs.Token) (refreshedToken structs.Token, err *t7Error.Error) {
 	log.Debug("refresh token: ", oriToken.Id.Hex())
 
-	ot, dbErr := db.New().GetToken(oriToken.Id)
-	if dbErr != nil {
-		log.Error("fail to get token: ", oriToken.Id.Hex(), ". ", dbErr.Error())
-		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	switch ot.ClaimType {
+	switch oriToken.ClaimType {
 	case structs.ClaimTypeUser:
 		return refreshUserToken(oriToken)
 
 	default:
-		log.Warn("unsupported claim type: ", ot.ClaimType)
+		log.Warn("unsupported claim type: ", oriToken.ClaimType)
 		err = t7Error.InvalidToken.WithStatus(http.StatusBadRequest)
 		return
 	}
@@ -97,7 +87,7 @@ func RefreshToken(oriToken structs.Token) (refreshedToken structs.Token, err *t7
 func refreshUserToken(oriToken structs.Token) (refreshedToken structs.Token, err *t7Error.Error) {
 	log.Debug("refresh user token: ", oriToken.Id.Hex())
 
-	token, tokenErr := jwt.ParseWithClaims(oriToken.AccessToken, &user.TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, tokenErr := jwt.ParseWithClaims(oriToken.AccessToken, &UserTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return config.New().JwtSign, nil
 	})
 
@@ -107,7 +97,7 @@ func refreshUserToken(oriToken structs.Token) (refreshedToken structs.Token, err
 		return
 	}
 
-	claims, ok := token.Claims.(*user.TokenClaims)
+	claims, ok := token.Claims.(*UserTokenClaims)
 	if !ok {
 		log.Error("token assertion fail")
 		err = t7Error.TokenAssertionFail.WithStatus(http.StatusBadRequest)
@@ -117,11 +107,6 @@ func refreshUserToken(oriToken structs.Token) (refreshedToken structs.Token, err
 	refreshedToken, err = GenUserToken(claims.UserId)
 	if err != nil {
 		log.Error("fail to gen user token: ", err.Error())
-		return
-	}
-	if dbErr := db.New().RemoveToken(oriToken.Id); dbErr != nil {
-		log.Error("fail to remove token: ", dbErr.Error())
-		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
 	}
 	return
 }
