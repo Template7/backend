@@ -3,9 +3,13 @@ package transaction
 import (
 	"github.com/Template7/backend/internal/pkg/db"
 	"github.com/Template7/backend/internal/pkg/t7Error"
+	"github.com/Template7/common/logger"
 	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
 	"net/http"
+)
+
+var (
+	log = logger.GetLogger()
 )
 
 func Transfer(data db.TransactionReq) (transactionId string, err *t7Error.Error) {

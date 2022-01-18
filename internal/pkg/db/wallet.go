@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/Template7/common/structs"
 	"github.com/Template7/common/util"
-	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -71,6 +70,10 @@ func (c client) Transfer(data TransactionData) (err error) {
 			log.Error("fail to take balance: ", err.Error())
 			return err
 		}
+
+		log.Debug("start sleep")
+		time.Sleep(30 * time.Second)
+		log.Debug("finish sleep")
 
 		// increment to the target wallet
 		if err := tx.Clauses(

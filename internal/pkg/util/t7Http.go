@@ -2,9 +2,13 @@ package util
 
 import (
 	"github.com/Template7/backend/internal/pkg/t7Error"
-	log "github.com/sirupsen/logrus"
+	"github.com/Template7/common/logger"
 	"io/ioutil"
 	"net/http"
+)
+
+var (
+	log = logger.GetLogger()
 )
 
 func SendHttpRequest(req *http.Request) (response []byte, err *t7Error.Error) {

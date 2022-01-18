@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/Template7/common/structs"
 	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
