@@ -9,6 +9,10 @@ import (
 	"net/http"
 )
 
+type depositResp struct {
+	DepositId string `json:"deposit_id"`
+}
+
 func Deposit(c *gin.Context) {
 	log.Debug("handle deposit")
 
@@ -23,10 +27,17 @@ func Deposit(c *gin.Context) {
 		return
 	}
 
-	if err := wallet.Deposit(req.WalletId, req.Money); err != nil {
+	depositId, err := wallet.Deposit(req)
+	if err != nil {
 		c.JSON(err.GetStatus(), err)
 		return
 	}
+
+	c.JSON(http.StatusOK, depositResp{DepositId: depositId})
+}
+
+type withdrawResp struct {
+	WithdrawId string `json:"withdraw_id"`
 }
 
 func Withdraw(c *gin.Context) {
@@ -43,8 +54,11 @@ func Withdraw(c *gin.Context) {
 		return
 	}
 
-	if err := wallet.Withdraw(req.WalletId, req.Money); err != nil {
+	withDrawId, err := wallet.Withdraw(req)
+	if err != nil {
 		c.JSON(err.GetStatus(), err)
 		return
 	}
+
+	c.JSON(http.StatusOK, withdrawResp{WithdrawId: withDrawId})
 }
