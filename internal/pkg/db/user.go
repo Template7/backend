@@ -85,14 +85,31 @@ func (c client) UpdateUserBasicInfo(userId string, data structs.UserInfo) (err e
 	log.Debug("update user basic info: ", userId)
 
 	filter := bson.M{
-		"userId": userId,
+		"user_id": userId,
 	}
 
 	update := bson.M{
 		"$set": bson.M{
 			"basic_info": data,
+			//"status":     structs.UserStatusActivate,
 		},
 	}
-	_, err = c.mongo.user.UpdateOne(nil, filter, update, options.Update().SetUpsert(true))
+	_, err = c.mongo.user.UpdateOne(context.Background(), filter, update)
+	return
+}
+
+func (c client) UpdateUserStatus(userId string, status structs.UserStatus) (err error) {
+	log.Debug("update user status: ", userId)
+
+	filter := bson.M{
+		"user_id": userId,
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			"status": status,
+		},
+	}
+	_, err = c.mongo.user.UpdateOne(nil, filter, update)
 	return
 }

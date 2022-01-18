@@ -2,6 +2,7 @@ package auth
 
 import (
 	"github.com/Template7/backend/internal/pkg/config"
+	"github.com/Template7/backend/internal/pkg/db"
 	"github.com/Template7/backend/internal/pkg/t7Error"
 	"github.com/Template7/common/structs"
 	"github.com/dgrijalva/jwt-go"
@@ -18,13 +19,22 @@ const (
 type UserTokenClaims struct {
 	jwt.StandardClaims
 	UserId string `json:"userId"`
+	Status structs.UserStatus
 }
 
 func GenUserToken(userId string) (token structs.Token, err *t7Error.Error) {
 	log.Debug("gen token for user: ", userId)
 
+	userData, dbErr := db.New().GetUserById(userId)
+	if dbErr != nil {
+		log.Error("fail to get user data: ", dbErr.Error())
+		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	utc := UserTokenClaims{
 		UserId: userId,
+		Status: userData.Status,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(userTokenTtl).Unix(),
 		},

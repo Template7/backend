@@ -185,40 +185,6 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/sign-up/verification": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Sms",
-                    "SignUp"
-                ],
-                "summary": "Send verify code to the user mobile",
-                "parameters": [
-                    {
-                        "description": "Sms request",
-                        "name": "smsRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/sms.Request"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": ""
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/users/{UserId}": {
             "get": {
                 "tags": [
@@ -363,6 +329,39 @@ var doc = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/t7Error.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/verify-code/sms": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sms"
+                ],
+                "summary": "Send verify code to the user mobile",
+                "parameters": [
+                    {
+                        "description": "Sms request",
+                        "name": "smsRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/sms.Request"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/t7Error.Error"
                         }

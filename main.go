@@ -8,13 +8,17 @@ import (
 	"github.com/Template7/backend/internal/pkg/db"
 	"github.com/Template7/backend/internal/pkg/route"
 	"github.com/Template7/backend/internal/pkg/t7Redis"
+	"github.com/Template7/common/logger"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+)
+
+var (
+	log = logger.GetLogger()
 )
 
 // @title Backend API

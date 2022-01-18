@@ -1,10 +1,14 @@
 package handler
 
 import (
+	"github.com/Template7/common/logger"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
+)
+
+var (
+	log = logger.GetLogger()
 )
 
 type hello struct {

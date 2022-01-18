@@ -4,7 +4,6 @@ import (
 	"github.com/Template7/backend/internal/pkg/auth"
 	"github.com/Template7/common/structs"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 

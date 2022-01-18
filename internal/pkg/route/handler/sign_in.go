@@ -7,7 +7,6 @@ import (
 	"github.com/Template7/backend/internal/pkg/thirdParty/facebook"
 	"github.com/Template7/backend/internal/pkg/user"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
 	"strings"
@@ -34,7 +33,7 @@ func MobileSignIn(c *gin.Context) {
 	}
 
 	// confirm verify code
-	confirm, err := sms.ConfirmVerifyCode(user.SignInPrefix, r.Mobile, r.Code)
+	confirm, err := sms.ConfirmVerifyCode(sms.VerifyCodePrefix, r.Mobile, r.Code)
 	if err != nil {
 		c.JSON(err.GetStatus(), err)
 		return

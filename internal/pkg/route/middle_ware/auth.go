@@ -3,7 +3,9 @@ package middle_ware
 import (
 	"github.com/Template7/backend/internal/pkg/auth"
 	"github.com/Template7/backend/internal/pkg/config"
+	"github.com/Template7/backend/internal/pkg/db"
 	"github.com/Template7/backend/internal/pkg/t7Error"
+	"github.com/Template7/common/structs"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -30,14 +32,42 @@ func AuthUserToken(c *gin.Context) {
 		return
 	}
 
-	if utc.UserId != c.Param("user-id") {
-		log.Warn("user id not match with claim")
-		c.JSON(http.StatusUnauthorized, t7Error.UnAuthorized)
+	c.Set("userId", utc.UserId)
+
+	//if utc.UserId != c.Param("userId") {
+	//	log.Warn("user id not match with claim")
+	//	c.JSON(http.StatusUnauthorized, t7Error.UnAuthorized)
+	//	c.Abort()
+	//	return
+	//}
+
+	log.Debug("user authorized")
+}
+
+func AuthActiveUser(c *gin.Context) {
+	log.Debug("auth active user")
+
+	userId, exist := c.Get("userId")
+	if !exist || userId == "" {
+		log.Warn("userId not found")
 		c.Abort()
 		return
 	}
 
-	log.Debug("user authorized")
+	user, dbErr := db.New().GetUserById(userId.(string))
+	if dbErr != nil {
+		log.Warn("fail to get user by id: ", dbErr.Error())
+		c.JSON(http.StatusInternalServerError, t7Error.DbOperationFail.WithDetail(dbErr.Error()))
+		return
+	}
+
+	if user.Status != structs.UserStatusActivate {
+		log.Info("non-active user status: ", user.Status, ". abort further process")
+		c.JSON(http.StatusForbidden, t7Error.UnAuthorized)
+		return
+	}
+
+	log.Debug("active user authorized")
 }
 
 func AuthAdmin(c *gin.Context) {
