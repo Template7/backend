@@ -17,10 +17,10 @@ func TestMain(m *testing.M) {
 	c.MySql.ConnectionString = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", c.MySql.Username, c.MySql.Password, c.MySql.Host, c.MySql.Port, c.MySql.Db)
 	code := m.Run()
 
-	teardown(db)
+	//teardown(db)
 	os.Exit(code)
 }
 
 func Test_user(t *testing.T) {
-	CreateUser()
+	//CreateUser()
 }

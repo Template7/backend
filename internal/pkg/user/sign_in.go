@@ -18,7 +18,7 @@ func MobileSignIn(mobile string) (userToken structs.Token, err *t7Error.Error) {
 
 	data, dbErr := db.New().GetUserByMobile(mobile)
 
-	// TODO: decouple from db implementation
+	// TODO: decouple from db implementation?
 	if dbErr == mongo.ErrNoDocuments {
 		log.Error("user not found")
 		err = t7Error.UserNotfound.WithStatus(http.StatusNoContent)

@@ -1,9 +1,9 @@
 package sms
 
 import (
+	"fmt"
 	"github.com/Template7/backend/internal/pkg/t7Error"
 	"github.com/Template7/backend/internal/pkg/t7Redis"
-	"fmt"
 	"github.com/go-redis/redis"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -12,6 +12,7 @@ import (
 
 const (
 	verifyTtl = 3 * time.Minute
+	VerifyCodePrefix = "verifyCode"
 )
 
 func SendVerifyCode(prefix string, mobile string, code string) (err *t7Error.Error) {

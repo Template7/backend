@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"github.com/Template7/common/structs"
+	"github.com/Template7/common/util"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"gorm.io/gorm"
@@ -27,7 +28,7 @@ func (c client) Deposit(walletId string, money structs.Money) (err error) {
 	err = c.mysql.db.Model(&structs.Balance{}).Clauses(
 		clause.OnConflict{
 			Columns:   []clause.Column{{Name: "walletId"}, {Name: "currency"}},
-			DoUpdates: clause.Assignments(map[string]interface{}{"amount": gorm.Expr("amount + ?", money.Amount)}),
+			DoUpdates: clause.Assignments(map[string]interface{}{"amount": gorm.Expr("amount + ?", util.ToPico(money))}),
 		}).Create(&structs.Balance{WalletId: walletId, Money: structs.Money{Currency: money.Currency, Amount: money.Amount, Unit: structs.UnitPico}}).Error
 	return
 }
@@ -49,15 +50,24 @@ func (c client) Transfer(data TransactionData) (err error) {
 
 	return c.mysql.db.Model(&structs.Balance{}).Transaction(func(tx *gorm.DB) error {
 		// reduce from the source wallet
-		tx.Where("walletId = ? AND currency = ? AND amount >= ?", data.FromWalletId, data.Currency, data.Amount).
-			Update("amount", gorm.Expr("amount - ?", data.Amount))
+		var blc structs.Balance
+		amount := util.ToPico(data.Money)
+
+		if err := tx.Take(&blc, "walletId = ? AND currency = ? AND amount >= ?", data.FromWalletId, data.Currency, amount).
+			Update("amount", gorm.Expr("amount - ?", amount)).Error; err != nil {
+			log.Error("fail to take balance: ", err.Error())
+			return err
+		}
 
 		// increment to the target wallet
-		tx.Clauses(
+		if err := tx.Clauses(
 			clause.OnConflict{
 				Columns:   []clause.Column{{Name: "walletId"}, {Name: "currency"}},
-				DoUpdates: clause.Assignments(map[string]interface{}{"amount": gorm.Expr("amount + ?", data.Amount)}),
-			}).Create(&structs.Balance{WalletId: data.ToWalletId, Money: structs.Money{Currency: data.Currency, Amount: data.Amount, Unit: structs.UnitPico}})
+				DoUpdates: clause.Assignments(map[string]interface{}{"amount": gorm.Expr("amount + ?", amount)}),
+			}).Create(&structs.Balance{WalletId: data.ToWalletId, Money: structs.Money{Currency: data.Currency, Amount: amount, Unit: structs.UnitPico}}).Error; err != nil {
+			log.Error("fail to add money: ", err.Error())
+			return err
+		}
 
 		return nil
 	})

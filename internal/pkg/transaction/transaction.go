@@ -1,13 +1,29 @@
 package transaction
 
-import "github.com/Template7/common/structs"
+import (
+	"github.com/Template7/backend/internal/pkg/db"
+	"github.com/Template7/backend/internal/pkg/t7Error"
+	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
+	"net/http"
+)
 
-// from api
-type RequestData struct {
-	FromWalletId  string `json:"from_wallet_id" bson:"from_wallet_id"`
-	ToWalletId    string `json:"to_wallet_id" bson:"to_wallet_id"`
-	Note          string `json:"note" bson:"note"`
-	structs.Money `json:",inline" bson:",inline"`
+func Transfer(data db.TransactionReq) (transactionId string, err *t7Error.Error) {
+	log.Debug("handle transfer: ", data.String())
+
+	// TODO: verify from_wallet_id and token
+
+	transferData := db.TransactionData{
+		TransactionReq: data,
+		TransactionId:  uuid.New().String(),
+	}
+	if dbErr := db.New().Transfer(transferData); dbErr != nil {
+		log.Error("fail to make transfer: ", dbErr.Error())
+		err = t7Error.DbOperationFail.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Debug("finish transfer: ", data.String())
+	transactionId = transferData.TransactionId
+	return
 }
-
-

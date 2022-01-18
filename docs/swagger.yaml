@@ -240,28 +240,6 @@ paths:
       tags:
       - Sms
       - SignUp
-  /api/v1/sign-up/verification:
-    post:
-      parameters:
-      - description: Sms request
-        in: body
-        name: smsRequest
-        required: true
-        schema:
-          $ref: '#/definitions/sms.Request'
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: ""
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-      summary: Send verify code to the user mobile
-      tags:
-      - Sms
-      - SignUp
   /api/v1/users/{UserId}:
     get:
       parameters:
@@ -363,4 +341,25 @@ paths:
       tags:
       - V1
       - Token
+  /api/v1/verify-code/sms:
+    post:
+      parameters:
+      - description: Sms request
+        in: body
+        name: smsRequest
+        required: true
+        schema:
+          $ref: '#/definitions/sms.Request'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/t7Error.Error'
+      summary: Send verify code to the user mobile
+      tags:
+      - Sms
 swagger: "2.0"

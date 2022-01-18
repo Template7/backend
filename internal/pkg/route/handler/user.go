@@ -3,8 +3,8 @@ package handler
 import (
 	"github.com/Template7/backend/internal/pkg/t7Error"
 	"github.com/Template7/backend/internal/pkg/user"
+	"github.com/Template7/common/structs"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -22,7 +22,7 @@ import (
 // @in header
 // @name Authorization
 func GetInfo(c *gin.Context) {
-	log.Debug("handle get info")
+	log.Debug("handle get user info")
 
 	userInfo, err := user.GetInfo(c.Param("userId"))
 	if err != nil {
@@ -90,22 +90,21 @@ func CreateUser(c *gin.Context) {
 func UpdateUser(c *gin.Context) {
 	log.Debug("handle update user")
 
-	//userId := c.Param("user-id")
-	//
-	//var userData structs.UserInfo
-	//if err := c.BindJSON(&userData); err != nil {
-	//	c.JSON(http.StatusBadRequest, t7Error.InvalidBody.WithDetail(err.Error()))
-	//	return
-	//}
-	//
-	//if err := user.UpdateBasicInfo(userId, userData); err != nil {
-	//	c.JSON(err.GetStatus(), err)
-	//	return
-	//}
-	//
-	//log.Debug("user updated: ", userId)
-	//c.JSON(http.StatusNoContent, nil)
-	return
+	userId := c.Param("userId")
+
+	var userData structs.UserInfo
+	if err := c.BindJSON(&userData); err != nil {
+		c.JSON(http.StatusBadRequest, t7Error.InvalidBody.WithDetail(err.Error()))
+		return
+	}
+
+	if err := user.UpdateBasicInfo(userId, userData); err != nil {
+		c.JSON(err.GetStatus(), err)
+		return
+	}
+
+	log.Debug("user updated: ", userId)
+	c.JSON(http.StatusNoContent, nil)
 }
 
 func UpdateLoginClient(c *gin.Context) {

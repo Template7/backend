@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/Template7/backend/internal/pkg/config"
-	"github.com/Template7/backend/internal/pkg/transaction"
 	"github.com/Template7/common/structs"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
@@ -231,7 +230,7 @@ func Test_dbClient(t *testing.T) {
 	})
 
 	testTransferData := TransactionData{
-		RequestData: transaction.RequestData{
+		TransactionReq: TransactionReq{
 			FromWalletId: senderWalletData.Id,
 			ToWalletId:   receiverWalletData.Id,
 			Money:        testMoneyNtd,
