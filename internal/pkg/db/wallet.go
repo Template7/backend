@@ -24,19 +24,32 @@ func (c client) GetWallet(userId string) (data structs.WalletData, err error) {
 	return
 }
 
-func (c client) Deposit(walletId string, money structs.Money) (err error) {
+func (c client) Deposit(data DepositData) (err error) {
+	data.CreatedAt = time.Now()
+	if _, err = c.mongo.depositHistory.InsertOne(context.Background(), data); err != nil {
+		log.Error("fail to insert document: ", err.Error())
+		return
+	}
+
 	err = c.mysql.db.Model(&structs.Balance{}).Clauses(
 		clause.OnConflict{
 			Columns:   []clause.Column{{Name: "walletId"}, {Name: "currency"}},
-			DoUpdates: clause.Assignments(map[string]interface{}{"amount": gorm.Expr("amount + ?", util.ToPico(money))}),
-		}).Create(&structs.Balance{WalletId: walletId, Money: structs.Money{Currency: money.Currency, Amount: money.Amount, Unit: structs.UnitPico}}).Error
+			DoUpdates: clause.Assignments(map[string]interface{}{"amount": gorm.Expr("amount + ?", util.ToPico(data.Money))}),
+		}).Create(&structs.Balance{WalletId: data.WalletId, Money: structs.Money{Currency: data.Money.Currency, Amount: data.Money.Amount, Unit: structs.UnitPico}}).Error
 	return
 }
 
-func (c client) Withdraw(walletId string, money structs.Money) (err error) {
+func (c client) Withdraw(data WithdrawData) (err error) {
+	data.CreatedAt = time.Now()
+	if _, err = c.mongo.withdrawHistory.InsertOne(context.Background(), data); err != nil {
+		log.Error("fail to insert document: ", err.Error())
+		return
+	}
+
+	amount := util.ToPico(data.Money)
 	err = c.mysql.db.Model(&structs.Balance{}).
-		Take(&structs.Balance{}, "walletId = ? AND currency = ? AND amount >= ?", walletId, money.Currency, money.Amount).
-		Update("amount", gorm.Expr("amount - ?", money.Amount)).Error
+		Take(&structs.Balance{}, "walletId = ? AND currency = ? AND amount >= ?", data.WalletId, data.Money.Currency, amount).
+		Update("amount", gorm.Expr("amount - ?", amount)).Error
 	return
 }
 

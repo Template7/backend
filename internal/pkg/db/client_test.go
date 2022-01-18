@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Template7/backend/internal/pkg/config"
 	"github.com/Template7/common/structs"
+	"github.com/google/uuid"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 )
 
 var (
@@ -127,20 +129,30 @@ func Test_dbClient(t *testing.T) {
 	})
 
 	t.Run("deposit", func(t *testing.T) {
-		// deposit
-		if err := New().Deposit(senderWalletData.Id, testMoneyNtd); err != nil {
+		data := DepositData{
+			DepositReq: DepositReq{
+				WalletId: senderWalletData.Id,
+				Money: testMoneyNtd,
+			},
+			CreatedAt: time.Now(),
+		}
+		data.DepositId = uuid.New().String()
+		if err := New().Deposit(data); err != nil {
 			t.Errorf("Deposit() error = %v", err)
 			return
 		}
-		if err := New().Deposit(senderWalletData.Id, testMoneyNtd); err != nil {
+		data.DepositId = uuid.New().String()
+		if err := New().Deposit(data); err != nil {
 			t.Errorf("Deposit() error = %v", err)
 			return
 		}
-		if err := New().Deposit(senderWalletData.Id, testMoneyUsd); err != nil {
+		data.DepositId = uuid.New().String()
+		if err := New().Deposit(data); err != nil {
 			t.Errorf("Deposit() error = %v", err)
 			return
 		}
-		if err := New().Deposit(senderWalletData.Id, testMoneyUsd); err != nil {
+		data.DepositId = uuid.New().String()
+		if err := New().Deposit(data); err != nil {
 			t.Errorf("Deposit() error = %v", err)
 			return
 		}

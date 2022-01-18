@@ -18,6 +18,8 @@ type client struct {
 		client             *mongo.Client
 		user               *mongo.Collection
 		transactionHistory *mongo.Collection
+		depositHistory     *mongo.Collection
+		withdrawHistory    *mongo.Collection
 	}
 	mysql struct {
 		db *gorm.DB
@@ -79,6 +81,8 @@ func New() ClientInterface {
 		instance.mongo.client = c
 		instance.mongo.user = db.Collection("user")
 		instance.mongo.transactionHistory = db.Collection("transactionHistory")
+		instance.mongo.depositHistory = db.Collection("depositHistory")
+		instance.mongo.withdrawHistory = db.Collection("withdrawHistory")
 
 		// mysql
 		sqlDb, err := gorm.Open(mysql.Open(config.New().MySql.ConnectionString), &gorm.Config{})
