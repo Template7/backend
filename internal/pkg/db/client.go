@@ -3,7 +3,7 @@ package db
 import (
 	"context"
 	"github.com/Template7/backend/internal/pkg/config"
-	log "github.com/sirupsen/logrus"
+	"github.com/Template7/common/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -64,6 +64,7 @@ func parseSortOrder(o bool) int {
 var (
 	once     sync.Once
 	instance *client
+	log = logger.GetLogger()
 )
 
 func New() ClientInterface {

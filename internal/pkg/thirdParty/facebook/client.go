@@ -2,7 +2,7 @@ package facebook
 
 import (
 	"github.com/Template7/backend/internal/pkg/config"
-	log "github.com/sirupsen/logrus"
+	"github.com/Template7/common/logger"
 	"sync"
 )
 
@@ -15,6 +15,7 @@ const (
 var (
 	once     sync.Once
 	instance *client
+	log = logger.GetLogger()
 	
 	// TODO: update after communicate with app
 	redirectUri = config.New().Facebook.Callback

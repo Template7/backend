@@ -5,11 +5,15 @@ import (
 	"github.com/Template7/backend/internal/pkg/config"
 	"github.com/Template7/backend/internal/pkg/db"
 	"github.com/Template7/backend/internal/pkg/t7Error"
+	"github.com/Template7/common/logger"
 	"github.com/Template7/common/structs"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"net/http"
+)
+
+var (
+	log = logger.GetLogger()
 )
 
 func AuthUserToken(c *gin.Context) {

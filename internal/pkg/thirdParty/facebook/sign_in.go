@@ -10,7 +10,6 @@ import (
 	"github.com/Template7/backend/internal/pkg/util"
 	"github.com/Template7/common/structs"
 	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"

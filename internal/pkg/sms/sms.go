@@ -5,13 +5,12 @@ import (
 	"github.com/Template7/backend/internal/pkg/t7Error"
 	"github.com/Template7/backend/internal/pkg/t7Redis"
 	"github.com/go-redis/redis"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
 )
 
 const (
-	verifyTtl = 3 * time.Minute
+	verifyTtl        = 3 * time.Minute
 	VerifyCodePrefix = "verifyCode"
 )
 
