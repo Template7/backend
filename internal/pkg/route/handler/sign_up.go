@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-// ConfirmVerifyCode
+// MobileSignUp
 // @Summary Confirm verify code
 // @Tags Sms,SignUp
 // @version 1.0
@@ -18,8 +18,8 @@ import (
 // @Success 200 {object} structs.Token "Token object"
 // @failure 400 {object} t7Error.Error
 // @failure 401 {object} t7Error.Error
-// @Router /api/v1/sign-up/confirmation [post]
-func ConfirmVerifyCode(c *gin.Context) {
+// @Router /api/v1/sign-up/mobile [post]
+func MobileSignUp(c *gin.Context) {
 	log.Debug("handle confirm verify code")
 
 	// check request cody
