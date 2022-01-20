@@ -142,7 +142,7 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/sign-up/confirmation": {
+        "/api/v1/sign-up/mobile": {
             "post": {
                 "produces": [
                     "application/json"

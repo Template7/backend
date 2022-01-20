@@ -28,7 +28,7 @@ func Setup(r *gin.Engine) {
 	// sign up
 	signUp := apiV1.Group("/sign-up")
 	//signUp.POST("/verification", handler.SendSmsVerifyCode)
-	signUp.POST("/confirmation", handler.ConfirmVerifyCode)
+	signUp.POST("/mobile", handler.MobileSignUp)
 
 	// sms
 	// TODO: per-mobile rate limit

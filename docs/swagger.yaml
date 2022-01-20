@@ -212,7 +212,7 @@ paths:
       - v1
       - SignIn
       - Sms
-  /api/v1/sign-up/confirmation:
+  /api/v1/sign-up/mobile:
     post:
       parameters:
       - description: Sms confirm
