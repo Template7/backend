@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/Template7/backend/internal/pkg/db"
 	"github.com/Template7/backend/internal/pkg/t7Error"
+	"github.com/Template7/backend/pkg/apiBody"
 	"github.com/Template7/common/logger"
 	"github.com/Template7/common/structs"
 	"github.com/google/uuid"
@@ -13,25 +14,20 @@ var (
 	log = logger.GetLogger()
 )
 
-type GetInfoResp struct {
-	UserInfo structs.UserInfo `json:",inline"`
-	WalletId string           `json:"wallet_id"`
-}
-
-func GetInfo(userId string) (data GetInfoResp, err *t7Error.Error) {
+func GetInfo(userId string) (data apiBody.UserInfoResp, err *t7Error.Error) {
 	userBasicInfo, dbErr := db.New().GetUserBasicInfo(userId)
 	if dbErr != nil {
 		err = t7Error.InvalidDocumentId.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
 		return
 	}
-	wallet, dbErr := db.New().GetWallet(userId)
+	walletData, dbErr := db.New().GetWallet(userId)
 	if dbErr != nil {
 		err = t7Error.InvalidDocumentId.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
 		return
 	}
-	data = GetInfoResp{
-		UserInfo: userBasicInfo,
-		WalletId: wallet.Id,
+	data = apiBody.UserInfoResp{
+		UserInfo:   userBasicInfo,
+		WalletData: walletData,
 	}
 	return
 }
