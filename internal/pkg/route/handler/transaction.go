@@ -9,10 +9,6 @@ import (
 	"net/http"
 )
 
-type transactionResp struct {
-	TransactionId string `json:"transaction_id"`
-}
-
 func MakeTransfer(c *gin.Context) {
 	log.WithContext(c).Debug("handle make transfer")
 
@@ -32,7 +28,7 @@ func MakeTransfer(c *gin.Context) {
 		return
 	}
 
-	resp := transactionResp{
+	resp := apiBody.TransactionResp{
 		TransactionId: transactionId,
 	}
 	c.JSON(http.StatusOK, resp)

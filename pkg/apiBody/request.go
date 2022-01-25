@@ -29,3 +29,7 @@ type TransactionReq struct {
 func (r TransactionReq) String() string {
 	return fmt.Sprintf("from %s to %s, %d %s", r.FromWalletId, r.ToWalletId, r.Amount, r.Unit)
 }
+
+type TransactionResp struct {
+	TransactionId string `json:"transaction_id"`
+}
