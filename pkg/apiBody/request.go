@@ -33,3 +33,10 @@ func (r TransactionReq) String() string {
 type TransactionResp struct {
 	TransactionId string `json:"transaction_id"`
 }
+
+type DepositReq struct {
+	Source   string        `json:"source" bson:"source"`
+	Note     string        `json:"note" bson:"note"`
+	WalletId string        `json:"wallet_id" bson:"wallet_id" validate:"uuid"`
+	Money    structs.Money `json:"money" bson:"money" validate:"dive"`
+}
