@@ -40,3 +40,7 @@ type DepositReq struct {
 	WalletId string        `json:"wallet_id" bson:"wallet_id" validate:"uuid"`
 	Money    structs.Money `json:"money" bson:"money" validate:"dive"`
 }
+
+type DepositResp struct {
+	DepositId string `json:"deposit_id"`
+}

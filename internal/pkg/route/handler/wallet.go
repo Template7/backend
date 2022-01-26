@@ -14,10 +14,6 @@ func GetWallet(c *gin.Context) {
 
 }
 
-type depositResp struct {
-	DepositId string `json:"deposit_id"`
-}
-
 func Deposit(c *gin.Context) {
 	log.Debug("handle deposit")
 
@@ -38,7 +34,7 @@ func Deposit(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, depositResp{DepositId: depositId})
+	c.JSON(http.StatusOK, apiBody.DepositResp{DepositId: depositId})
 }
 
 type withdrawResp struct {
