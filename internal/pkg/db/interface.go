@@ -33,15 +33,9 @@ type TransactionData struct {
 }
 
 type DepositData struct {
-	DepositReq `json:",inline" bson:",inline" validate:"dive"`
-	DepositId  string    `json:"deposit_id" bson:"deposit_id" validate:"uuid"`
-	CreatedAt  time.Time `json:"created_at" bson:"created_at"`
-}
-
-type DepositReq struct {
-	Source   string        `json:"source" bson:"source"`
-	WalletId string        `json:"wallet_id" bson:"wallet_id" validate:"uuid"`
-	Money    structs.Money `json:"money" bson:"money" validate:"dive"`
+	apiBody.DepositReq `json:",inline" bson:",inline" validate:"dive"`
+	DepositId          string    `json:"deposit_id" bson:"deposit_id" validate:"uuid"`
+	CreatedAt          time.Time `json:"created_at" bson:"created_at"`
 }
 
 type WithdrawData struct {
