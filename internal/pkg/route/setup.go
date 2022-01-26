@@ -45,6 +45,7 @@ func Setup(r *gin.Engine) {
 
 	// wallet
 	wallet := apiV1.Group("/wallet", middle_ware.AuthUserToken, middle_ware.AuthActiveUser)
+	wallet.GET("/:walletId", handler.GetWallet)
 	wallet.POST("/deposit", handler.Deposit)
 	wallet.POST("/withdraw", handler.Withdraw)
 
