@@ -4,10 +4,15 @@ import (
 	"github.com/Template7/backend/internal/pkg/db"
 	"github.com/Template7/backend/internal/pkg/t7Error"
 	"github.com/Template7/backend/internal/pkg/wallet"
+	"github.com/Template7/backend/pkg/apiBody"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"net/http"
 )
+
+func GetWallet(c *gin.Context) {
+
+}
 
 type depositResp struct {
 	DepositId string `json:"deposit_id"`
@@ -16,7 +21,7 @@ type depositResp struct {
 func Deposit(c *gin.Context) {
 	log.Debug("handle deposit")
 
-	var req db.DepositReq
+	var req apiBody.DepositReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, t7Error.InvalidBody)
 		return
