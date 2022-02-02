@@ -65,6 +65,8 @@ github.com/Template7/backend v1.2.0/go.mod h1:x7l6hkFAlgDD5RcmB9Hf3RYsC63g57smRU
 github.com/Template7/common v0.0.0-20220117062309-aefc500e2dea/go.mod h1:gg47i7jS0AxXWcWxk+jypc86HwXCcAp0uYwOdMbUgNU=
 github.com/Template7/common v0.0.0-20220120032944-4b5be01936fc h1:yW9gP8NxnXb0zDL2uxGSz1Rm1TfhOx2Vq39dvgfOSr8=
 github.com/Template7/common v0.0.0-20220120032944-4b5be01936fc/go.mod h1:48wwHyKJEzIDpwDrNy4kXU3EZnYIeCoKoGtjK0t2Rd8=
+github.com/Template7/common v0.0.0-20220126105659-d09fd8b6a020 h1:QASByhOEHU1+ddsJmmEMBuWqag8Z/kPnO+tGh0Nc3e0=
+github.com/Template7/common v0.0.0-20220126105659-d09fd8b6a020/go.mod h1:48wwHyKJEzIDpwDrNy4kXU3EZnYIeCoKoGtjK0t2Rd8=
 github.com/agiledragon/gomonkey/v2 v2.3.1 h1:k+UnUY0EMNYUFUAQVETGY9uUTxjMdnUkP0ARyJS1zzs=
 github.com/agiledragon/gomonkey/v2 v2.3.1/go.mod h1:ap1AmDzcVOAz1YpeJ3TCzIgstoaWLA6jbbgxfB4w2iY=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
