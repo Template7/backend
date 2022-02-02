@@ -34,7 +34,7 @@ func (c client) Deposit(data DepositData) (err error) {
 		clause.OnConflict{
 			Columns:   []clause.Column{{Name: "walletId"}, {Name: "currency"}},
 			DoUpdates: clause.Assignments(map[string]interface{}{"amount": gorm.Expr("amount + ?", util.ToPico(data.Money))}),
-		}).Create(&structs.Balance{WalletId: data.WalletId, Money: structs.Money{Currency: data.Money.Currency, Amount: data.Money.Amount, Unit: structs.UnitPico}}).Error
+		}).Create(&structs.Balance{WalletId: data.WalletId, Money: structs.Money{Currency: data.Money.Currency, Amount: util.ToPico(data.Money), Unit: structs.UnitPico}}).Error
 	return
 }
 
@@ -70,10 +70,6 @@ func (c client) Transfer(data TransactionData) (err error) {
 			log.Error("fail to take balance: ", err.Error())
 			return err
 		}
-
-		log.Debug("start sleep")
-		time.Sleep(30 * time.Second)
-		log.Debug("finish sleep")
 
 		// increment to the target wallet
 		if err := tx.Clauses(
