@@ -96,9 +96,9 @@ func (c client) GetTransactions(userId string) (data []TransactionData, err erro
 	filter := bson.M{
 		"$or": []bson.M{
 			{
-				"request_data.from_wallet_id": wallet.Id,
+				"from_wallet_id": wallet.Id,
 			}, {
-				"request_data.to_wallet_id": wallet.Id,
+				"to_wallet_id": wallet.Id,
 			},
 		},
 	}
