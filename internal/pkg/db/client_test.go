@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/Template7/backend/internal/pkg/config"
+	"github.com/Template7/backend/pkg/apiBody"
 	"github.com/Template7/common/structs"
 	"github.com/google/uuid"
 	"github.com/spf13/viper"
@@ -130,7 +131,7 @@ func Test_dbClient(t *testing.T) {
 
 	t.Run("deposit", func(t *testing.T) {
 		data := DepositData{
-			DepositReq: DepositReq{
+			DepositReq: apiBody.DepositReq{
 				WalletId: senderWalletData.Id,
 				Money: testMoneyNtd,
 			},
@@ -146,6 +147,7 @@ func Test_dbClient(t *testing.T) {
 			t.Errorf("Deposit() error = %v", err)
 			return
 		}
+		data.Money = testMoneyUsd
 		data.DepositId = uuid.New().String()
 		if err := New().Deposit(data); err != nil {
 			t.Errorf("Deposit() error = %v", err)
@@ -189,11 +191,20 @@ func Test_dbClient(t *testing.T) {
 	})
 
 	t.Run("withdraw_normal", func(t *testing.T) {
-		if err := New().Withdraw(senderWalletData.Id, testMoneyNtd); err != nil {
+		data := WithdrawData{
+			WithdrawReq: WithdrawReq{
+				Target: "fakeTarget",
+				WalletId: senderWalletData.Id,
+				Money: testMoneyNtd,
+			},
+			WithdrawId: uuid.New().String(),
+		}
+		if err := New().Withdraw(data); err != nil {
 			t.Errorf("Withdraw() error = %v", err)
 			return
 		}
-		if err := New().Withdraw(senderWalletData.Id, testMoneyUsd); err != nil {
+		data.Money = testMoneyUsd
+		if err := New().Withdraw(data); err != nil {
 			t.Errorf("Withdraw() error = %v", err)
 			return
 		}
@@ -231,18 +242,26 @@ func Test_dbClient(t *testing.T) {
 	})
 
 	t.Run("withdraw_negative", func(t *testing.T) {
-		if err := New().Withdraw(senderWalletData.Id, testMoneyUsd); err != nil {
+		data := WithdrawData{
+			WithdrawReq: WithdrawReq{
+				Target: "fakeTarget",
+				WalletId: senderWalletData.Id,
+				Money: testMoneyUsd,
+			},
+			WithdrawId: uuid.New().String(),
+		}
+		if err := New().Withdraw(data); err != nil {
 			t.Errorf("Withdraw() error = %v", err)
 			return
 		}
-		if err := New().Withdraw(senderWalletData.Id, testMoneyUsd); err != gorm.ErrRecordNotFound {
+		if err := New().Withdraw(data); err != gorm.ErrRecordNotFound {
 			t.Errorf("Withdraw() want: %v, got: %v", gorm.ErrRecordNotFound, err)
 			return
 		}
 	})
 
 	testTransferData := TransactionData{
-		TransactionReq: TransactionReq{
+		TransactionReq: apiBody.TransactionReq{
 			FromWalletId: senderWalletData.Id,
 			ToWalletId:   receiverWalletData.Id,
 			Money:        testMoneyNtd,
