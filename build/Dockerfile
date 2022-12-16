@@ -6,7 +6,7 @@ COPY . .
 RUN go mod download
 
 # install swag cli then build swagger document
-RUN go get -u github.com/swaggo/swag/cmd/swag
+RUN go install github.com/swaggo/swag/cmd/swag@latest
 RUN swag init --parseDependency --parseDepth 3
 
 RUN go build -o $PROJECT .

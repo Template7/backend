@@ -33,10 +33,55 @@ definitions:
     required:
     - mobile
     type: object
+  structs.Gender:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-comments:
+      GenderGay: distinguish 0 and 1 ?
+      GenderLesbian: distinguish 0 and 1 ?
+    x-enum-varnames:
+    - GenderUnknown
+    - GenderMale
+    - GenderFemale
+    - GenderGay
+    - GenderLesbian
+  structs.LoginChannel:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - LoginChannelUnknown
+    - LoginChannelMobile
+    - LoginChannelFacebook
+    - LoginChannelGoogle
+  structs.LoginClientOs:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - LoginClientOsUnknown
+    - LoginClientOsIos
+    - LoginClientOsAndroid
   structs.LoginInfo:
     properties:
       channel:
-        type: integer
+        allOf:
+        - $ref: '#/definitions/structs.LoginChannel'
+        enum:
+        - 0
+        - 1
+        - 2
+        - 3
       channel_user_id:
         description: user id of the channel
         type: string
@@ -44,7 +89,12 @@ definitions:
         description: iPhoneN, PixelN, NoteN, ...
         type: string
       os:
-        type: integer
+        allOf:
+        - $ref: '#/definitions/structs.LoginClientOs'
+        enum:
+        - 0
+        - 1
+        - 2
     required:
     - device
     type: object
@@ -74,7 +124,12 @@ definitions:
         example: "+886987654321"
         type: string
       status:
-        type: integer
+        allOf:
+        - $ref: '#/definitions/structs.UserStatus'
+        enum:
+        - -1
+        - 0
+        - 1
       user_id:
         type: string
     type: object
@@ -88,8 +143,15 @@ definitions:
       birthday:
         type: integer
       gender:
+        allOf:
+        - $ref: '#/definitions/structs.Gender'
         description: configable?
-        type: integer
+        enum:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
       hobbies:
         items:
           type: string
@@ -103,11 +165,67 @@ definitions:
     required:
     - nick_name
     type: object
+  structs.UserStatus:
+    enum:
+    - -1
+    - 0
+    - 1
+    type: integer
+    x-enum-comments:
+      UserStatusActivate: sign up finished, able to use the app
+      UserStatusInitialized: not finish basic info yet
+    x-enum-varnames:
+    - UserStatusBlock
+    - UserStatusInitialized
+    - UserStatusActivate
+  t7Error.Code:
+    enum:
+    - 1024
+    - 1025
+    - 1026
+    - 1027
+    - 1028
+    - 1029
+    - 1030
+    - 1031
+    - 1032
+    - 1033
+    - 1034
+    - 1035
+    - 1036
+    - 1037
+    - 1038
+    - 1039
+    - 1040
+    - 1041
+    - 1042
+    type: integer
+    x-enum-varnames:
+    - codeUnAuthorized
+    - codeInvalidBody
+    - codeDbConnectionFail
+    - codeDbOperationFail
+    - codeInvalidDocumentId
+    - codeHttpOperationFail
+    - codeHttpUnexpectedResponseCode
+    - codeHashFail
+    - codeUserNotfound
+    - codeUserAlreadyExist
+    - codeSignInFail
+    - codeVerifyCodeExpired
+    - codeIncorrectVerifyCode
+    - codeRedisOperationFail
+    - codeTokenSignFail
+    - codeTokenAssertionFail
+    - codeInvalidToken
+    - codeDecodeFail
+    - codeWalletNotFound
   t7Error.Error:
     properties:
       code:
+        allOf:
+        - $ref: '#/definitions/t7Error.Code'
         example: 1024
-        type: integer
       detail:
         example: empty token
         type: string
@@ -115,9 +233,24 @@ definitions:
         example: token unauthorized
         type: string
       type:
+        allOf:
+        - $ref: '#/definitions/t7Error.Type'
         example: 32
-        type: integer
     type: object
+  t7Error.Type:
+    enum:
+    - 32
+    - 33
+    - 34
+    - 35
+    - 36
+    type: integer
+    x-enum-varnames:
+    - typeAuth
+    - typeInvalidData
+    - typeDb
+    - typeRedis
+    - typeNetwork
   user.CreateUserReq:
     properties:
       email:
@@ -292,7 +425,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
         "400":
           description: Bad Request
           schema:
@@ -354,7 +487,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: ""
+          description: No Content
         "400":
           description: Bad Request
           schema:

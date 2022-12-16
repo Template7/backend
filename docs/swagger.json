@@ -248,7 +248,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -341,7 +341,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": ""
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -404,6 +404,55 @@
                 }
             }
         },
+        "structs.Gender": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "x-enum-comments": {
+                "GenderGay": "distinguish 0 and 1 ?",
+                "GenderLesbian": "distinguish 0 and 1 ?"
+            },
+            "x-enum-varnames": [
+                "GenderUnknown",
+                "GenderMale",
+                "GenderFemale",
+                "GenderGay",
+                "GenderLesbian"
+            ]
+        },
+        "structs.LoginChannel": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "LoginChannelUnknown",
+                "LoginChannelMobile",
+                "LoginChannelFacebook",
+                "LoginChannelGoogle"
+            ]
+        },
+        "structs.LoginClientOs": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "LoginClientOsUnknown",
+                "LoginClientOsIos",
+                "LoginClientOsAndroid"
+            ]
+        },
         "structs.LoginInfo": {
             "type": "object",
             "required": [
@@ -411,7 +460,17 @@
             ],
             "properties": {
                 "channel": {
-                    "type": "integer"
+                    "enum": [
+                        0,
+                        1,
+                        2,
+                        3
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/structs.LoginChannel"
+                        }
+                    ]
                 },
                 "channel_user_id": {
                     "description": "user id of the channel",
@@ -422,7 +481,16 @@
                     "type": "string"
                 },
                 "os": {
-                    "type": "integer"
+                    "enum": [
+                        0,
+                        1,
+                        2
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/structs.LoginClientOs"
+                        }
+                    ]
                 }
             }
         },
@@ -463,7 +531,16 @@
                     "example": "+886987654321"
                 },
                 "status": {
-                    "type": "integer"
+                    "enum": [
+                        -1,
+                        0,
+                        1
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/structs.UserStatus"
+                        }
+                    ]
                 },
                 "user_id": {
                     "type": "string"
@@ -488,7 +565,18 @@
                 },
                 "gender": {
                     "description": "configable?",
-                    "type": "integer"
+                    "enum": [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/structs.Gender"
+                        }
+                    ]
                 },
                 "hobbies": {
                     "type": "array",
@@ -507,11 +595,77 @@
                 }
             }
         },
+        "structs.UserStatus": {
+            "type": "integer",
+            "enum": [
+                -1,
+                0,
+                1
+            ],
+            "x-enum-comments": {
+                "UserStatusActivate": "sign up finished, able to use the app",
+                "UserStatusInitialized": "not finish basic info yet"
+            },
+            "x-enum-varnames": [
+                "UserStatusBlock",
+                "UserStatusInitialized",
+                "UserStatusActivate"
+            ]
+        },
+        "t7Error.Code": {
+            "type": "integer",
+            "enum": [
+                1024,
+                1025,
+                1026,
+                1027,
+                1028,
+                1029,
+                1030,
+                1031,
+                1032,
+                1033,
+                1034,
+                1035,
+                1036,
+                1037,
+                1038,
+                1039,
+                1040,
+                1041,
+                1042
+            ],
+            "x-enum-varnames": [
+                "codeUnAuthorized",
+                "codeInvalidBody",
+                "codeDbConnectionFail",
+                "codeDbOperationFail",
+                "codeInvalidDocumentId",
+                "codeHttpOperationFail",
+                "codeHttpUnexpectedResponseCode",
+                "codeHashFail",
+                "codeUserNotfound",
+                "codeUserAlreadyExist",
+                "codeSignInFail",
+                "codeVerifyCodeExpired",
+                "codeIncorrectVerifyCode",
+                "codeRedisOperationFail",
+                "codeTokenSignFail",
+                "codeTokenAssertionFail",
+                "codeInvalidToken",
+                "codeDecodeFail",
+                "codeWalletNotFound"
+            ]
+        },
         "t7Error.Error": {
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "integer",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/t7Error.Code"
+                        }
+                    ],
                     "example": 1024
                 },
                 "detail": {
@@ -523,10 +677,31 @@
                     "example": "token unauthorized"
                 },
                 "type": {
-                    "type": "integer",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/t7Error.Type"
+                        }
+                    ],
                     "example": 32
                 }
             }
+        },
+        "t7Error.Type": {
+            "type": "integer",
+            "enum": [
+                32,
+                33,
+                34,
+                35,
+                36
+            ],
+            "x-enum-varnames": [
+                "typeAuth",
+                "typeInvalidData",
+                "typeDb",
+                "typeRedis",
+                "typeNetwork"
+            ]
         },
         "user.CreateUserReq": {
             "type": "object",
