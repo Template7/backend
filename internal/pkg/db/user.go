@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func (c client) CreateUser(user structs.User) (err error) {
+func (c impl) CreateUser(user structs.User) (err error) {
 	log.Debug("create user")
 
 	user.Status = structs.UserStatusInitialized
@@ -34,14 +34,14 @@ func (c client) CreateUser(user structs.User) (err error) {
 	return
 }
 
-func (c client) GetUserById(userId string) (data structs.User, err error) {
+func (c impl) GetUserById(userId string) (data structs.User, err error) {
 	filter := bson.M{
 		"user_id": userId,
 	}
 	return c.getUser(filter)
 }
 
-func (c client) GetFbUser(fbUserId string) (data structs.User, err error) {
+func (c impl) GetFbUser(fbUserId string) (data structs.User, err error) {
 	filter := bson.M{
 		"login_info.channel":         structs.LoginChannelFacebook,
 		"login_info.channel_user_id": fbUserId,
@@ -49,19 +49,19 @@ func (c client) GetFbUser(fbUserId string) (data structs.User, err error) {
 	return c.getUser(filter)
 }
 
-func (c client) GetUserByMobile(mobile string) (data structs.User, err error) {
+func (c impl) GetUserByMobile(mobile string) (data structs.User, err error) {
 	filter := bson.M{
 		"mobile": mobile,
 	}
 	return c.getUser(filter)
 }
 
-func (c client) getUser(filter bson.M) (data structs.User, err error) {
+func (c impl) getUser(filter bson.M) (data structs.User, err error) {
 	err = c.mongo.user.FindOne(context.Background(), filter).Decode(&data)
 	return
 }
 
-func (c client) GetUserBasicInfo(userId string) (data structs.UserInfo, err error) {
+func (c impl) GetUserBasicInfo(userId string) (data structs.UserInfo, err error) {
 	log.Debug("get user info: ", userId)
 
 	var temp structs.User
@@ -80,7 +80,7 @@ func (c client) GetUserBasicInfo(userId string) (data structs.UserInfo, err erro
 	return
 }
 
-func (c client) UpdateUserBasicInfo(userId string, data structs.UserInfo) (err error) {
+func (c impl) UpdateUserBasicInfo(userId string, data structs.UserInfo) (err error) {
 	log.Debug("update user basic info: ", userId)
 
 	filter := bson.M{
@@ -97,7 +97,7 @@ func (c client) UpdateUserBasicInfo(userId string, data structs.UserInfo) (err e
 	return
 }
 
-func (c client) UpdateUserStatus(userId string, status structs.UserStatus) (err error) {
+func (c impl) UpdateUserStatus(userId string, status structs.UserStatus) (err error) {
 	log.Debug("update user status: ", userId)
 
 	filter := bson.M{

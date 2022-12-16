@@ -13,7 +13,7 @@ import (
 	"sync"
 )
 
-type client struct {
+type impl struct {
 	mongo struct {
 		client             *mongo.Client
 		user               *mongo.Collection
@@ -63,8 +63,8 @@ func parseSortOrder(o bool) int {
 
 var (
 	once     sync.Once
-	instance *client
-	log = logger.GetLogger()
+	instance *impl
+	log      = logger.GetLogger()
 )
 
 func New() ClientInterface {
@@ -78,7 +78,7 @@ func New() ClientInterface {
 			log.Fatal(err)
 		}
 		db := c.Database(config.New().Mongo.Db)
-		instance = &client{}
+		instance = &impl{}
 		instance.mongo.client = c
 		instance.mongo.user = db.Collection("user")
 		instance.mongo.transactionHistory = db.Collection("transactionHistory")
@@ -91,12 +91,12 @@ func New() ClientInterface {
 			log.Fatal(err)
 		}
 		instance.mysql.db = sqlDb
-		log.Debug("db client initialized")
+		log.Debug("db impl initialized")
 	})
 	return instance
 }
 
-func (c client) initIndex(db *mongo.Database) (err error) {
+func (c impl) initIndex(db *mongo.Database) (err error) {
 	ctx := context.Background()
 	for col, idx := range CollectionIndexes {
 		log.Debug("create index for collection: ", col)
