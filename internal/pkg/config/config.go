@@ -14,7 +14,7 @@ const (
 
 var log = logger.GetLogger()
 
-type config struct {
+type Config struct {
 	JwtSign []byte
 	Log     struct {
 		Formatter string
@@ -56,13 +56,13 @@ type config struct {
 
 var (
 	once     sync.Once
-	instance *config
+	instance *Config
 )
 
-func New() *config {
+func New() *Config {
 	once.Do(func() {
 		viper.SetConfigType("yaml")
-		instance = &config{}
+		instance = &Config{}
 		viper.AddConfigPath(configPath)
 		viper.SetConfigName("config")
 		if err := viper.ReadInConfig(); err != nil {
@@ -86,7 +86,7 @@ func New() *config {
 	return instance
 }
 
-func (c *config) initLog() {
+func (c *Config) initLog() {
 	logger.SetLevel(c.Log.Level)
 	logger.SetFormatter(c.Log.Formatter)
 	log.Debug("logger initialized")

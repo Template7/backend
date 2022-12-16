@@ -1,6 +1,6 @@
 package db
 
-//func (c client) SaveToken(token structs.Token) (tokenId *primitive.ObjectID, err error) {
+//func (c impl) SaveToken(token structs.Token) (tokenId *primitive.ObjectID, err error) {
 //	log.Debug("save token")
 //
 //	res, err := c.token.InsertOne(context.Background(), token)
@@ -13,7 +13,7 @@ package db
 //	return
 //}
 
-//func (c client) RemoveToken(id *primitive.ObjectID) (err error) {
+//func (c impl) RemoveToken(id *primitive.ObjectID) (err error) {
 //	log.Debug("remove token: ", id.Hex())
 //
 //	filter := bson.M{
@@ -23,7 +23,7 @@ package db
 //	return
 //}
 
-//func (c client) GetToken(id *primitive.ObjectID) (token structs.Token, err error) {
+//func (c impl) GetToken(id *primitive.ObjectID) (token structs.Token, err error) {
 //	log.Debug("get token: ", id.Hex())
 //
 //	filter := bson.M{

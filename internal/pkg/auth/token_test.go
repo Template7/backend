@@ -3,6 +3,7 @@ package auth
 import (
 	"github.com/spf13/viper"
 	"testing"
+	"time"
 )
 
 func TestRefreshToken(t *testing.T) {
@@ -54,4 +55,27 @@ func TestRefreshToken(t *testing.T) {
 	//}
 	//db := c.Database(config.New().Mongo.Db)
 	//db.Drop(context.Background())
+}
+
+func TestTemp(t *testing.T) {
+	t.Log("start...1")
+
+	time.Sleep(1 * time.Second)
+
+	f := func() {
+		t.Log("start go routine...2")
+		defer func() {
+			t.Log("defer before sleep...3")
+			time.Sleep(1 * time.Second)
+			t.Log("defer after sleep...4")
+		}()
+	}
+
+	f()
+
+	t.Log("...5")
+
+	time.Sleep(2 * time.Second)
+
+	t.Log("test end...6")
 }
