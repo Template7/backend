@@ -96,7 +96,7 @@ func New() ClientInterface {
 	return instance
 }
 
-func (c impl) initIndex(db *mongo.Database) (err error) {
+func (c *impl) initIndex(db *mongo.Database) (err error) {
 	ctx := context.Background()
 	for col, idx := range CollectionIndexes {
 		log.Debug("create index for collection: ", col)

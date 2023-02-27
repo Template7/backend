@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func (c impl) GetWallet(userId string) (data structs.WalletData, err error) {
+func (c *impl) GetWallet(userId string) (data structs.WalletData, err error) {
 	var wallet structs.Wallet
 	if err = c.mysql.db.Model(&structs.Wallet{}).Where("userId = ?", userId).Take(&wallet).Error; err != nil {
 		log.Error("fail to get wallet for user: ", userId, ". ", err.Error())
@@ -23,7 +23,7 @@ func (c impl) GetWallet(userId string) (data structs.WalletData, err error) {
 	return
 }
 
-func (c impl) Deposit(data DepositData) (err error) {
+func (c *impl) Deposit(data DepositData) (err error) {
 	data.CreatedAt = time.Now()
 	if _, err = c.mongo.depositHistory.InsertOne(context.Background(), data); err != nil {
 		log.Error("fail to insert document: ", err.Error())
@@ -38,7 +38,7 @@ func (c impl) Deposit(data DepositData) (err error) {
 	return
 }
 
-func (c impl) Withdraw(data WithdrawData) (err error) {
+func (c *impl) Withdraw(data WithdrawData) (err error) {
 	data.CreatedAt = time.Now()
 	if _, err = c.mongo.withdrawHistory.InsertOne(context.Background(), data); err != nil {
 		log.Error("fail to insert document: ", err.Error())
@@ -52,7 +52,7 @@ func (c impl) Withdraw(data WithdrawData) (err error) {
 	return
 }
 
-func (c impl) Transfer(data TransactionData) (err error) {
+func (c *impl) Transfer(data TransactionData) (err error) {
 	data.CreatedAt = time.Now()
 	// insert to mongodb
 	if _, err := c.mongo.transactionHistory.InsertOne(context.Background(), data); err != nil {
@@ -86,7 +86,7 @@ func (c impl) Transfer(data TransactionData) (err error) {
 }
 
 // TODO: add paging and some query filter
-func (c impl) GetTransactions(userId string) (data []TransactionData, err error) {
+func (c *impl) GetTransactions(userId string) (data []TransactionData, err error) {
 	var wallet structs.Wallet
 	if err = c.mysql.db.Model(&structs.Wallet{}).Where("userId = ?", userId).Take(&wallet).Error; err != nil {
 		log.Error("fail to get wallet for user: ", userId, ". ", err.Error())

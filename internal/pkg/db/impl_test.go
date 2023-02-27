@@ -61,7 +61,7 @@ var (
 func TestMain(m *testing.M) {
 	viper.AddConfigPath("../../../configs")
 	c := config.New()
-	db := fmt.Sprintf("temp_test")
+	db := fmt.Sprintf("template7")
 	c.Mongo.Db = db
 	c.MySql.Db = db
 	c.MySql.ConnectionString = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", c.MySql.Username, c.MySql.Password, c.MySql.Host, c.MySql.Port, c.MySql.Db)
@@ -133,7 +133,7 @@ func Test_dbClient(t *testing.T) {
 		data := DepositData{
 			DepositReq: apiBody.DepositReq{
 				WalletId: senderWalletData.Id,
-				Money: testMoneyNtd,
+				Money:    testMoneyNtd,
 			},
 			CreatedAt: time.Now(),
 		}
@@ -193,9 +193,9 @@ func Test_dbClient(t *testing.T) {
 	t.Run("withdraw_normal", func(t *testing.T) {
 		data := WithdrawData{
 			WithdrawReq: WithdrawReq{
-				Target: "fakeTarget",
+				Target:   "fakeTarget",
 				WalletId: senderWalletData.Id,
-				Money: testMoneyNtd,
+				Money:    testMoneyNtd,
 			},
 			WithdrawId: uuid.New().String(),
 		}
@@ -244,9 +244,9 @@ func Test_dbClient(t *testing.T) {
 	t.Run("withdraw_negative", func(t *testing.T) {
 		data := WithdrawData{
 			WithdrawReq: WithdrawReq{
-				Target: "fakeTarget",
+				Target:   "fakeTarget",
 				WalletId: senderWalletData.Id,
-				Money: testMoneyUsd,
+				Money:    testMoneyUsd,
 			},
 			WithdrawId: uuid.New().String(),
 		}
@@ -344,6 +344,20 @@ func Test_dbClient(t *testing.T) {
 		t.Log(data)
 	})
 }
+
+//func Test_t(t *testing.T) {
+//	sqlDb, err := gorm.Open(mysql.Open(config.New().MySql.ConnectionString), &gorm.Config{})
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	//b453e4d7-bf09-4923-b7a0-3143054a0a83
+//	w := structs.Wallet{
+//		Id: "55f0d350-6cb3-4397-ae3b-faee0eab6470",
+//	}
+//	sqlDb.Preload("Balance").Find(&w)
+//
+//	_ = w
+//}
 
 func teardown(db string) {
 	_ = instance.mongo.client.Database(db).Drop(context.Background())
