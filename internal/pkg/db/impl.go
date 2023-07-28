@@ -4,11 +4,11 @@ import (
 	"context"
 	"github.com/Template7/backend/internal/pkg/config"
 	"github.com/Template7/common/logger"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"log"
 
 	"sync"
 )
@@ -33,38 +33,9 @@ type QueryOption struct {
 	Desc   bool
 }
 
-func (q *QueryOption) ToMongoOption() (option options.FindOptions) {
-	//opt := options.Find()
-	if q.Limit > 0 {
-		option.Limit = &q.Limit
-	}
-	if q.Offset > 0 {
-		option.Skip = &q.Offset
-	}
-	if q.SortBy != "" {
-		option.SetSort(bson.M{
-			q.SortBy: parseSortOrder(q.Desc),
-		})
-	} else {
-		option.SetSort(bson.M{
-			"_id": parseSortOrder(q.Desc),
-		})
-	}
-	return
-}
-
-func parseSortOrder(o bool) int {
-	if o {
-		return 1
-	} else {
-		return -1
-	}
-}
-
 var (
 	once     sync.Once
 	instance *impl
-	log      = logger.GetLogger()
 )
 
 func New() ClientInterface {
@@ -72,10 +43,10 @@ func New() ClientInterface {
 		// mongo
 		c, err := mongo.Connect(nil, options.Client().ApplyURI(config.New().Mongo.ConnectionString))
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 		if err := c.Ping(nil, nil); err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 		db := c.Database(config.New().Mongo.Db)
 		instance = &impl{}
@@ -91,7 +62,7 @@ func New() ClientInterface {
 			log.Fatal(err)
 		}
 		instance.mysql.db = sqlDb
-		log.Debug("db impl initialized")
+		logger.New().Debug("db client initialized")
 	})
 	return instance
 }
@@ -99,7 +70,7 @@ func New() ClientInterface {
 func (c *impl) initIndex(db *mongo.Database) (err error) {
 	ctx := context.Background()
 	for col, idx := range CollectionIndexes {
-		log.Debug("create index for collection: ", col)
+		logger.New().With("collection", col).Debug("create index")
 		_, err = db.Collection(col).Indexes().CreateMany(ctx, idx)
 		if err != nil {
 			log.Error("fail to create index: ", err.Error())

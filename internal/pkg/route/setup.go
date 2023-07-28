@@ -6,9 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"go.elastic.co/apm/module/apmgin/v2"
 )
 
 func Setup(r *gin.Engine) {
+	r.Use(apmgin.Middleware(r))
 	r.LoadHTMLFiles("resource/template/facebook_login.html")
 
 	r.GET("", handler.HelloPage)
