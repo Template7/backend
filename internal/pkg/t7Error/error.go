@@ -43,3 +43,10 @@ func (e Error) WithDetailAndStatus(d string, s int) *Error {
 	e.status = s
 	return &e
 }
+
+func ToT7Error(err error) (*Error, bool) {
+	if t7Err, ok := err.(*Error); ok {
+		return t7Err, true
+	}
+	return nil, false
+}

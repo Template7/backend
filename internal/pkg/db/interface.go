@@ -1,29 +1,24 @@
 package db
 
 import (
+	"context"
+	"github.com/Template7/backend/internal/pkg/db/entity"
 	"github.com/Template7/backend/pkg/apiBody"
 	"github.com/Template7/common/structs"
 	"time"
 )
 
-type ClientInterface interface {
-
+type Client interface {
 	// user
-	GetUserById(userId string) (data structs.User, err error)
-	GetUserByMobile(mobile string) (data structs.User, err error)
-	GetUserBasicInfo(userId string) (data structs.UserInfo, err error)
-	GetFbUser(fbUserId string) (data structs.User, err error)
-
-	CreateUser(user structs.User) (err error)
-	UpdateUserBasicInfo(userId string, info structs.UserInfo) (err error)
-	UpdateUserStatus(userId string, status structs.UserStatus) (err error)
+	CreateUser(ctx context.Context, data entity.User) (err error)
+	GetUser(ctx context.Context, username string) (data entity.User, err error)
+	GetUserById(ctx context.Context, userId string) (data structs.User, err error)
 
 	// wallet
-	GetWallet(userId string) (data structs.WalletData, err error)
-	Deposit(data DepositData) (err error)
-	Withdraw(data WithdrawData) (err error)
-	Transfer(t TransactionData) (err error)
-	GetTransactions(userId string) (data []TransactionData, err error)
+	GetWallet(ctx context.Context, userId string) (data entity.Wallet, err error)
+	Deposit(ctx context.Context, walletId string, money entity.Money) (err error)
+	Withdraw(ctx context.Context, walletId string, money entity.Money) (err error)
+	Transfer(ctx context.Context, fromWalletId string, toWalletId string, money entity.Money) (err error)
 }
 
 type TransactionData struct {

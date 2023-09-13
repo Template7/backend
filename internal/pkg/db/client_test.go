@@ -63,8 +63,8 @@ func TestMain(m *testing.M) {
 	c := config.New()
 	db := fmt.Sprintf("template7")
 	c.Mongo.Db = db
-	c.MySql.Db = db
-	c.MySql.ConnectionString = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", c.MySql.Username, c.MySql.Password, c.MySql.Host, c.MySql.Port, c.MySql.Db)
+	c.Sql.Db = db
+	c.Sql.ConnectionString = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", c.Sql.Username, c.Sql.Password, c.Sql.Host, c.Sql.Port, c.Sql.Db)
 	code := m.Run()
 
 	teardown(db)
@@ -361,6 +361,6 @@ func Test_dbClient(t *testing.T) {
 
 func teardown(db string) {
 	_ = instance.mongo.client.Database(db).Drop(context.Background())
-	instance.mysql.db.Model(&structs.Wallet{}).Exec(fmt.Sprintf("DROP DATABASE IF EXISTS `%s`", db))
+	instance.sql.db.Model(&structs.Wallet{}).Exec(fmt.Sprintf("DROP DATABASE IF EXISTS `%s`", db))
 	//instance.mysql.db.Delete(&structs.Balance{})
 }

@@ -20,6 +20,8 @@ const (
 	codeInvalidToken
 	codeDecodeFail
 	codeWalletNotFound
+	codePasswordIncorrect
+	codeUserHasNoRole
 )
 
 const (
@@ -31,6 +33,18 @@ const (
 )
 
 var (
+	UserHasNoRole = &Error{
+		Code:    codeUserHasNoRole,
+		Message: "user has no role",
+		Type:    typeAuth,
+	}
+
+	PasswordIncorrect = &Error{
+		Code:    codePasswordIncorrect,
+		Message: "password incorrect",
+		Type:    typeAuth,
+	}
+
 	UnAuthorized = &Error{
 		Code:    codeUnAuthorized,
 		Message: "token unauthorized",
