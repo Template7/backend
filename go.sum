@@ -47,6 +47,8 @@ github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbt
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
 github.com/Template7/common v0.1.1 h1:h2QDmUFZ1dZ47fIV7QF04XFsBO0ccLgZszceAy2J3Ic=
 github.com/Template7/common v0.1.1/go.mod h1:mvamuhQwLKgqGM4MoljFSRH5MeS65o0RhE/bFT8rvIs=
+github.com/Template7/common v0.1.2 h1:QgE4zSEWbEC4zbtuIUx4oQ0Soh8WUFN4RBFbmTJZMj4=
+github.com/Template7/common v0.1.2/go.mod h1:FTuXz5rmthrtERwpeylEDU12eXNIEkKUe9boMG3zgy0=
 github.com/Template7/protobuf v0.1.0 h1:CiSEoZvCBVkUkre99BrErQu1OWHgzsezv/M4jmHwus0=
 github.com/Template7/protobuf v0.1.0/go.mod h1:3QQRRrGU++a/Ig1RDfDsvkQMcCAMLvL3VZNyeRtY0zc=
 github.com/Template7/protobuf v0.1.1 h1:b97NyYRcWUT+2mxx7yEOeYTdUv8ctVIrg7SIgkF3nHw=
@@ -55,6 +57,8 @@ github.com/Template7/protobuf v0.1.2 h1:UqWQe8thW1+cN3+mOvvsL9JlphmyVG3VgVIYbljn
 github.com/Template7/protobuf v0.1.2/go.mod h1:3QQRRrGU++a/Ig1RDfDsvkQMcCAMLvL3VZNyeRtY0zc=
 github.com/Template7/protobuf v0.1.3 h1:Y4HuGMdyrSOygwnRG4FHxXG8sYLMjjScUYxrSEHj5Gg=
 github.com/Template7/protobuf v0.1.3/go.mod h1:3QQRRrGU++a/Ig1RDfDsvkQMcCAMLvL3VZNyeRtY0zc=
+github.com/Template7/protobuf v0.1.4 h1:rj/PRQ9MuO0Rcf0kXSBGkD71iHf8RdQTFASPQyJvxhA=
+github.com/Template7/protobuf v0.1.4/go.mod h1:3QQRRrGU++a/Ig1RDfDsvkQMcCAMLvL3VZNyeRtY0zc=
 github.com/agiledragon/gomonkey/v2 v2.3.1/go.mod h1:ap1AmDzcVOAz1YpeJ3TCzIgstoaWLA6jbbgxfB4w2iY=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
 github.com/armon/go-radix v1.0.0 h1:F4z6KzEeeQIMeLFa97iZU6vupzoecKdU5TX24SNppXI=
