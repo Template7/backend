@@ -1,35 +1,30 @@
 package user
 
 import (
+	"context"
 	"github.com/Template7/backend/internal/pkg/db"
 	"github.com/Template7/backend/internal/t7Error"
-	"github.com/Template7/backend/pkg/apiBody"
-	"github.com/Template7/common/logger"
 	"github.com/Template7/common/structs"
+	v1 "github.com/Template7/protobuf/gen/proto/template7/user"
 	"github.com/google/uuid"
 	"net/http"
 )
 
-var (
-	log = logger.GetLogger()
-)
+func (s *Service) GetInfo(ctx context.Context, userId string) (*v1.UserInfoResponse, error) {
+	log := s.log.WithContext(ctx).With("userId", userId)
+	log.Debug("get user info")
 
-func GetInfo(userId string) (data apiBody.UserInfoResp, err *t7Error.Error) {
-	userBasicInfo, dbErr := db.New().GetUserBasicInfo(userId)
-	if dbErr != nil {
-		err = t7Error.InvalidDocumentId.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
-		return
+	data, err := s.db.GetUserById(ctx, userId)
+	if err != nil {
+		log.WithError(err).Error("fail to get user by id")
+		return nil, t7Error.DbOperationFail.WithDetail(err.Error())
 	}
-	walletData, dbErr := db.New().GetWallet(userId)
-	if dbErr != nil {
-		err = t7Error.InvalidDocumentId.WithDetailAndStatus(dbErr.Error(), http.StatusInternalServerError)
-		return
+
+	resp := v1.UserInfoResponse{
+		UserId: data.UserId,
+		//Role: data.
+		Status: data.Status,
 	}
-	data = apiBody.UserInfoResp{
-		UserInfo:   userBasicInfo,
-		WalletData: walletData,
-	}
-	return
 }
 
 type CreateUserReq struct {

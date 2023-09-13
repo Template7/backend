@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"github.com/Template7/backend/internal/db/entity"
-	"github.com/Template7/common/structs"
 )
 
 func (c *client) CreateUser(ctx context.Context, data entity.User) (err error) {
@@ -26,7 +25,7 @@ func (c *client) GetUser(ctx context.Context, username string) (data entity.User
 	return
 }
 
-func (c *client) GetUserById(ctx context.Context, userId string) (data structs.User, err error) {
+func (c *client) GetUserById(ctx context.Context, userId string) (data entity.User, err error) {
 	log := c.log.WithContext(ctx).With("userId", userId)
 	log.Debug("get user")
 

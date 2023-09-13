@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/Template7/common v0.1.2
-	github.com/Template7/protobuf v0.1.4
+	github.com/Template7/protobuf v0.1.5
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.8.2
 	github.com/go-playground/validator/v10 v10.11.1
