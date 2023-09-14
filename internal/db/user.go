@@ -34,3 +34,13 @@ func (c *client) GetUserById(ctx context.Context, userId string) (data entity.Us
 	}
 	return
 }
+
+func (c *client) UpdateUserInfo(ctx context.Context, userId string, info entity.UserInfo) (err error) {
+	log := c.log.WithContext(ctx).With("userId", userId)
+	log.Debug("update user info")
+
+	if err = c.sql.db.WithContext(ctx).Where("user_id = ?", userId).Update("nickname", info.NickName).Error; err != nil {
+		log.WithError(err).Error("fail to update user info")
+	}
+	return
+}

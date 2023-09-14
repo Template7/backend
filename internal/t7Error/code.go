@@ -22,6 +22,7 @@ const (
 	codeWalletNotFound
 	codePasswordIncorrect
 	codeUserHasNoRole
+	codeUnknown
 )
 
 const (
@@ -30,9 +31,16 @@ const (
 	typeDb
 	typeRedis
 	typeNetwork
+	typeOther
 )
 
 var (
+	Unknown = &Error{
+		Code:    codeUnknown,
+		Message: "unknown",
+		Type:    typeOther,
+	}
+
 	UserHasNoRole = &Error{
 		Code:    codeUserHasNoRole,
 		Message: "user has no role",

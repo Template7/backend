@@ -4,10 +4,8 @@ import (
 	"context"
 	"fmt"
 	_ "github.com/Template7/backend/docs"
-	"github.com/Template7/backend/internal/pkg/config"
-	"github.com/Template7/backend/internal/pkg/db"
-	"github.com/Template7/backend/internal/pkg/route"
-	"github.com/Template7/backend/internal/pkg/t7Redis"
+	"github.com/Template7/backend/internal/config"
+	"github.com/Template7/backend/internal/route"
 	"github.com/Template7/common/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -15,10 +13,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-)
-
-var (
-	log = logger.GetLogger()
 )
 
 // @title Backend API
@@ -30,6 +24,7 @@ var (
 
 // schemes http
 func main() {
+	log := logger.New().WithService("main")
 
 	r := gin.Default()
 
@@ -42,9 +37,9 @@ func main() {
 	}
 
 	go func() {
-		log.Debug("server listen on: ", config.New().Gin.ListenPort)
+		log.With("port", config.New().Gin.ListenPort).Info("server started")
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal(err)
+			log.WithError(err).Panic(err.Error())
 		}
 	}()
 
@@ -56,19 +51,14 @@ func main() {
 	// kill -9 is syscall.SIGKILL but can't be catch, so don't need add it
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("Shutdown Server ...")
+
+	log.Info("shutdown server")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(config.New().Gin.ShutdownTimeout)*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server Shutdown: ", err)
+		log.WithError(err).Panic("fail to shutdown server")
 	}
 
 	log.Info("server exited properly")
-}
-
-func init() {
-	config.New()
-	db.New()
-	t7Redis.New()
 }

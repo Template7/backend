@@ -26,7 +26,7 @@ func (s *service) Login(ctx context.Context, username string, password string) (
 		return "", t7Error.UserHasNoRole
 	}
 
-	token, err := s.genUserToken(ctx, username, s.GetUserRole(ctx, username))
+	token, err := s.genUserToken(ctx, user.Id.String(), s.GetUserRole(ctx, user.Id.String()))
 	if err != nil {
 		log.WithError(err).Error("fail to generate user token")
 		return "", err
@@ -46,25 +46,4 @@ func (s *service) CheckPermission(ctx context.Context, sub, obj, act string) boo
 
 	log.Debug("permission check ok")
 	return true
-}
-
-func (s *service) GetUserRole(ctx context.Context, username string) v1.Role {
-	log := s.log.WithContext(ctx).With("username", username)
-	log.Debug("get user role")
-
-	roles, err := s.core.GetRolesForUser(username)
-	if err != nil {
-		log.WithError(err).Error("unable to get user role")
-		return -1
-	}
-	if len(roles) == 0 {
-		log.Warn("user have no roles")
-		return -1
-	}
-	if len(roles) > 1 {
-		log.With("roles", roles).Warn("user has multiple roles")
-	}
-
-	log.With("role", roles).Debug("got user role")
-	return v1.Role(v1.Role_value[roles[0]])
 }

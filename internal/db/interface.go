@@ -3,14 +3,14 @@ package db
 import (
 	"context"
 	"github.com/Template7/backend/internal/db/entity"
-	"github.com/Template7/common/structs"
 )
 
 type Client interface {
 	// user
 	CreateUser(ctx context.Context, data entity.User) (err error)
 	GetUser(ctx context.Context, username string) (data entity.User, err error)
-	GetUserById(ctx context.Context, userId string) (data structs.User, err error)
+	GetUserById(ctx context.Context, userId string) (data entity.User, err error)
+	UpdateUserInfo(ctx context.Context, userId string, info entity.UserInfo) (err error)
 
 	// wallet
 	GetWallet(ctx context.Context, userId string) (data entity.Wallet, err error)

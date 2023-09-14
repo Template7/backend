@@ -4,18 +4,13 @@ import (
 	"github.com/Template7/backend/internal/route/handler"
 	middleware "github.com/Template7/backend/internal/route/middleWare"
 	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 func Setup(r *gin.Engine) {
 	r.Use(middleware.Request, middleware.RecoverMiddleware)
 	r.GET("", handler.HelloPage)
-
-	if gin.Mode() == gin.DebugMode {
-		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-		r.GET("/test/graceful-shutdown", handler.TestGracefulShutdown)
-	}
 
 	apiV1 := r.Group("/api/v1")
 
@@ -26,12 +21,13 @@ func Setup(r *gin.Engine) {
 	apiV1.Use(middleware.AuthToken, middleware.Permission)
 
 	// user
-	user := apiV1.Group("/users")
-	user.GET("/:userId/info", handler.GetUserInfo)
-	user.PUT("/:userId", handler.UpdateUser)
+	user := apiV1.Group("/user")
+	user.GET("/info", handler.GetUserInfo)
+	user.PUT("/info", handler.UpdateUser)
+	user.POST("/new", handler.CreateUser)
 
 	// wallet
-	wallet := apiV1.Group("/wallet")
+	wallet := apiV1.Group("/wallets")
 	wallet.GET("/:walletId", handler.GetWallet)
 	wallet.POST("/deposit", handler.Deposit)
 	wallet.POST("/withdraw", handler.Withdraw)
@@ -44,4 +40,9 @@ func Setup(r *gin.Engine) {
 	adminV1 := r.Group("/admin/v1")
 	adminV1.POST("/user", handler.CreateUser)
 	//adminV1.DELETE("/user", handler.DeleteUser)
+
+	if gin.Mode() == gin.DebugMode {
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		r.GET("/test/graceful-shutdown", handler.TestGracefulShutdown)
+	}
 }

@@ -9,6 +9,7 @@ import (
 	gormadapter "github.com/casbin/gorm-adapter/v2"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
+	"net/http"
 	"sync"
 )
 
@@ -71,8 +72,12 @@ func New() Auth {
 // TODO: reset db policies
 func (s *service) loadDefaultPolicies() {
 	pPolicy := [][]string{
-		//"Operator": 1,
-		//"User":     2,
+		{v1.Role_User.String(), "/api/v1/users/:userId/info", http.MethodGet},
+		{v1.Role_User.String(), "/api/v1/users/:userId/info", http.MethodPut},
+		{v1.Role_User.String(), "/api/v1/wallets/:walletId", http.MethodGet},
+		{v1.Role_User.String(), "/api/v1/wallets/:walletId/deposit", http.MethodPost},
+		{v1.Role_User.String(), "/api/v1/wallets/:walletId/withdraw", http.MethodPost},
+		{v1.Role_User.String(), "/api/v1/transaction", http.MethodPost},
 	}
 
 	ok, err := s.core.AddPolicies(pPolicy)
