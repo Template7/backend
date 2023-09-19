@@ -44,3 +44,14 @@ func (c *client) UpdateUserInfo(ctx context.Context, userId string, info entity.
 	}
 	return
 }
+
+func (c *client) GetUserWallets(ctx context.Context, userId string) (data []entity.Wallet) {
+	log := c.log.WithContext(ctx).With("userId", userId)
+	log.Debug("get wallet")
+
+	if err := c.sql.core.Model(&entity.Wallet{}).Preload("Balance").Where("userId = ?", userId).Find(&data).Error; err != nil {
+		log.WithError(err).Error("fail to get wallet")
+		return
+	}
+	return
+}
