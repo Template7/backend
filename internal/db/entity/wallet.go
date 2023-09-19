@@ -6,8 +6,8 @@ import (
 )
 
 type Wallet struct {
-	Id        string `gorm:"primaryKey;column:id;type:varchar(36);not null"`
-	UserId    string `gorm:"uniqueIndex:user_id;column:userId;type:varchar(36);not null"`
+	Id        string `gorm:"type:uuid;primary_key;"`
+	UserId    string `gorm:"uniqueIndex:user_id;type:varchar(36);not null"`
 	CreatedAt int64  `gorm:"autoCreateTime:milli"`
 	UpdatedAt int64  `gorm:"autoUpdateTime:milli"`
 
@@ -19,10 +19,10 @@ func (w Wallet) TableName() string {
 }
 
 type Balance struct {
-	WalletId  string `gorm:"primaryKey;type:varchar(36);not_null"`
+	WalletId  string `gorm:"primaryKey;type:uuid;not_null"`
 	Money     `gorm:"embedded"`
 	CreatedAt time.Time `gorm:"autoCreateTime:milli;not null"`
-	UpdatedAt int64     `gorm:"autoUpdateTime:milli"`
+	UpdatedAt int64     `gorm:"autoUpdateTime:milli;not null"`
 }
 
 func (b *Balance) TableName() string {

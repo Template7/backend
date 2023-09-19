@@ -1,10 +1,10 @@
 module github.com/Template7/backend
 
-go 1.20
+go 1.21.1
 
 require (
-	github.com/Template7/common v0.1.2
-	github.com/Template7/protobuf v0.1.8
+	github.com/Template7/common v0.1.6
+	github.com/Template7/protobuf v0.1.10
 	github.com/casbin/casbin/v2 v2.77.2
 	github.com/casbin/gorm-adapter/v2 v2.1.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -18,8 +18,7 @@ require (
 	go.mongodb.org/mongo-driver v1.8.2
 	golang.org/x/crypto v0.11.0
 	google.golang.org/protobuf v1.31.0
-	gorm.io/driver/mysql v1.4.4
-	gorm.io/gorm v1.24.2
+	gorm.io/gorm v1.25.4
 )
 
 require (
@@ -81,6 +80,7 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gorm.io/driver/mysql v1.5.1 // indirect
 )
 
 //replace (

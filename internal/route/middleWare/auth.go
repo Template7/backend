@@ -3,6 +3,7 @@ package middleware
 import (
 	"github.com/Template7/backend/internal/auth"
 	"github.com/Template7/backend/internal/t7Error"
+	"github.com/Template7/backend/internal/user"
 	"github.com/Template7/common/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -78,4 +79,45 @@ func AuthToken(c *gin.Context) {
 
 	log.With("userId", claims.UserId).Debug("user token authorized")
 	c.Next()
+}
+
+func AuthUserWallet(c *gin.Context) {
+	log := logger.New().WithContext(c)
+	log.Debug("check user wallet")
+
+	walletId := c.Param("walletId")
+	if walletId == "" {
+		log.Warn("empty wallet id")
+		c.JSON(http.StatusBadRequest, t7Error.InvalidBody)
+		c.Abort()
+		return
+	}
+	log = log.With("walletId", walletId)
+
+	uId, ok := c.Get(UserId)
+	if !ok {
+		log.Warn("no user id from the previous middleware")
+		c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+		c.Abort()
+		return
+	}
+	userId, ok := uId.(string)
+	if !ok {
+		log.With("uId", uId).Error("type assertion fail")
+		c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+		c.Abort()
+		return
+	}
+	log = log.With("userId", userId)
+
+	for _, uw := range user.New().GetUserWallets(c, userId) {
+		if uw.Id == walletId {
+			log.Debug("user wallet check ok")
+			c.Next()
+			return
+		}
+	}
+	log.Warn("user has no permission to the wallet")
+	c.Abort()
+	return
 }

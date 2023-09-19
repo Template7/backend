@@ -23,12 +23,13 @@ func Setup(r *gin.Engine) {
 	// user
 	user := apiV1.Group("/user")
 	user.GET("/info", handler.GetUserInfo)
+	user.GET("/wallets", handler.GetUserWallets)
 	user.PUT("/info", handler.UpdateUser)
 	user.POST("/new", handler.CreateUser)
 
 	// wallet
-	wallet := apiV1.Group("/wallets")
-	wallet.GET("/:walletId", handler.GetWallet)
+	wallet := apiV1.Group("/wallets/:walletId", middleware.AuthUserWallet)
+	wallet.GET("", handler.GetWallet)
 	wallet.POST("/deposit", handler.Deposit)
 	wallet.POST("/withdraw", handler.Withdraw)
 

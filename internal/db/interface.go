@@ -13,7 +13,7 @@ type Client interface {
 	UpdateUserInfo(ctx context.Context, userId string, info entity.UserInfo) (err error)
 
 	// wallet
-	GetWallet(ctx context.Context, userId string) (data entity.Wallet, err error)
+	GetUserWallets(ctx context.Context, userId string) (data []entity.Wallet)
 	Deposit(ctx context.Context, walletId string, money entity.Money) (err error)
 	Withdraw(ctx context.Context, walletId string, money entity.Money) (err error)
 	Transfer(ctx context.Context, fromWalletId string, toWalletId string, money entity.Money) (err error)

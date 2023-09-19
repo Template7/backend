@@ -3,18 +3,15 @@ package db
 import (
 	"context"
 	"github.com/Template7/backend/internal/db/entity"
-	"github.com/Template7/common/structs"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
-func (c *client) GetWallet(ctx context.Context, userId string) (data entity.Wallet, err error) {
+func (c *client) GetUserWallets(ctx context.Context, userId string) (data []entity.Wallet) {
 	log := c.log.WithContext(ctx).With("userId", userId)
 	log.Debug("get wallet")
 
-	// TODO: join wallet and balance
-	var wallet structs.Wallet
-	if err = c.sql.db.Model(&structs.Wallet{}).Where("userId = ?", userId).Take(&wallet).Error; err != nil {
+	if err := c.sql.core.Model(&entity.Wallet{}).Preload("Balance").Where("userId = ?", userId).Find(&data).Error; err != nil {
 		log.WithError(err).Error("fail to get wallet")
 		return
 	}
@@ -25,21 +22,21 @@ func (c *client) Deposit(ctx context.Context, walletId string, money entity.Mone
 	log := c.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("deposit")
 
-	return c.deposit(ctx, c.sql.db, walletId, money)
+	return c.deposit(ctx, c.sql.core, walletId, money)
 }
 
 func (c *client) Withdraw(ctx context.Context, walletId string, money entity.Money) (err error) {
 	log := c.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("withdraw")
 
-	return c.withdraw(ctx, c.sql.db, walletId, money)
+	return c.withdraw(ctx, c.sql.core, walletId, money)
 }
 
 func (c *client) Transfer(ctx context.Context, fromWalletId string, toWalletId string, money entity.Money) (err error) {
 	log := c.log.WithContext(ctx).With("fromWalletId", fromWalletId).With("toWalletId", toWalletId).With("money", money)
 	log.Debug("transfer money")
 
-	tx := c.sql.db.Begin()
+	tx := c.sql.core.Begin()
 	defer tx.Rollback()
 
 	err = c.withdraw(ctx, tx, fromWalletId, money)

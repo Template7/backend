@@ -1,8 +1,9 @@
 package auth
 
 import (
-	"github.com/Template7/backend/internal/config"
+	"fmt"
 	"github.com/Template7/backend/internal/db"
+	"github.com/Template7/common/config"
 	"github.com/Template7/common/logger"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/casbin/casbin/v2"
@@ -38,7 +39,8 @@ func New() Auth {
 		log := logger.New().WithService("auth")
 
 		cfg := config.New()
-		adapter, err := gormadapter.NewAdapter("mysql", cfg.Sql.ConnectionString, true)
+		cs := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", cfg.Db.Sql.Username, cfg.Db.Sql.Password, cfg.Db.Sql.Host, cfg.Db.Sql.Port, cfg.Db.Sql.Db)
+		adapter, err := gormadapter.NewAdapter("mysql", cs, true)
 		if err != nil {
 			log.WithError(err).Error("fail to new mysql adapter")
 			panic(err)

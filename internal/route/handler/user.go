@@ -7,7 +7,7 @@ import (
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/backend/internal/user"
 	"github.com/Template7/common/logger"
-	v1 "github.com/Template7/protobuf/gen/proto/template7/user"
+	userV1 "github.com/Template7/protobuf/gen/proto/template7/user"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/encoding/protojson"
 	"io"
@@ -72,7 +72,7 @@ func CreateUser(c *gin.Context) {
 	}
 
 	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
-	var req v1.CreateUserRequest
+	var req userV1.CreateUserRequest
 	if err := unmarshaler.Unmarshal(bd, &req); err != nil {
 		log.WithError(err).With("resp", string(bd)).Error("fail to decode resp data")
 		c.JSON(http.StatusBadRequest, t7Error.DecodeFail.WithDetail(err.Error()))
@@ -111,7 +111,7 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
-	var req v1.UpdateUserInfoRequest
+	var req userV1.UpdateUserInfoRequest
 	if err := unmarshaler.Unmarshal(bd, &req); err != nil {
 		log.WithError(err).With("resp", string(bd)).Error("fail to decode resp data")
 		c.JSON(http.StatusBadRequest, t7Error.DecodeFail.WithDetail(err.Error()))
@@ -147,4 +147,26 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusNoContent, nil)
+}
+
+func GetUserWallets(c *gin.Context) {
+	log := logger.New().WithContext(c)
+	log.Debug("handle get user wallets")
+
+	uId, ok := c.Get(middleware.UserId)
+	if !ok {
+		log.Warn("no user id from the previous middleware")
+		c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+		return
+	}
+	userId, ok := uId.(string)
+	if !ok {
+		log.With("uId", uId).Error("type assertion fail")
+		c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+		return
+	}
+
+	c.JSON(http.StatusOK, userV1.GetUserWalletResponse{
+		Wallets: user.New().GetUserWallets(c, userId),
+	})
 }
