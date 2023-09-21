@@ -33,9 +33,9 @@ func Setup(r *gin.Engine) {
 	wallet.POST("/deposit", handler.Deposit)
 	wallet.POST("/withdraw", handler.Withdraw)
 
-	// transaction
-	transaction := apiV1.Group("/transaction")
-	transaction.POST("", handler.MakeTransfer)
+	// transfer
+	transaction := apiV1.Group("/transfer")
+	transaction.POST("", handler.Transfer)
 
 	// admin
 	adminV1 := r.Group("/admin/v1")

@@ -71,7 +71,6 @@ func New() Auth {
 	return instance
 }
 
-// TODO: reset db policies
 func (s *service) loadDefaultPolicies() {
 	pPolicy := [][]string{
 		{v1.Role_User.String(), "/api/v1/users/:userId/info", http.MethodGet},
@@ -82,12 +81,15 @@ func (s *service) loadDefaultPolicies() {
 		{v1.Role_User.String(), "/api/v1/transaction", http.MethodPost},
 	}
 
-	ok, err := s.core.AddPolicies(pPolicy)
-	if err != nil {
-		s.log.WithError(err).Error("fail to add policies")
-	}
-	if !ok {
-		s.log.With("policy", pPolicy).Warn("no policies added")
+	for _, p := range pPolicy {
+		ok, err := s.core.AddPolicy(p)
+		if err != nil {
+			s.log.WithError(err).Panic("fail to add policy")
+			panic(err)
+		}
+		if !ok {
+			s.log.With("policy", p).Info("policy already exists")
+		}
 	}
 }
 
