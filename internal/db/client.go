@@ -32,6 +32,7 @@ func New() Client {
 	once.Do(func() {
 		// nosql
 		mDb := db.NewNoSql().Database(config.New().Db.NoSql.Db)
+		instance = &client{}
 		instance.mongo.user = mDb.Collection("user")
 		instance.mongo.transactionHistory = mDb.Collection("transactionHistory")
 		instance.mongo.depositHistory = mDb.Collection("depositHistory")

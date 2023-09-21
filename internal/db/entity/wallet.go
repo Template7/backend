@@ -9,10 +9,10 @@ import (
 )
 
 type Wallet struct {
-	Id        string `gorm:"type:uuid;primary_key;"`
-	UserId    string `gorm:"uniqueIndex:user_id;type:varchar(36);not null"`
-	CreatedAt int64  `gorm:"autoCreateTime:milli"`
-	UpdatedAt int64  `gorm:"autoUpdateTime:milli"`
+	Id        string    `gorm:"type:char(36);primary_key;"`
+	UserId    string    `gorm:"uniqueIndex:user_id;type:varchar(36);not null"`
+	CreatedAt time.Time `gorm:"autoCreateTime:milli"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime:milli"`
 
 	Balance []Balance `gorm:"foreignKey:WalletId;references:Id"`
 }
@@ -42,10 +42,10 @@ func (w *Wallet) ToProto(ctx context.Context) *v1.Wallet {
 }
 
 type Balance struct {
-	WalletId  string `gorm:"primaryKey;type:uuid;not_null"`
+	WalletId  string `gorm:"primaryKey;type:char(36);not_null"`
 	Money     `gorm:"embedded"`
 	CreatedAt time.Time `gorm:"autoCreateTime:milli;not null"`
-	UpdatedAt int64     `gorm:"autoUpdateTime:milli;not null"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime:milli;not null"`
 }
 
 func (b *Balance) TableName() string {
@@ -54,5 +54,5 @@ func (b *Balance) TableName() string {
 
 type Money struct {
 	Currency string          `gorm:"primaryKey;type:varchar(4);uniqueIndex:wc;not null"`
-	Amount   decimal.Decimal `gorm:"type:decimal(16,4),not null;default:0"`
+	Amount   decimal.Decimal `gorm:"type:decimal(16,4);not null;default:0"`
 }

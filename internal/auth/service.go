@@ -45,11 +45,14 @@ func New() Auth {
 			log.WithError(err).Error("fail to new mysql adapter")
 			panic(err)
 		}
+
+		// TODO: load without file
 		e, err := casbin.NewEnforcer("./config/rbac_model.conf", adapter)
 		if err != nil {
 			log.WithError(err).Error("fail to new enforcer")
 			panic(err)
 		}
+
 		err = e.LoadPolicy()
 		if err != nil {
 			log.WithError(err).Error("fail to load policy")

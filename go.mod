@@ -3,7 +3,7 @@ module github.com/Template7/backend
 go 1.21.1
 
 require (
-	github.com/Template7/common v0.1.7
+	github.com/Template7/common v0.1.8
 	github.com/Template7/protobuf v0.1.12
 	github.com/casbin/casbin/v2 v2.77.2
 	github.com/casbin/gorm-adapter/v2 v2.1.0

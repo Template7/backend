@@ -7,9 +7,9 @@ import (
 )
 
 type User struct {
-	Id        uuid.UUID `gorm:"type:uuid;primary_key;"`
-	Username  string    `gorm:"uniqueIndex;not_null"`
-	Password  string    `gorm:"type:varchar(128);not_null"`
+	Id        uuid.UUID `gorm:"type:char(36);primary_key;"`
+	Username  string    `gorm:"type:varchar(64);uniqueIndex;not_null"`
+	Password  string    `gorm:"type:varchar(64);not_null"`
 	Info      UserInfo  `gorm:"embedded"`
 	Email     string    `gorm:"type:varchar(128)"`
 	Status    v1.AccountStatus

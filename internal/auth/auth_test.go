@@ -1,9 +1,10 @@
 package auth
 
 import (
+	"context"
+	v1 "github.com/Template7/protobuf/gen/proto/template7/user"
 	"github.com/spf13/viper"
 	"testing"
-	"time"
 )
 
 func TestRefreshToken(t *testing.T) {
@@ -57,25 +58,16 @@ func TestRefreshToken(t *testing.T) {
 	//db.Drop(context.Background())
 }
 
-func TestTemp(t *testing.T) {
-	t.Log("start...1")
+func TestService_CreateUser(t *testing.T) {
+	viper.AddConfigPath("../../config")
 
-	time.Sleep(1 * time.Second)
-
-	f := func() {
-		t.Log("start go routine...2")
-		defer func() {
-			t.Log("defer before sleep...3")
-			time.Sleep(1 * time.Second)
-			t.Log("defer after sleep...4")
-		}()
+	req := v1.CreateUserRequest{
+		Username: "allentest",
+		Password: "password",
 	}
 
-	f()
-
-	t.Log("...5")
-
-	time.Sleep(2 * time.Second)
-
-	t.Log("test end...6")
+	err := New().CreateUser(context.Background(), &req)
+	if err != nil {
+		t.Error(err)
+	}
 }

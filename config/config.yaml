@@ -6,7 +6,7 @@ db:
     db: template7
     host: 127.0.0.1
     port: 3306
-    username: template7
+    username: admin
     password: password
     connection:
       min: 4
