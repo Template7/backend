@@ -23,13 +23,6 @@ type client struct {
 	log *logger.Logger
 }
 
-type QueryOption struct {
-	Limit  int64
-	Offset int64
-	SortBy string
-	Desc   bool
-}
-
 var (
 	once     sync.Once
 	instance *client

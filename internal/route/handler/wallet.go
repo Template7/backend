@@ -54,7 +54,7 @@ func Deposit(c *gin.Context) {
 
 	if err := wallet.New().Deposit(c, c.Param("walletId"), req.GetCurrency(), req.GetAmount()); err != nil {
 		defer c.Abort()
-		log.WithError(err).Error("fail to update user info")
+		log.WithError(err).Error("fail to deposit")
 		t7Err, ok := t7Error.ToT7Error(err)
 		if !ok {
 			log.WithError(err).Error("unknown error")
@@ -89,7 +89,42 @@ func Withdraw(c *gin.Context) {
 
 	if err := wallet.New().Withdraw(c, c.Param("walletId"), req.GetCurrency(), req.GetAmount()); err != nil {
 		defer c.Abort()
-		log.WithError(err).Error("fail to update user info")
+		log.WithError(err).Error("fail to withdraw")
+		t7Err, ok := t7Error.ToT7Error(err)
+		if !ok {
+			log.WithError(err).Error("unknown error")
+			c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+			return
+		}
+		c.JSON(t7Err.GetStatus(), t7Err)
+		return
+	}
+	c.JSON(http.StatusNoContent, nil)
+}
+
+func Transfer(c *gin.Context) {
+	log := logger.New().WithContext(c)
+	log.WithContext(c).Debug("handle make transfer")
+
+	defer c.Request.Body.Close()
+	bd, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		log.WithError(err).Error("fail to read resp body")
+		c.JSON(http.StatusBadRequest, t7Error.InvalidBody.WithDetail(err.Error()))
+		return
+	}
+
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	var req v1.TransferRequest
+	if err := unmarshaler.Unmarshal(bd, &req); err != nil {
+		log.WithError(err).With("resp", string(bd)).Error("fail to decode resp data")
+		c.JSON(http.StatusBadRequest, t7Error.DecodeFail.WithDetail(err.Error()))
+		return
+	}
+
+	if err := wallet.New().Transfer(c, req.GetFromWalletId(), req.GetToWalletId(), req.GetCurrency(), req.GetAmount()); err != nil {
+		defer c.Abort()
+		log.WithError(err).Error("fail to transfer")
 		t7Err, ok := t7Error.ToT7Error(err)
 		if !ok {
 			log.WithError(err).Error("unknown error")
