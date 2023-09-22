@@ -7,6 +7,7 @@ import (
 	"github.com/Template7/common/logger"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/casbin/casbin/v2"
+	"github.com/casbin/casbin/v2/model"
 	gormadapter "github.com/casbin/gorm-adapter/v2"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
@@ -42,20 +43,31 @@ func New() Auth {
 		cs := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", cfg.Db.Sql.Username, cfg.Db.Sql.Password, cfg.Db.Sql.Host, cfg.Db.Sql.Port, cfg.Db.Sql.Db)
 		adapter, err := gormadapter.NewAdapter("mysql", cs, true)
 		if err != nil {
-			log.WithError(err).Error("fail to new mysql adapter")
+			log.WithError(err).Panic("fail to new mysql adapter")
 			panic(err)
 		}
 
-		// TODO: load without file
-		e, err := casbin.NewEnforcer("./config/rbac_model.conf", adapter)
+		e, err := casbin.NewEnforcer()
 		if err != nil {
-			log.WithError(err).Error("fail to new enforcer")
+			log.WithError(err).Panic("fail to new enforcer")
+			panic(err)
+		}
+
+		// TODO: refine
+		ms := "[request_definition]\nr = sub, obj, act\n\n[policy_definition]\np = sub, obj, act\n\n[role_definition]\ng = _, _\n\n[policy_effect]\ne = some(where (p.eft == allow))\n\n[matchers]\nm = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act || checkAdmin(r.sub)"
+		md, err := model.NewModelFromString(ms)
+		if err != nil {
+			log.WithError(err).Panic("fail to new model")
+			panic(err)
+		}
+		if err := e.InitWithModelAndAdapter(md, adapter); err != nil {
+			log.WithError(err).Panic("fail to init enforcer")
 			panic(err)
 		}
 
 		err = e.LoadPolicy()
 		if err != nil {
-			log.WithError(err).Error("fail to load policy")
+			log.WithError(err).Panic("fail to load policy")
 			panic(err)
 		}
 		e.AddFunction("checkAdmin", func(args ...interface{}) (interface{}, error) {
