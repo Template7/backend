@@ -18,7 +18,6 @@ import (
 // @Summary Get user Info
 // @Tags V1,User
 // @version 1.0
-// @Success 200 {object} structs.User
 // @failure 400 {object} t7Error.Error
 func GetUserInfo(c *gin.Context) {
 	log := logger.New().WithContext(c)
