@@ -1,184 +1,5 @@
 definitions:
-  handler.createUserResp:
-    properties:
-      user_id:
-        type: string
-    type: object
-  handler.hello:
-    properties:
-      message:
-        example: Hello
-        type: string
-      timestamp:
-        example: "2021-07-24T20:01:25.874565+08:00"
-        type: string
-    type: object
-  sms.Confirm:
-    properties:
-      code:
-        example: "1234567"
-        type: string
-      mobile:
-        example: "+886987654321"
-        type: string
-    required:
-    - code
-    - mobile
-    type: object
-  sms.Request:
-    properties:
-      mobile:
-        example: "+886987654321"
-        type: string
-    required:
-    - mobile
-    type: object
-  structs.Gender:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    type: integer
-    x-enum-comments:
-      GenderGay: distinguish 0 and 1 ?
-      GenderLesbian: distinguish 0 and 1 ?
-    x-enum-varnames:
-    - GenderUnknown
-    - GenderMale
-    - GenderFemale
-    - GenderGay
-    - GenderLesbian
-  structs.LoginChannel:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    type: integer
-    x-enum-varnames:
-    - LoginChannelUnknown
-    - LoginChannelMobile
-    - LoginChannelFacebook
-    - LoginChannelGoogle
-  structs.LoginClientOs:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - LoginClientOsUnknown
-    - LoginClientOsIos
-    - LoginClientOsAndroid
-  structs.LoginInfo:
-    properties:
-      channel:
-        allOf:
-        - $ref: '#/definitions/structs.LoginChannel'
-        enum:
-        - 0
-        - 1
-        - 2
-        - 3
-      channel_user_id:
-        description: user id of the channel
-        type: string
-      device:
-        description: iPhoneN, PixelN, NoteN, ...
-        type: string
-      os:
-        allOf:
-        - $ref: '#/definitions/structs.LoginClientOs'
-        enum:
-        - 0
-        - 1
-        - 2
-    required:
-    - device
-    type: object
-  structs.Token:
-    properties:
-      access_token:
-        type: string
-      id:
-        type: string
-      refresh_token:
-        type: string
-    type: object
-  structs.User:
-    properties:
-      basic_info:
-        $ref: '#/definitions/structs.UserInfo'
-      email:
-        example: username@mail.com
-        type: string
-      last_update:
-        description: unix time in second
-        type: integer
-      login_info:
-        $ref: '#/definitions/structs.LoginInfo'
-      mobile:
-        description: "+886987654321"
-        example: "+886987654321"
-        type: string
-      status:
-        allOf:
-        - $ref: '#/definitions/structs.UserStatus'
-        enum:
-        - -1
-        - 0
-        - 1
-      user_id:
-        type: string
-    type: object
-  structs.UserInfo:
-    properties:
-      Avatar:
-        description: s3 object url
-        type: string
-      bio:
-        type: string
-      birthday:
-        type: integer
-      gender:
-        allOf:
-        - $ref: '#/definitions/structs.Gender'
-        description: configable?
-        enum:
-        - 0
-        - 1
-        - 2
-        - 3
-        - 4
-      hobbies:
-        items:
-          type: string
-        type: array
-      nick_name:
-        type: string
-      profile_pictures:
-        items:
-          type: string
-        type: array
-    required:
-    - nick_name
-    type: object
-  structs.UserStatus:
-    enum:
-    - -1
-    - 0
-    - 1
-    type: integer
-    x-enum-comments:
-      UserStatusActivate: sign up finished, able to use the app
-      UserStatusInitialized: not finish basic info yet
-    x-enum-varnames:
-    - UserStatusBlock
-    - UserStatusInitialized
-    - UserStatusActivate
-  t7Error.Code:
+  github_com_Template7_backend_internal_t7Error.Code:
     enum:
     - 1024
     - 1025
@@ -199,6 +20,9 @@ definitions:
     - 1040
     - 1041
     - 1042
+    - 1043
+    - 1044
+    - 1045
     type: integer
     x-enum-varnames:
     - codeUnAuthorized
@@ -220,11 +44,14 @@ definitions:
     - codeInvalidToken
     - codeDecodeFail
     - codeWalletNotFound
-  t7Error.Error:
+    - codePasswordIncorrect
+    - codeUserHasNoRole
+    - codeUnknown
+  github_com_Template7_backend_internal_t7Error.Error:
     properties:
       code:
         allOf:
-        - $ref: '#/definitions/t7Error.Code'
+        - $ref: '#/definitions/github_com_Template7_backend_internal_t7Error.Code'
         example: 1024
       detail:
         example: empty token
@@ -234,16 +61,17 @@ definitions:
         type: string
       type:
         allOf:
-        - $ref: '#/definitions/t7Error.Type'
+        - $ref: '#/definitions/github_com_Template7_backend_internal_t7Error.Type'
         example: 32
     type: object
-  t7Error.Type:
+  github_com_Template7_backend_internal_t7Error.Type:
     enum:
     - 32
     - 33
     - 34
     - 35
     - 36
+    - 37
     type: integer
     x-enum-varnames:
     - typeAuth
@@ -251,14 +79,28 @@ definitions:
     - typeDb
     - typeRedis
     - typeNetwork
-  user.CreateUserReq:
+    - typeOther
+  internal_route_handler.hello:
     properties:
-      email:
-        example: username@mail.com
+      message:
+        example: Hello
         type: string
-      mobile:
-        description: "+886987654321"
-        example: "+886987654321"
+      timestamp:
+        example: "2021-07-24T20:01:25.874565+08:00"
+        type: string
+    type: object
+  v1.LoginRequest:
+    properties:
+      password:
+        description: password
+        type: string
+      username:
+        description: username
+        type: string
+    type: object
+  v1.LoginResponse:
+    properties:
+      token:
         type: string
     type: object
 info:
@@ -278,221 +120,32 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.hello'
+            $ref: '#/definitions/internal_route_handler.hello'
       summary: Hello Page
       tags:
       - Hello
-  /admin/v1/user:
+  /api/v1/login/native:
     post:
       parameters:
-      - description: Access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: User data
+      - description: Request
         in: body
-        name: userData
+        name: request
         required: true
         schema:
-          $ref: '#/definitions/user.CreateUserReq'
+          $ref: '#/definitions/v1.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: User object
+          description: Response
           schema:
-            $ref: '#/definitions/handler.createUserResp'
-        "400":
-          description: Error object
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-        "401":
-          description: Error object
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-      summary: Create user
-      tags:
-      - V1
-      - User
-      - Admin
-  /api/v1/sign-in/mobile:
-    post:
-      parameters:
-      - description: Sms confirm
-        in: body
-        name: smsConfirm
-        required: true
-        schema:
-          $ref: '#/definitions/sms.Confirm'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Token object
-          schema:
-            $ref: '#/definitions/structs.Token'
+            $ref: '#/definitions/v1.LoginResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/t7Error.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-      summary: Mobile sign in
+            $ref: '#/definitions/github_com_Template7_backend_internal_t7Error.Error'
+      summary: Native login
       tags:
       - v1
-      - SignIn
-      - Sms
-  /api/v1/sign-up/mobile:
-    post:
-      parameters:
-      - description: Sms confirm
-        in: body
-        name: smsConfirm
-        required: true
-        schema:
-          $ref: '#/definitions/sms.Confirm'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Token object
-          schema:
-            $ref: '#/definitions/structs.Token'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-      summary: Confirm verify code
-      tags:
-      - Sms
-      - SignUp
-  /api/v1/users/{UserId}:
-    get:
-      parameters:
-      - description: User ID
-        in: path
-        name: UserId
-        required: true
-        type: string
-      - description: Access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/structs.User'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-      summary: Get user Info
-      tags:
-      - V1
-      - User
-    put:
-      parameters:
-      - description: Access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: User basic info
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/structs.UserInfo'
-      - description: User ID
-        in: path
-        name: UserId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-      summary: Update user
-      tags:
-      - V1
-      - User
-  /api/v1/users/{UserId}/token:
-    put:
-      parameters:
-      - description: Token object
-        in: body
-        name: token
-        required: true
-        schema:
-          $ref: '#/definitions/structs.Token'
-      - description: User ID
-        in: path
-        name: UserId
-        required: true
-        type: string
-      - description: Access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      responses:
-        "200":
-          description: Token object
-          schema:
-            $ref: '#/definitions/structs.Token'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-      summary: Refresh access token
-      tags:
-      - V1
-      - Token
-  /api/v1/verify-code/sms:
-    post:
-      parameters:
-      - description: Sms request
-        in: body
-        name: smsRequest
-        required: true
-        schema:
-          $ref: '#/definitions/sms.Request'
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/t7Error.Error'
-      summary: Send verify code to the user mobile
-      tags:
-      - Sms
+      - login
 swagger: "2.0"

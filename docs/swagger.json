@@ -24,329 +24,44 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.hello"
+                            "$ref": "#/definitions/internal_route_handler.hello"
                         }
                     }
                 }
             }
         },
-        "/admin/v1/user": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "V1",
-                    "User",
-                    "Admin"
-                ],
-                "summary": "Create user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "User data",
-                        "name": "userData",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/user.CreateUserReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User object",
-                        "schema": {
-                            "$ref": "#/definitions/handler.createUserResp"
-                        }
-                    },
-                    "400": {
-                        "description": "Error object",
-                        "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Error object",
-                        "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/sign-in/mobile": {
+        "/api/v1/login/native": {
             "post": {
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v1",
-                    "SignIn",
-                    "Sms"
+                    "login"
                 ],
-                "summary": "Mobile sign in",
+                "summary": "Native login",
                 "parameters": [
                     {
-                        "description": "Sms confirm",
-                        "name": "smsConfirm",
+                        "description": "Request",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/sms.Confirm"
+                            "$ref": "#/definitions/v1.LoginRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Token object",
+                        "description": "Response",
                         "schema": {
-                            "$ref": "#/definitions/structs.Token"
+                            "$ref": "#/definitions/v1.LoginResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/sign-up/mobile": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Sms",
-                    "SignUp"
-                ],
-                "summary": "Confirm verify code",
-                "parameters": [
-                    {
-                        "description": "Sms confirm",
-                        "name": "smsConfirm",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/sms.Confirm"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Token object",
-                        "schema": {
-                            "$ref": "#/definitions/structs.Token"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/users/{UserId}": {
-            "get": {
-                "tags": [
-                    "V1",
-                    "User"
-                ],
-                "summary": "Get user Info",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "UserId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/structs.User"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "V1",
-                    "User"
-                ],
-                "summary": "Update user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "User basic info",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/structs.UserInfo"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "UserId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/users/{UserId}/token": {
-            "put": {
-                "tags": [
-                    "V1",
-                    "Token"
-                ],
-                "summary": "Refresh access token",
-                "parameters": [
-                    {
-                        "description": "Token object",
-                        "name": "token",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/structs.Token"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "UserId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Token object",
-                        "schema": {
-                            "$ref": "#/definitions/structs.Token"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/verify-code/sms": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Sms"
-                ],
-                "summary": "Send verify code to the user mobile",
-                "parameters": [
-                    {
-                        "description": "Sms request",
-                        "name": "smsRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/sms.Request"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/t7Error.Error"
+                            "$ref": "#/definitions/github_com_Template7_backend_internal_t7Error.Error"
                         }
                     }
                 }
@@ -354,265 +69,7 @@
         }
     },
     "definitions": {
-        "handler.createUserResp": {
-            "type": "object",
-            "properties": {
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.hello": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "Hello"
-                },
-                "timestamp": {
-                    "type": "string",
-                    "example": "2021-07-24T20:01:25.874565+08:00"
-                }
-            }
-        },
-        "sms.Confirm": {
-            "type": "object",
-            "required": [
-                "code",
-                "mobile"
-            ],
-            "properties": {
-                "code": {
-                    "type": "string",
-                    "example": "1234567"
-                },
-                "mobile": {
-                    "type": "string",
-                    "example": "+886987654321"
-                }
-            }
-        },
-        "sms.Request": {
-            "type": "object",
-            "required": [
-                "mobile"
-            ],
-            "properties": {
-                "mobile": {
-                    "type": "string",
-                    "example": "+886987654321"
-                }
-            }
-        },
-        "structs.Gender": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4
-            ],
-            "x-enum-comments": {
-                "GenderGay": "distinguish 0 and 1 ?",
-                "GenderLesbian": "distinguish 0 and 1 ?"
-            },
-            "x-enum-varnames": [
-                "GenderUnknown",
-                "GenderMale",
-                "GenderFemale",
-                "GenderGay",
-                "GenderLesbian"
-            ]
-        },
-        "structs.LoginChannel": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "x-enum-varnames": [
-                "LoginChannelUnknown",
-                "LoginChannelMobile",
-                "LoginChannelFacebook",
-                "LoginChannelGoogle"
-            ]
-        },
-        "structs.LoginClientOs": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "LoginClientOsUnknown",
-                "LoginClientOsIos",
-                "LoginClientOsAndroid"
-            ]
-        },
-        "structs.LoginInfo": {
-            "type": "object",
-            "required": [
-                "device"
-            ],
-            "properties": {
-                "channel": {
-                    "enum": [
-                        0,
-                        1,
-                        2,
-                        3
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/structs.LoginChannel"
-                        }
-                    ]
-                },
-                "channel_user_id": {
-                    "description": "user id of the channel",
-                    "type": "string"
-                },
-                "device": {
-                    "description": "iPhoneN, PixelN, NoteN, ...",
-                    "type": "string"
-                },
-                "os": {
-                    "enum": [
-                        0,
-                        1,
-                        2
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/structs.LoginClientOs"
-                        }
-                    ]
-                }
-            }
-        },
-        "structs.Token": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "refresh_token": {
-                    "type": "string"
-                }
-            }
-        },
-        "structs.User": {
-            "type": "object",
-            "properties": {
-                "basic_info": {
-                    "$ref": "#/definitions/structs.UserInfo"
-                },
-                "email": {
-                    "type": "string",
-                    "example": "username@mail.com"
-                },
-                "last_update": {
-                    "description": "unix time in second",
-                    "type": "integer"
-                },
-                "login_info": {
-                    "$ref": "#/definitions/structs.LoginInfo"
-                },
-                "mobile": {
-                    "description": "+886987654321",
-                    "type": "string",
-                    "example": "+886987654321"
-                },
-                "status": {
-                    "enum": [
-                        -1,
-                        0,
-                        1
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/structs.UserStatus"
-                        }
-                    ]
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "structs.UserInfo": {
-            "type": "object",
-            "required": [
-                "nick_name"
-            ],
-            "properties": {
-                "Avatar": {
-                    "description": "s3 object url",
-                    "type": "string"
-                },
-                "bio": {
-                    "type": "string"
-                },
-                "birthday": {
-                    "type": "integer"
-                },
-                "gender": {
-                    "description": "configable?",
-                    "enum": [
-                        0,
-                        1,
-                        2,
-                        3,
-                        4
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/structs.Gender"
-                        }
-                    ]
-                },
-                "hobbies": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "nick_name": {
-                    "type": "string"
-                },
-                "profile_pictures": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "structs.UserStatus": {
-            "type": "integer",
-            "enum": [
-                -1,
-                0,
-                1
-            ],
-            "x-enum-comments": {
-                "UserStatusActivate": "sign up finished, able to use the app",
-                "UserStatusInitialized": "not finish basic info yet"
-            },
-            "x-enum-varnames": [
-                "UserStatusBlock",
-                "UserStatusInitialized",
-                "UserStatusActivate"
-            ]
-        },
-        "t7Error.Code": {
+        "github_com_Template7_backend_internal_t7Error.Code": {
             "type": "integer",
             "enum": [
                 1024,
@@ -633,7 +90,10 @@
                 1039,
                 1040,
                 1041,
-                1042
+                1042,
+                1043,
+                1044,
+                1045
             ],
             "x-enum-varnames": [
                 "codeUnAuthorized",
@@ -654,16 +114,19 @@
                 "codeTokenAssertionFail",
                 "codeInvalidToken",
                 "codeDecodeFail",
-                "codeWalletNotFound"
+                "codeWalletNotFound",
+                "codePasswordIncorrect",
+                "codeUserHasNoRole",
+                "codeUnknown"
             ]
         },
-        "t7Error.Error": {
+        "github_com_Template7_backend_internal_t7Error.Error": {
             "type": "object",
             "properties": {
                 "code": {
                     "allOf": [
                         {
-                            "$ref": "#/definitions/t7Error.Code"
+                            "$ref": "#/definitions/github_com_Template7_backend_internal_t7Error.Code"
                         }
                     ],
                     "example": 1024
@@ -679,41 +142,63 @@
                 "type": {
                     "allOf": [
                         {
-                            "$ref": "#/definitions/t7Error.Type"
+                            "$ref": "#/definitions/github_com_Template7_backend_internal_t7Error.Type"
                         }
                     ],
                     "example": 32
                 }
             }
         },
-        "t7Error.Type": {
+        "github_com_Template7_backend_internal_t7Error.Type": {
             "type": "integer",
             "enum": [
                 32,
                 33,
                 34,
                 35,
-                36
+                36,
+                37
             ],
             "x-enum-varnames": [
                 "typeAuth",
                 "typeInvalidData",
                 "typeDb",
                 "typeRedis",
-                "typeNetwork"
+                "typeNetwork",
+                "typeOther"
             ]
         },
-        "user.CreateUserReq": {
+        "internal_route_handler.hello": {
             "type": "object",
             "properties": {
-                "email": {
+                "message": {
                     "type": "string",
-                    "example": "username@mail.com"
+                    "example": "Hello"
                 },
-                "mobile": {
-                    "description": "+886987654321",
+                "timestamp": {
                     "type": "string",
-                    "example": "+886987654321"
+                    "example": "2021-07-24T20:01:25.874565+08:00"
+                }
+            }
+        },
+        "v1.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "description": "password",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "username",
+                    "type": "string"
+                }
+            }
+        },
+        "v1.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
                 }
             }
         }
