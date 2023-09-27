@@ -20,13 +20,13 @@ func (s *service) Login(ctx context.Context, username string, password string) (
 		log.Info("password incorrect")
 		return "", t7Error.PasswordIncorrect
 	}
-	role := s.GetUserRole(ctx, username)
+	role := s.GetUserRole(ctx, user.Id.String())
 	if _, ok := v1.Role_name[int32(role)]; !ok {
 		log.With("role", role).Warn("invalid user role")
 		return "", t7Error.UserHasNoRole
 	}
 
-	token, err := s.genUserToken(ctx, user.Id.String(), s.GetUserRole(ctx, user.Id.String()))
+	token, err := s.genUserToken(ctx, user.Id.String(), role)
 	if err != nil {
 		log.WithError(err).Error("fail to generate user token")
 		return "", err

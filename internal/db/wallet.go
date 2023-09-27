@@ -11,7 +11,7 @@ func (c *client) GetWallet(ctx context.Context, walletId string) (data entity.Wa
 	log := c.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("get wallet")
 
-	if err = c.sql.core.WithContext(ctx).Where("wallet_id = ?", walletId).Preload("Balance").Take(&data).Error; err != nil {
+	if err = c.sql.core.WithContext(ctx).Where("id = ?", walletId).Preload("Balance").Take(&data).Error; err != nil {
 		log.WithError(err).Error("fail to get wallet")
 	}
 	return
@@ -35,7 +35,7 @@ func (c *client) Transfer(ctx context.Context, fromWalletId string, toWalletId s
 	log := c.log.WithContext(ctx).With("fromWalletId", fromWalletId).With("toWalletId", toWalletId).With("money", money)
 	log.Debug("transfer money")
 
-	tx := c.sql.core.Begin()
+	tx := c.sql.core.WithContext(ctx).Begin()
 	defer tx.Rollback()
 
 	err = c.withdraw(ctx, tx, fromWalletId, money)
@@ -49,6 +49,10 @@ func (c *client) Transfer(ctx context.Context, fromWalletId string, toWalletId s
 		return
 	}
 
+	if err = tx.Commit().Error; err != nil {
+		log.WithError(err).Error("fail to commit tx")
+		return
+	}
 	log.Debug("finish transfer money")
 	return
 }
@@ -59,7 +63,7 @@ func (c *client) deposit(ctx context.Context, tx *gorm.DB, walletId string, mone
 
 	err = tx.Model(&entity.Balance{}).Clauses(
 		clause.OnConflict{
-			Columns:   []clause.Column{{Name: "walletId"}, {Name: "currency"}},
+			Columns:   []clause.Column{{Name: "wallet_id"}, {Name: "currency"}},
 			DoUpdates: clause.Assignments(map[string]interface{}{"amount": gorm.Expr("amount + ?", money.Amount)}),
 		}).Create(&entity.Balance{WalletId: walletId, Money: money}).Error
 
