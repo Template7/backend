@@ -12,7 +12,7 @@ import (
 func Test_wallet(t *testing.T) {
 	viper.AddConfigPath("../config")
 
-	wId := "8250e425-e02c-410b-ad8a-b2d29149bf8a"
+	wId := "ac03df62-f362-4a89-9a2e-e3cc0d129ea4"
 	ctx := context.WithValue(context.Background(), "traceId", uuid.NewString())
 	w, err := wallet.New().GetWallet(ctx, wId)
 	if err != nil {
@@ -61,4 +61,19 @@ func Test_wallet(t *testing.T) {
 	}
 
 	t.Log(w.String())
+}
+
+func Test_transfer(t *testing.T) {
+	viper.AddConfigPath("../config")
+
+	fw := "ac03df62-f362-4a89-9a2e-e3cc0d129ea4"
+	tw := "bee58b8b-a035-423d-93b5-1d668a94f05c"
+	ctx := context.WithValue(context.Background(), "traceId", uuid.NewString())
+
+	//wallet.New().Deposit(ctx, fw, v1.Currency_NTD, 7)
+
+	if err := wallet.New().Transfer(ctx, fw, tw, v1.Currency_NTD, 7); err != nil {
+		t.Error(err)
+		return
+	}
 }

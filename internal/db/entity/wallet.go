@@ -53,6 +53,6 @@ func (b *Balance) TableName() string {
 }
 
 type Money struct {
-	Currency string          `gorm:"primaryKey;type:varchar(4);uniqueIndex:wc;not null"`
+	Currency string          `gorm:"primaryKey;type:varchar(4);not null"`
 	Amount   decimal.Decimal `gorm:"type:decimal(16,4);not null;default:0"`
 }
