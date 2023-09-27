@@ -131,7 +131,7 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	data := entity.UserInfo{
-		NickName: req.Nickname,
+		Nickname: req.Nickname,
 	}
 	if err := user.New().UpdateInfo(c, userId, data); err != nil {
 		defer c.Abort()
