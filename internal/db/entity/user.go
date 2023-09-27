@@ -20,7 +20,7 @@ type User struct {
 // UserInfo
 // the fields which configurable by the user
 type UserInfo struct {
-	NickName string `gorm:"type:varchar(64);not_null;default:''"`
+	Nickname string `gorm:"type:varchar(64);not_null;default:''"`
 }
 
 func (u User) TableName() string {

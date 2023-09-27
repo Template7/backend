@@ -46,7 +46,7 @@ func (s *service) genUserToken(ctx context.Context, userId string, role v1.Role)
 	}
 
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, &utc)
-	tokenString, signErr := tokenClaims.SignedString(jwtSign)
+	tokenString, signErr := tokenClaims.SignedString([]byte(jwtSign))
 	if signErr != nil {
 		log.WithError(signErr).Error("fail to sign jwt")
 		return "", t7Error.TokenSignFail.WithDetailAndStatus(signErr.Error(), http.StatusInternalServerError)

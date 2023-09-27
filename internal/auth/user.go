@@ -34,7 +34,7 @@ func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest)
 		Username: req.Username,
 		Password: hp,
 		Info: entity.UserInfo{
-			NickName: req.Nickname,
+			Nickname: req.Nickname,
 		},
 		Email:  req.Email,
 		Status: authV1.AccountStatus_Initialized,
@@ -58,7 +58,7 @@ func (s *service) GetUserRole(ctx context.Context, username string) authV1.Role 
 		return -1
 	}
 	if len(roles) == 0 {
-		log.Warn("user have no roles")
+		log.Warn("user has no roles")
 		return -1
 	}
 	if len(roles) > 1 {
