@@ -1,13 +1,12 @@
 package handler
 
 import (
+	"github.com/Template7/backend/api/types"
 	"github.com/Template7/backend/internal/auth"
+	middleware "github.com/Template7/backend/internal/route/middleWare"
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/common/logger"
-	v1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/gin-gonic/gin"
-	"google.golang.org/protobuf/encoding/protojson"
-	"io"
 	"net/http"
 )
 
@@ -17,26 +16,21 @@ import (
 // @version 1.0
 // @Param request body v1.LoginRequest true "Request"
 // @produce json
-// @Success 200 {object} v1.LoginResponse "Response"
-// @failure 400 {object} t7Error.Error
+// @Success 200 {object} types.HttpLoginResp "Response"
+// @failure 400 {object} types.HttpRespError
 // @Router /api/v1/login/native [post]
 func NativeLogin(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("handle native login")
 
-	defer c.Request.Body.Close()
-	bd, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		log.WithError(err).Error("fail to read resp body")
-		c.JSON(http.StatusBadRequest, t7Error.InvalidBody.WithDetail(err.Error()))
-		return
-	}
-
-	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
-	var req v1.LoginRequest
-	if err := unmarshaler.Unmarshal(bd, &req); err != nil {
-		log.WithError(err).With("resp", string(bd)).Error("fail to decode resp data")
-		c.JSON(http.StatusBadRequest, t7Error.DecodeFail.WithDetail(err.Error()))
+	var req types.HttpLoginReq
+	if err := c.ShouldBindJSON(req); err != nil {
+		log.WithError(err).Warn("invalid body")
+		c.JSON(http.StatusBadRequest, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidBody.Code),
+			Message:   t7Error.InvalidBody.Message,
+		})
 		return
 	}
 
@@ -46,14 +40,28 @@ func NativeLogin(c *gin.Context) {
 		t7Err, ok := t7Error.ToT7Error(err)
 		if !ok {
 			log.WithError(err).Error("unknown error")
-			c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+			c.JSON(http.StatusForbidden, types.HttpRespBase{
+				RequestId: c.GetHeader(middleware.HeaderRequestId),
+				Code:      int(t7Error.Unknown.Code),
+				Message:   t7Error.Unknown.Message,
+			})
 			return
 		}
-		c.JSON(t7Err.GetStatus(), t7Err)
+		c.JSON(t7Err.GetStatus(), types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Err.Code),
+			Message:   t7Err.Message,
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, v1.LoginResponse{
-		Token: token,
-	})
+	lr := types.HttpLoginResp{
+		HttpRespBase: types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      types.HttpRespCodeOk,
+			Message:   types.HttpRespMsgOk,
+		},
+	}
+	lr.Data.Token = token
+	c.JSON(http.StatusOK, lr)
 }
