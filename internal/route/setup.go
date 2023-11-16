@@ -25,7 +25,6 @@ func Setup(r *gin.Engine) {
 	user.GET("/info", handler.GetUserInfo)
 	user.GET("/wallets", handler.GetUserWallets)
 	user.PUT("/info", handler.UpdateUser)
-	user.POST("/new", handler.CreateUser)
 
 	// wallet
 	wallet := apiV1.Group("/wallets/:walletId", middleware.AuthUserWallet)
@@ -38,6 +37,7 @@ func Setup(r *gin.Engine) {
 	transaction.POST("", handler.Transfer)
 
 	// admin
+	// TODO: auth admin middleware
 	adminV1 := r.Group("/admin/v1")
 	adminV1.POST("/user", handler.CreateUser)
 	//adminV1.DELETE("/user", handler.DeleteUser)
