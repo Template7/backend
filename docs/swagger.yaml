@@ -1,85 +1,89 @@
 definitions:
-  github_com_Template7_backend_internal_t7Error.Code:
-    enum:
-    - 1024
-    - 1025
-    - 1026
-    - 1027
-    - 1028
-    - 1029
-    - 1030
-    - 1031
-    - 1032
-    - 1033
-    - 1034
-    - 1035
-    - 1036
-    - 1037
-    - 1038
-    - 1039
-    - 1040
-    - 1041
-    - 1042
-    - 1043
-    - 1044
-    - 1045
-    type: integer
-    x-enum-varnames:
-    - codeUnAuthorized
-    - codeInvalidBody
-    - codeDbConnectionFail
-    - codeDbOperationFail
-    - codeInvalidDocumentId
-    - codeHttpOperationFail
-    - codeHttpUnexpectedResponseCode
-    - codeHashFail
-    - codeUserNotfound
-    - codeUserAlreadyExist
-    - codeSignInFail
-    - codeVerifyCodeExpired
-    - codeIncorrectVerifyCode
-    - codeRedisOperationFail
-    - codeTokenSignFail
-    - codeTokenAssertionFail
-    - codeInvalidToken
-    - codeDecodeFail
-    - codeWalletNotFound
-    - codePasswordIncorrect
-    - codeUserHasNoRole
-    - codeUnknown
-  github_com_Template7_backend_internal_t7Error.Error:
+  github_com_Template7_backend_api_types.HttpCreateUserReq:
+    properties:
+      email:
+        example: example@email.com
+        type: string
+      nickname:
+        example: nickname
+        type: string
+      password:
+        example: password
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/v1.Role'
+        example: 0
+      username:
+        example: username
+        type: string
+    required:
+    - password
+    - role
+    - username
+    type: object
+  github_com_Template7_backend_api_types.HttpLoginResp:
     properties:
       code:
-        allOf:
-        - $ref: '#/definitions/github_com_Template7_backend_internal_t7Error.Code'
-        example: 1024
-      detail:
-        example: empty token
+        example: 3000
+        type: integer
+      data:
+        properties:
+          token:
+            example: 70596484-67d3-46bd-94bf-08f7c9fb7ac1
+            type: string
+        type: object
+      message:
+        example: ok
         type: string
+      requestId:
+        example: b8974256-1f17-477f-8638-c7ebbac656d7
+        type: string
+    type: object
+  github_com_Template7_backend_api_types.HttpRespError:
+    properties:
+      code:
+        example: 1024
+        type: integer
       message:
         example: token unauthorized
         type: string
-      type:
-        allOf:
-        - $ref: '#/definitions/github_com_Template7_backend_internal_t7Error.Type'
-        example: 32
+      requestId:
+        example: 27c0a70e-59ab-4a94-872c-5f014aaa047f
+        type: string
     type: object
-  github_com_Template7_backend_internal_t7Error.Type:
-    enum:
-    - 32
-    - 33
-    - 34
-    - 35
-    - 36
-    - 37
-    type: integer
-    x-enum-varnames:
-    - typeAuth
-    - typeInvalidData
-    - typeDb
-    - typeRedis
-    - typeNetwork
-    - typeOther
+  github_com_Template7_backend_api_types.HttpUserInfoResp:
+    properties:
+      code:
+        example: 3000
+        type: integer
+      data:
+        properties:
+          email:
+            example: example@email.com
+            type: string
+          nickname:
+            example: example
+            type: string
+          role:
+            allOf:
+            - $ref: '#/definitions/v1.Role'
+            example: 0
+          status:
+            allOf:
+            - $ref: '#/definitions/v1.AccountStatus'
+            example: 0
+          userId:
+            example: userId001
+            type: string
+        type: object
+      message:
+        example: ok
+        type: string
+      requestId:
+        example: b8974256-1f17-477f-8638-c7ebbac656d7
+        type: string
+    type: object
   internal_route_handler.hello:
     properties:
       message:
@@ -89,6 +93,16 @@ definitions:
         example: "2021-07-24T20:01:25.874565+08:00"
         type: string
     type: object
+  v1.AccountStatus:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - AccountStatus_Blocked
+    - AccountStatus_Initialized
+    - AccountStatus_Activated
   v1.LoginRequest:
     properties:
       password:
@@ -98,11 +112,16 @@ definitions:
         description: username
         type: string
     type: object
-  v1.LoginResponse:
-    properties:
-      token:
-        type: string
-    type: object
+  v1.Role:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - Role_Admin
+    - Role_Operator
+    - Role_User
 info:
   contact: {}
   description: API Documentation
@@ -124,6 +143,30 @@ paths:
       summary: Hello Page
       tags:
       - Hello
+  /admin/v1/user:
+    post:
+      parameters:
+      - description: Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_Template7_backend_api_types.HttpCreateUserReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response
+          schema:
+            $ref: '#/definitions/github_com_Template7_backend_api_types.HttpLoginResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Template7_backend_api_types.HttpRespError'
+      summary: Create user
+      tags:
+      - V1
+      - User
   /api/v1/login/native:
     post:
       parameters:
@@ -139,13 +182,28 @@ paths:
         "200":
           description: Response
           schema:
-            $ref: '#/definitions/v1.LoginResponse'
+            $ref: '#/definitions/github_com_Template7_backend_api_types.HttpLoginResp'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_Template7_backend_internal_t7Error.Error'
+            $ref: '#/definitions/github_com_Template7_backend_api_types.HttpRespError'
       summary: Native login
       tags:
       - v1
       - login
+  /api/v1/user/info:
+    get:
+      responses:
+        "200":
+          description: Response
+          schema:
+            $ref: '#/definitions/github_com_Template7_backend_api_types.HttpUserInfoResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Template7_backend_api_types.HttpRespError'
+      summary: Get user Info
+      tags:
+      - V1
+      - User
 swagger: "2.0"

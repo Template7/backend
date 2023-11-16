@@ -30,6 +30,43 @@
                 }
             }
         },
+        "/admin/v1/user": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V1",
+                    "User"
+                ],
+                "summary": "Create user",
+                "parameters": [
+                    {
+                        "description": "Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpCreateUserReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpLoginResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpRespError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/login/native": {
             "post": {
                 "produces": [
@@ -55,13 +92,36 @@
                     "200": {
                         "description": "Response",
                         "schema": {
-                            "$ref": "#/definitions/v1.LoginResponse"
+                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpLoginResp"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Template7_backend_internal_t7Error.Error"
+                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpRespError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/info": {
+            "get": {
+                "tags": [
+                    "V1",
+                    "User"
+                ],
+                "summary": "Get user Info",
+                "responses": {
+                    "200": {
+                        "description": "Response",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpUserInfoResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpRespError"
                         }
                     }
                 }
@@ -69,104 +129,132 @@
         }
     },
     "definitions": {
-        "github_com_Template7_backend_internal_t7Error.Code": {
-            "type": "integer",
-            "enum": [
-                1024,
-                1025,
-                1026,
-                1027,
-                1028,
-                1029,
-                1030,
-                1031,
-                1032,
-                1033,
-                1034,
-                1035,
-                1036,
-                1037,
-                1038,
-                1039,
-                1040,
-                1041,
-                1042,
-                1043,
-                1044,
-                1045
+        "github_com_Template7_backend_api_types.HttpCreateUserReq": {
+            "type": "object",
+            "required": [
+                "password",
+                "role",
+                "username"
             ],
-            "x-enum-varnames": [
-                "codeUnAuthorized",
-                "codeInvalidBody",
-                "codeDbConnectionFail",
-                "codeDbOperationFail",
-                "codeInvalidDocumentId",
-                "codeHttpOperationFail",
-                "codeHttpUnexpectedResponseCode",
-                "codeHashFail",
-                "codeUserNotfound",
-                "codeUserAlreadyExist",
-                "codeSignInFail",
-                "codeVerifyCodeExpired",
-                "codeIncorrectVerifyCode",
-                "codeRedisOperationFail",
-                "codeTokenSignFail",
-                "codeTokenAssertionFail",
-                "codeInvalidToken",
-                "codeDecodeFail",
-                "codeWalletNotFound",
-                "codePasswordIncorrect",
-                "codeUserHasNoRole",
-                "codeUnknown"
-            ]
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "example@email.com"
+                },
+                "nickname": {
+                    "type": "string",
+                    "example": "nickname"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "password"
+                },
+                "role": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.Role"
+                        }
+                    ],
+                    "example": 0
+                },
+                "username": {
+                    "type": "string",
+                    "example": "username"
+                }
+            }
         },
-        "github_com_Template7_backend_internal_t7Error.Error": {
+        "github_com_Template7_backend_api_types.HttpLoginResp": {
             "type": "object",
             "properties": {
                 "code": {
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/github_com_Template7_backend_internal_t7Error.Code"
-                        }
-                    ],
-                    "example": 1024
+                    "type": "integer",
+                    "example": 3000
                 },
-                "detail": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "token": {
+                            "type": "string",
+                            "example": "70596484-67d3-46bd-94bf-08f7c9fb7ac1"
+                        }
+                    }
+                },
+                "message": {
                     "type": "string",
-                    "example": "empty token"
+                    "example": "ok"
+                },
+                "requestId": {
+                    "type": "string",
+                    "example": "b8974256-1f17-477f-8638-c7ebbac656d7"
+                }
+            }
+        },
+        "github_com_Template7_backend_api_types.HttpRespError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 1024
                 },
                 "message": {
                     "type": "string",
                     "example": "token unauthorized"
                 },
-                "type": {
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/github_com_Template7_backend_internal_t7Error.Type"
-                        }
-                    ],
-                    "example": 32
+                "requestId": {
+                    "type": "string",
+                    "example": "27c0a70e-59ab-4a94-872c-5f014aaa047f"
                 }
             }
         },
-        "github_com_Template7_backend_internal_t7Error.Type": {
-            "type": "integer",
-            "enum": [
-                32,
-                33,
-                34,
-                35,
-                36,
-                37
-            ],
-            "x-enum-varnames": [
-                "typeAuth",
-                "typeInvalidData",
-                "typeDb",
-                "typeRedis",
-                "typeNetwork",
-                "typeOther"
-            ]
+        "github_com_Template7_backend_api_types.HttpUserInfoResp": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 3000
+                },
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "email": {
+                            "type": "string",
+                            "example": "example@email.com"
+                        },
+                        "nickname": {
+                            "type": "string",
+                            "example": "example"
+                        },
+                        "role": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/v1.Role"
+                                }
+                            ],
+                            "example": 0
+                        },
+                        "status": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/v1.AccountStatus"
+                                }
+                            ],
+                            "example": 0
+                        },
+                        "userId": {
+                            "type": "string",
+                            "example": "userId001"
+                        }
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "requestId": {
+                    "type": "string",
+                    "example": "b8974256-1f17-477f-8638-c7ebbac656d7"
+                }
+            }
         },
         "internal_route_handler.hello": {
             "type": "object",
@@ -181,6 +269,19 @@
                 }
             }
         },
+        "v1.AccountStatus": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "AccountStatus_Blocked",
+                "AccountStatus_Initialized",
+                "AccountStatus_Activated"
+            ]
+        },
         "v1.LoginRequest": {
             "type": "object",
             "properties": {
@@ -194,13 +295,18 @@
                 }
             }
         },
-        "v1.LoginResponse": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                }
-            }
+        "v1.Role": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "Role_Admin",
+                "Role_Operator",
+                "Role_User"
+            ]
         }
     }
 }
