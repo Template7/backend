@@ -8,6 +8,7 @@ import (
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/backend/internal/user"
 	"github.com/Template7/common/logger"
+	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	userV1 "github.com/Template7/protobuf/gen/proto/template7/user"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -76,8 +77,8 @@ func GetUserInfo(c *gin.Context) {
 		},
 	}
 	resp.Data.UserId = info.GetUserId()
-	resp.Data.Role = info.GetRole()
-	resp.Data.Status = info.GetStatus()
+	resp.Data.Role = authV1.Role_name[int32(info.GetRole())]
+	resp.Data.Status = authV1.AccountStatus_name[int32(info.GetStatus())]
 	resp.Data.Nickname = info.GetNickname()
 	resp.Data.Email = info.GetEmail()
 	c.JSON(http.StatusOK, resp)

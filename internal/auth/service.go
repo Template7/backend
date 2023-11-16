@@ -87,12 +87,12 @@ func New() Auth {
 
 func (s *service) loadDefaultPolicies() {
 	pPolicy := [][]string{
-		{v1.Role_User.String(), "/api/v1/users/:userId/info", http.MethodGet},
-		{v1.Role_User.String(), "/api/v1/users/:userId/info", http.MethodPut},
-		{v1.Role_User.String(), "/api/v1/wallets/:walletId", http.MethodGet},
-		{v1.Role_User.String(), "/api/v1/wallets/:walletId/deposit", http.MethodPost},
-		{v1.Role_User.String(), "/api/v1/wallets/:walletId/withdraw", http.MethodPost},
-		{v1.Role_User.String(), "/api/v1/transaction", http.MethodPost},
+		{v1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodGet},
+		{v1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodPut},
+		{v1.Role_user.String(), "/api/v1/wallets/:walletId", http.MethodGet},
+		{v1.Role_user.String(), "/api/v1/wallets/:walletId/deposit", http.MethodPost},
+		{v1.Role_user.String(), "/api/v1/wallets/:walletId/withdraw", http.MethodPost},
+		{v1.Role_user.String(), "/api/v1/transaction", http.MethodPost},
 	}
 
 	for _, p := range pPolicy {

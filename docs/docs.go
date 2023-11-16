@@ -92,7 +92,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.LoginRequest"
+                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpLoginReq"
                         }
                     }
                 ],
@@ -141,7 +141,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "password",
-                "role",
                 "username"
             ],
             "properties": {
@@ -158,12 +157,28 @@ const docTemplate = `{
                     "example": "password"
                 },
                 "role": {
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/v1.Role"
-                        }
+                    "type": "string",
+                    "enum": [
+                        "admin"
                     ],
-                    "example": 0
+                    "example": "user"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "username"
+                }
+            }
+        },
+        "github_com_Template7_backend_api_types.HttpLoginReq": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "password"
                 },
                 "username": {
                     "type": "string",
@@ -233,20 +248,12 @@ const docTemplate = `{
                             "example": "example"
                         },
                         "role": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/v1.Role"
-                                }
-                            ],
-                            "example": 0
+                            "type": "string",
+                            "example": "user"
                         },
                         "status": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/v1.AccountStatus"
-                                }
-                            ],
-                            "example": 0
+                            "type": "string",
+                            "example": "activated"
                         },
                         "userId": {
                             "type": "string",
@@ -276,45 +283,6 @@ const docTemplate = `{
                     "example": "2021-07-24T20:01:25.874565+08:00"
                 }
             }
-        },
-        "v1.AccountStatus": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "AccountStatus_Blocked",
-                "AccountStatus_Initialized",
-                "AccountStatus_Activated"
-            ]
-        },
-        "v1.LoginRequest": {
-            "type": "object",
-            "properties": {
-                "password": {
-                    "description": "password",
-                    "type": "string"
-                },
-                "username": {
-                    "description": "username",
-                    "type": "string"
-                }
-            }
-        },
-        "v1.Role": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "Role_Admin",
-                "Role_Operator",
-                "Role_User"
-            ]
         }
     }
 }`

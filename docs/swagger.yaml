@@ -11,15 +11,27 @@ definitions:
         example: password
         type: string
       role:
-        allOf:
-        - $ref: '#/definitions/v1.Role'
-        example: 0
+        enum:
+        - admin
+        example: user
+        type: string
       username:
         example: username
         type: string
     required:
     - password
-    - role
+    - username
+    type: object
+  github_com_Template7_backend_api_types.HttpLoginReq:
+    properties:
+      password:
+        example: password
+        type: string
+      username:
+        example: username
+        type: string
+    required:
+    - password
     - username
     type: object
   github_com_Template7_backend_api_types.HttpLoginResp:
@@ -66,13 +78,11 @@ definitions:
             example: example
             type: string
           role:
-            allOf:
-            - $ref: '#/definitions/v1.Role'
-            example: 0
+            example: user
+            type: string
           status:
-            allOf:
-            - $ref: '#/definitions/v1.AccountStatus'
-            example: 0
+            example: activated
+            type: string
           userId:
             example: userId001
             type: string
@@ -93,35 +103,6 @@ definitions:
         example: "2021-07-24T20:01:25.874565+08:00"
         type: string
     type: object
-  v1.AccountStatus:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - AccountStatus_Blocked
-    - AccountStatus_Initialized
-    - AccountStatus_Activated
-  v1.LoginRequest:
-    properties:
-      password:
-        description: password
-        type: string
-      username:
-        description: username
-        type: string
-    type: object
-  v1.Role:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - Role_Admin
-    - Role_Operator
-    - Role_User
 info:
   contact: {}
   description: API Documentation
@@ -175,7 +156,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/v1.LoginRequest'
+          $ref: '#/definitions/github_com_Template7_backend_api_types.HttpLoginReq'
       produces:
       - application/json
       responses:
