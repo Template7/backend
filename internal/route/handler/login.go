@@ -40,7 +40,7 @@ func NativeLogin(c *gin.Context) {
 		t7Err, ok := t7Error.ToT7Error(err)
 		if !ok {
 			log.WithError(err).Error("unknown error")
-			c.JSON(http.StatusForbidden, types.HttpRespBase{
+			c.JSON(http.StatusInternalServerError, types.HttpRespBase{
 				RequestId: c.GetHeader(middleware.HeaderRequestId),
 				Code:      int(t7Error.Unknown.Code),
 				Message:   t7Error.Unknown.Message,
