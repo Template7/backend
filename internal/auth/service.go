@@ -53,7 +53,6 @@ func New() Auth {
 			panic(err)
 		}
 
-		// TODO: refine
 		ms := "[request_definition]\nr = sub, obj, act\n\n[policy_definition]\np = sub, obj, act\n\n[role_definition]\ng = _, _\n\n[policy_effect]\ne = some(where (p.eft == allow))\n\n[matchers]\nm = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act || checkAdmin(r.sub)"
 		md, err := model.NewModelFromString(ms)
 		if err != nil {
