@@ -14,7 +14,7 @@ import (
 // @Summary Native login
 // @Tags v1,login
 // @version 1.0
-// @Param request body v1.LoginRequest true "Request"
+// @Param request body types.HttpLoginReq true "Request"
 // @produce json
 // @Success 200 {object} types.HttpLoginResp "Response"
 // @failure 400 {object} types.HttpRespError

@@ -37,7 +37,7 @@ func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest)
 			Nickname: req.Nickname,
 		},
 		Email:  req.Email,
-		Status: authV1.AccountStatus_Initialized,
+		Status: authV1.AccountStatus_initialized,
 	}
 	if err := s.db.CreateUser(ctx, data); err != nil {
 		log.WithError(err).Error("fail to create user")
