@@ -28,7 +28,6 @@ func (c *client) CreateUser(ctx context.Context, data entity.User) (err error) {
 
 	if err = tx.Commit().Error; err != nil {
 		log.WithError(err).Error("fail to commit tx")
-		return
 	}
 	return
 }
