@@ -4,6 +4,7 @@ type HttpLoginReq struct {
 	Username string `json:"username" binding:"required" example:"username"`
 	Password string `json:"password" binding:"required" example:"password"`
 }
+
 type HttpLoginResp struct {
 	HttpRespBase
 	Data struct {

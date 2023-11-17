@@ -1,5 +1,14 @@
 definitions:
-  github_com_Template7_backend_api_types.HttpCreateUserReq:
+  handler.hello:
+    properties:
+      message:
+        example: Hello
+        type: string
+      timestamp:
+        example: "2021-07-24T20:01:25.874565+08:00"
+        type: string
+    type: object
+  types.HttpCreateUserReq:
     properties:
       email:
         example: example@email.com
@@ -22,7 +31,7 @@ definitions:
     - password
     - username
     type: object
-  github_com_Template7_backend_api_types.HttpLoginReq:
+  types.HttpLoginReq:
     properties:
       password:
         example: password
@@ -34,7 +43,7 @@ definitions:
     - password
     - username
     type: object
-  github_com_Template7_backend_api_types.HttpLoginResp:
+  types.HttpLoginResp:
     properties:
       code:
         example: 3000
@@ -52,7 +61,19 @@ definitions:
         example: b8974256-1f17-477f-8638-c7ebbac656d7
         type: string
     type: object
-  github_com_Template7_backend_api_types.HttpRespError:
+  types.HttpRespBase:
+    properties:
+      code:
+        example: 3000
+        type: integer
+      message:
+        example: ok
+        type: string
+      requestId:
+        example: b8974256-1f17-477f-8638-c7ebbac656d7
+        type: string
+    type: object
+  types.HttpRespError:
     properties:
       code:
         example: 1024
@@ -64,7 +85,15 @@ definitions:
         example: 27c0a70e-59ab-4a94-872c-5f014aaa047f
         type: string
     type: object
-  github_com_Template7_backend_api_types.HttpUserInfoResp:
+  types.HttpUpdateUserInfoReq:
+    properties:
+      nickname:
+        example: nickname
+        type: string
+    required:
+    - nickname
+    type: object
+  types.HttpUserInfoResp:
     properties:
       code:
         example: 3000
@@ -94,15 +123,6 @@ definitions:
         example: b8974256-1f17-477f-8638-c7ebbac656d7
         type: string
     type: object
-  internal_route_handler.hello:
-    properties:
-      message:
-        example: Hello
-        type: string
-      timestamp:
-        example: "2021-07-24T20:01:25.874565+08:00"
-        type: string
-    type: object
 info:
   contact: {}
   description: API Documentation
@@ -120,7 +140,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_route_handler.hello'
+            $ref: '#/definitions/handler.hello'
       summary: Hello Page
       tags:
       - Hello
@@ -132,18 +152,18 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_Template7_backend_api_types.HttpCreateUserReq'
+          $ref: '#/definitions/types.HttpCreateUserReq'
       produces:
       - application/json
       responses:
         "200":
           description: Response
           schema:
-            $ref: '#/definitions/github_com_Template7_backend_api_types.HttpLoginResp'
+            $ref: '#/definitions/types.HttpLoginResp'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_Template7_backend_api_types.HttpRespError'
+            $ref: '#/definitions/types.HttpRespError'
       summary: Create user
       tags:
       - V1
@@ -156,18 +176,18 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_Template7_backend_api_types.HttpLoginReq'
+          $ref: '#/definitions/types.HttpLoginReq'
       produces:
       - application/json
       responses:
         "200":
           description: Response
           schema:
-            $ref: '#/definitions/github_com_Template7_backend_api_types.HttpLoginResp'
+            $ref: '#/definitions/types.HttpLoginResp'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_Template7_backend_api_types.HttpRespError'
+            $ref: '#/definitions/types.HttpRespError'
       summary: Native login
       tags:
       - v1
@@ -178,12 +198,35 @@ paths:
         "200":
           description: Response
           schema:
-            $ref: '#/definitions/github_com_Template7_backend_api_types.HttpUserInfoResp'
+            $ref: '#/definitions/types.HttpUserInfoResp'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_Template7_backend_api_types.HttpRespError'
+            $ref: '#/definitions/types.HttpRespError'
       summary: Get user Info
+      tags:
+      - V1
+      - User
+    put:
+      parameters:
+      - description: Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.HttpUpdateUserInfoReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response
+          schema:
+            $ref: '#/definitions/types.HttpRespBase'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
+      summary: Update user info
       tags:
       - V1
       - User

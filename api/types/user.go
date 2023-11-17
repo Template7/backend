@@ -33,3 +33,7 @@ func (h HttpCreateUserReq) ToProto() *userV1.CreateUserRequest {
 		Email:    h.Email,
 	}
 }
+
+type HttpUpdateUserInfoReq struct {
+	Nickname string `json:"nickname" binding:"required" example:"nickname"`
+}

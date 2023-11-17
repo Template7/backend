@@ -11,8 +11,6 @@ import (
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	userV1 "github.com/Template7/protobuf/gen/proto/template7/user"
 	"github.com/gin-gonic/gin"
-	"google.golang.org/protobuf/encoding/protojson"
-	"io"
 	"net/http"
 )
 
@@ -138,39 +136,47 @@ func CreateUser(c *gin.Context) {
 }
 
 // UpdateUser
-// @Summary Update user
+// @Summary Update user info
 // @Tags V1,User
 // @version 1.0
+// @Param request body types.HttpUpdateUserInfoReq true "Request"
+// @produce json
+// @Success 200 {object} types.HttpRespBase "Response"
+// @failure 400 {object} types.HttpRespError
+// @Router /api/v1/user/info [put]
 func UpdateUser(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("handle update user")
 
-	defer c.Request.Body.Close()
-	bd, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		log.WithError(err).Error("fail to read resp body")
-		c.JSON(http.StatusBadRequest, t7Error.InvalidBody.WithDetail(err.Error()))
-		return
-	}
-
-	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
-	var req userV1.UpdateUserInfoRequest
-	if err := unmarshaler.Unmarshal(bd, &req); err != nil {
-		log.WithError(err).With("resp", string(bd)).Error("fail to decode resp data")
-		c.JSON(http.StatusBadRequest, t7Error.DecodeFail.WithDetail(err.Error()))
+	var req types.HttpUpdateUserInfoReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.WithError(err).Warn("invalid body")
+		c.JSON(http.StatusBadRequest, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidBody.Code),
+			Message:   t7Error.InvalidBody.Message,
+		})
 		return
 	}
 
 	uId, ok := c.Get(middleware.UserId)
 	if !ok {
 		log.Warn("no user id from the previous middleware")
-		c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
 		return
 	}
 	userId, ok := uId.(string)
 	if !ok {
 		log.With("uId", uId).Error("type assertion fail")
-		c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
 		return
 	}
 
@@ -183,13 +189,26 @@ func UpdateUser(c *gin.Context) {
 		t7Err, ok := t7Error.ToT7Error(err)
 		if !ok {
 			log.WithError(err).Error("unknown error")
-			c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+			c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+				RequestId: c.GetHeader(middleware.HeaderRequestId),
+				Code:      int(t7Error.Unknown.Code),
+				Message:   t7Error.Unknown.Message,
+			})
 			return
 		}
-		c.JSON(t7Err.GetStatus(), t7Err)
+		c.JSON(t7Err.GetStatus(), types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Err.Code),
+			Message:   t7Err.Message,
+		})
 		return
 	}
-	c.JSON(http.StatusNoContent, nil)
+
+	c.JSON(http.StatusOK, types.HttpRespBase{
+		RequestId: c.GetHeader(middleware.HeaderRequestId),
+		Code:      types.HttpRespCodeOk,
+		Message:   types.HttpRespMsgOk,
+	})
 }
 
 func GetUserWallets(c *gin.Context) {

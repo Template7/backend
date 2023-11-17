@@ -32,7 +32,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_route_handler.hello"
+                            "$ref": "#/definitions/handler.hello"
                         }
                     }
                 }
@@ -55,7 +55,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpCreateUserReq"
+                            "$ref": "#/definitions/types.HttpCreateUserReq"
                         }
                     }
                 ],
@@ -63,13 +63,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Response",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpLoginResp"
+                            "$ref": "#/definitions/types.HttpLoginResp"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpRespError"
+                            "$ref": "#/definitions/types.HttpRespError"
                         }
                     }
                 }
@@ -92,7 +92,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpLoginReq"
+                            "$ref": "#/definitions/types.HttpLoginReq"
                         }
                     }
                 ],
@@ -100,13 +100,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Response",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpLoginResp"
+                            "$ref": "#/definitions/types.HttpLoginResp"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpRespError"
+                            "$ref": "#/definitions/types.HttpRespError"
                         }
                     }
                 }
@@ -123,13 +123,48 @@ const docTemplate = `{
                     "200": {
                         "description": "Response",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpUserInfoResp"
+                            "$ref": "#/definitions/types.HttpUserInfoResp"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Template7_backend_api_types.HttpRespError"
+                            "$ref": "#/definitions/types.HttpRespError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V1",
+                    "User"
+                ],
+                "summary": "Update user info",
+                "parameters": [
+                    {
+                        "description": "Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpUpdateUserInfoReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpRespBase"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpRespError"
                         }
                     }
                 }
@@ -137,7 +172,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_Template7_backend_api_types.HttpCreateUserReq": {
+        "handler.hello": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Hello"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2021-07-24T20:01:25.874565+08:00"
+                }
+            }
+        },
+        "types.HttpCreateUserReq": {
             "type": "object",
             "required": [
                 "password",
@@ -169,7 +217,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_Template7_backend_api_types.HttpLoginReq": {
+        "types.HttpLoginReq": {
             "type": "object",
             "required": [
                 "password",
@@ -186,7 +234,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_Template7_backend_api_types.HttpLoginResp": {
+        "types.HttpLoginResp": {
             "type": "object",
             "properties": {
                 "code": {
@@ -212,7 +260,24 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_Template7_backend_api_types.HttpRespError": {
+        "types.HttpRespBase": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 3000
+                },
+                "message": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "requestId": {
+                    "type": "string",
+                    "example": "b8974256-1f17-477f-8638-c7ebbac656d7"
+                }
+            }
+        },
+        "types.HttpRespError": {
             "type": "object",
             "properties": {
                 "code": {
@@ -229,7 +294,19 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_Template7_backend_api_types.HttpUserInfoResp": {
+        "types.HttpUpdateUserInfoReq": {
+            "type": "object",
+            "required": [
+                "nickname"
+            ],
+            "properties": {
+                "nickname": {
+                    "type": "string",
+                    "example": "nickname"
+                }
+            }
+        },
+        "types.HttpUserInfoResp": {
             "type": "object",
             "properties": {
                 "code": {
@@ -268,19 +345,6 @@ const docTemplate = `{
                 "requestId": {
                     "type": "string",
                     "example": "b8974256-1f17-477f-8638-c7ebbac656d7"
-                }
-            }
-        },
-        "internal_route_handler.hello": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "Hello"
-                },
-                "timestamp": {
-                    "type": "string",
-                    "example": "2021-07-24T20:01:25.874565+08:00"
                 }
             }
         }
