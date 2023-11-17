@@ -4,10 +4,10 @@ import (
 	"context"
 	"github.com/Template7/backend/internal/db/entity"
 	"github.com/Template7/backend/internal/t7Error"
-	v1 "github.com/Template7/protobuf/gen/proto/template7/user"
+	userV1 "github.com/Template7/protobuf/gen/proto/template7/user"
 )
 
-func (s *Service) GetInfo(ctx context.Context, userId string) (*v1.UserInfoResponse, error) {
+func (s *Service) GetInfo(ctx context.Context, userId string) (*userV1.UserInfoResponse, error) {
 	log := s.log.WithContext(ctx).With("userId", userId)
 	log.Debug("get user info")
 
@@ -17,7 +17,7 @@ func (s *Service) GetInfo(ctx context.Context, userId string) (*v1.UserInfoRespo
 		return nil, t7Error.DbOperationFail.WithDetail(err.Error())
 	}
 
-	resp := v1.UserInfoResponse{
+	resp := userV1.UserInfoResponse{
 		UserId:   data.Id.String(),
 		Role:     s.authSvc.GetUserRole(ctx, data.Id.String()),
 		Status:   data.Status,

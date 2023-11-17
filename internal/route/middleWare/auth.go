@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"github.com/Template7/backend/api/types"
 	"github.com/Template7/backend/internal/auth"
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/backend/internal/user"
@@ -16,34 +17,54 @@ func Permission(c *gin.Context) {
 	uId, ok := c.Get(UserId)
 	if !ok {
 		log.Warn("no user id from the previous middleware")
-		c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
 		c.Abort()
 		return
 	}
 	userId, ok := uId.(string)
 	if !ok {
 		log.With("uId", uId).Error("type assertion fail")
-		c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
 		c.Abort()
 		return
 	}
 	_, ok = c.Get(Role)
 	if !ok {
 		log.Warn("no user role from the previous middleware")
-		c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
 		c.Abort()
 		return
 	}
 	_, ok = c.Get(Status)
 	if !ok {
 		log.Warn("no user status from the previous middleware")
-		c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
 		c.Abort()
 		return
 	}
 
 	if !auth.New().CheckPermission(c, userId, c.Request.URL.Path, c.Request.Method) {
-		c.JSON(http.StatusOK, t7Error.UnAuthorized)
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
 		c.Abort()
 		return
 	}
@@ -56,7 +77,11 @@ func AuthToken(c *gin.Context) {
 
 	token := c.GetHeader("Authorization")
 	if token == "" {
-		c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
 		c.Abort()
 		return
 	}
@@ -66,10 +91,18 @@ func AuthToken(c *gin.Context) {
 		t7Err, ok := t7Error.ToT7Error(err)
 		if !ok {
 			log.WithError(err).Error("unknown error")
-			c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+			c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+				RequestId: c.GetHeader(HeaderRequestId),
+				Code:      int(t7Error.Unknown.Code),
+				Message:   t7Error.Unknown.Message,
+			})
 			return
 		}
-		c.JSON(http.StatusBadRequest, t7Err)
+		c.JSON(t7Err.GetStatus(), types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Err.Code),
+			Message:   t7Err.Message,
+		})
 		return
 	}
 
@@ -88,7 +121,11 @@ func AuthUserWallet(c *gin.Context) {
 	walletId := c.Param("walletId")
 	if walletId == "" {
 		log.Warn("empty wallet id")
-		c.JSON(http.StatusBadRequest, t7Error.InvalidBody)
+		c.JSON(http.StatusBadRequest, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidBody.Code),
+			Message:   t7Error.InvalidBody.Message,
+		})
 		c.Abort()
 		return
 	}
@@ -97,14 +134,22 @@ func AuthUserWallet(c *gin.Context) {
 	uId, ok := c.Get(UserId)
 	if !ok {
 		log.Warn("no user id from the previous middleware")
-		c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
 		c.Abort()
 		return
 	}
 	userId, ok := uId.(string)
 	if !ok {
 		log.With("uId", uId).Error("type assertion fail")
-		c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
 		c.Abort()
 		return
 	}
@@ -117,7 +162,13 @@ func AuthUserWallet(c *gin.Context) {
 			return
 		}
 	}
+
 	log.Warn("user has no permission to the wallet")
+	c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+		RequestId: c.GetHeader(HeaderRequestId),
+		Code:      int(t7Error.InvalidToken.Code),
+		Message:   t7Error.InvalidToken.Message,
+	})
 	c.Abort()
 	return
 }

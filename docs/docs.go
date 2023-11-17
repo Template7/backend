@@ -169,6 +169,65 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/user/wallets": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V1",
+                    "User",
+                    "Wallet"
+                ],
+                "summary": "Get user wallets",
+                "responses": {
+                    "200": {
+                        "description": "Response",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpGetUserWalletsResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpRespError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/wallets/{walletId}": {
+            "get": {
+                "tags": [
+                    "v1",
+                    "wallet"
+                ],
+                "summary": "Get wallet",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "wallet id",
+                        "name": "walletId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpGetWalletResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpRespError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -214,6 +273,77 @@ const docTemplate = `{
                 "username": {
                     "type": "string",
                     "example": "username"
+                }
+            }
+        },
+        "types.HttpGetUserWalletsResp": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 3000
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.HttpGetUserWalletsRespData"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "requestId": {
+                    "type": "string",
+                    "example": "b8974256-1f17-477f-8638-c7ebbac656d7"
+                }
+            }
+        },
+        "types.HttpGetUserWalletsRespData": {
+            "type": "object",
+            "properties": {
+                "balances": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.HttpGetUserWalletsRespDataBalance"
+                    }
+                },
+                "id": {
+                    "type": "string",
+                    "example": "af68a360-d035-469c-8ae9-a8640c2ffd19"
+                }
+            }
+        },
+        "types.HttpGetUserWalletsRespDataBalance": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "string",
+                    "example": "100"
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "usd"
+                }
+            }
+        },
+        "types.HttpGetWalletResp": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 3000
+                },
+                "data": {
+                    "$ref": "#/definitions/types.HttpGetUserWalletsRespData"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "requestId": {
+                    "type": "string",
+                    "example": "b8974256-1f17-477f-8638-c7ebbac656d7"
                 }
             }
         },

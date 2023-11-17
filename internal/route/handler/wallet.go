@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"github.com/Template7/backend/api/types"
+	middleware "github.com/Template7/backend/internal/route/middleWare"
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/backend/internal/wallet"
 	"github.com/Template7/common/logger"
@@ -11,6 +13,14 @@ import (
 	"net/http"
 )
 
+// GetWallet
+// @Summary Get wallet
+// @Tags v1,wallet
+// @version 1.0
+// @Success 200 {object} types.HttpGetWalletResp "Response"
+// @failure 400 {object} types.HttpRespError
+// @Param walletId path string true "wallet id"
+// @Router /api/v1/wallets/{walletId} [get]
 func GetWallet(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("handle get wallet")
@@ -18,18 +28,44 @@ func GetWallet(c *gin.Context) {
 	data, err := wallet.New().GetWallet(c, c.Param("walletId"))
 	if err != nil {
 		defer c.Abort()
-		log.WithError(err).Error("fail to update user info")
+		log.WithError(err).Error("fail to get wallet")
 		t7Err, ok := t7Error.ToT7Error(err)
 		if !ok {
 			log.WithError(err).Error("unknown error")
-			c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+			c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+				RequestId: c.GetHeader(middleware.HeaderRequestId),
+				Code:      int(t7Error.Unknown.Code),
+				Message:   t7Error.Unknown.Message,
+			})
 			return
 		}
-		c.JSON(t7Err.GetStatus(), t7Err)
+		c.JSON(t7Err.GetStatus(), types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Err.Code),
+			Message:   t7Err.Message,
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, &data)
+	bls := make([]types.HttpGetUserWalletsRespDataBalance, len(data.Balances))
+	for i, bl := range data.GetBalances() {
+		bls[i] = types.HttpGetUserWalletsRespDataBalance{
+			Currency: bl.GetCurrency().String(),
+			Amount:   bl.GetAmount(),
+		}
+	}
+
+	c.JSON(http.StatusOK, types.HttpGetWalletResp{
+		HttpRespBase: types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      types.HttpRespCodeOk,
+			Message:   types.HttpRespMsgOk,
+		},
+		Data: types.HttpGetUserWalletsRespData{
+			Id:       data.Id,
+			Balances: bls,
+		},
+	})
 }
 
 func Deposit(c *gin.Context) {

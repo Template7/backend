@@ -37,3 +37,18 @@ func (h HttpCreateUserReq) ToProto() *userV1.CreateUserRequest {
 type HttpUpdateUserInfoReq struct {
 	Nickname string `json:"nickname" binding:"required" example:"nickname"`
 }
+
+type HttpGetUserWalletsResp struct {
+	HttpRespBase
+	Data []HttpGetUserWalletsRespData `json:"data"`
+}
+
+type HttpGetUserWalletsRespData struct {
+	Id       string                              `json:"id" example:"af68a360-d035-469c-8ae9-a8640c2ffd19"`
+	Balances []HttpGetUserWalletsRespDataBalance `json:"balances"`
+}
+
+type HttpGetUserWalletsRespDataBalance struct {
+	Currency string `json:"currency" example:"usd"`
+	Amount   string `json:"amount" example:"100"`
+}

@@ -8,5 +8,5 @@ import (
 func Request(c *gin.Context) {
 	uId := uuid.New().String()
 	c.Request.Header.Add(HeaderRequestId, uId)
-	c.Set("traceId", uuid.New().String())
+	c.Set("traceId", uId)
 }
