@@ -8,7 +8,7 @@ image:
 	docker-compose -f ./build/docker-compose.yaml build
 
 swagger:
-	swag init -g ./cmd/main.go --parseDependency --parseDepth 3
+	swag init -g ./cmd/main.go
 
 run:
 	./bin/backend
