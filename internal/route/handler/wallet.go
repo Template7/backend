@@ -15,11 +15,11 @@ import (
 
 // GetWallet
 // @Summary Get wallet
-// @Tags v1,wallet
+// @Tags V1,Wallet
 // @version 1.0
 // @Success 200 {object} types.HttpGetWalletResp "Response"
 // @failure 400 {object} types.HttpRespError
-// @Param walletId path string true "wallet id"
+// @Param walletId path string true "Wallet ID"
 // @Router /api/v1/wallets/{walletId} [get]
 func GetWallet(c *gin.Context) {
 	log := logger.New().WithContext(c)
@@ -103,39 +103,57 @@ func Deposit(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
+// Withdraw
+// @Summary Wallet withdraw
+// @Tags V1,Wallet
+// @version 1.0
+// @Param request body types.HttpWalletWithdrawReq true "Request"
+// @produce json
+// @Success 200 {object} types.HttpRespBase "Response"
+// @failure 400 {object} types.HttpRespError
+// @Param walletId path string true "Wallet ID"
+// @Router /api/v1/wallets/{walletId}/withdraw [post]
 func Withdraw(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("handle withdraw")
 
-	defer c.Request.Body.Close()
-	bd, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		log.WithError(err).Error("fail to read resp body")
-		c.JSON(http.StatusBadRequest, t7Error.InvalidBody.WithDetail(err.Error()))
+	var req types.HttpWalletWithdrawReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.WithError(err).Warn("invalid body")
+		c.JSON(http.StatusBadRequest, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidBody.Code),
+			Message:   t7Error.InvalidBody.Message,
+		})
 		return
 	}
 
-	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
-	var req v1.WithdrawRequest
-	if err := unmarshaler.Unmarshal(bd, &req); err != nil {
-		log.WithError(err).With("resp", string(bd)).Error("fail to decode resp data")
-		c.JSON(http.StatusBadRequest, t7Error.DecodeFail.WithDetail(err.Error()))
-		return
-	}
-
-	if err := wallet.New().Withdraw(c, c.Param("walletId"), req.GetCurrency(), req.GetAmount()); err != nil {
+	if err := wallet.New().Withdraw(c, c.Param("walletId"), v1.Currency(v1.Currency_value[req.Currency]), req.Amount); err != nil {
 		defer c.Abort()
 		log.WithError(err).Error("fail to withdraw")
 		t7Err, ok := t7Error.ToT7Error(err)
 		if !ok {
 			log.WithError(err).Error("unknown error")
-			c.JSON(http.StatusForbidden, t7Error.InvalidToken)
+			c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+				RequestId: c.GetHeader(middleware.HeaderRequestId),
+				Code:      int(t7Error.Unknown.Code),
+				Message:   t7Error.Unknown.Message,
+			})
 			return
 		}
-		c.JSON(t7Err.GetStatus(), t7Err)
+		c.JSON(t7Err.GetStatus(), types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Err.Code),
+			Message:   t7Err.Message,
+		})
 		return
 	}
-	c.JSON(http.StatusNoContent, nil)
+
+	c.JSON(http.StatusOK, types.HttpRespBase{
+		RequestId: c.GetHeader(middleware.HeaderRequestId),
+		Code:      types.HttpRespCodeOk,
+		Message:   types.HttpRespMsgOk,
+	})
 }
 
 func Transfer(c *gin.Context) {
