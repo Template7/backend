@@ -82,7 +82,7 @@ const docTemplate = `{
                 ],
                 "tags": [
                     "V1",
-                    "login"
+                    "Login"
                 ],
                 "summary": "Native login",
                 "parameters": [
@@ -218,6 +218,50 @@ const docTemplate = `{
                         "description": "Response",
                         "schema": {
                             "$ref": "#/definitions/types.HttpGetWalletResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpRespError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/wallets/{walletId}/deposit": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V1",
+                    "Wallet"
+                ],
+                "summary": "Wallet deposit",
+                "parameters": [
+                    {
+                        "description": "Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpWalletDepositReq"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Wallet ID",
+                        "name": "walletId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpRespBase"
                         }
                     },
                     "400": {
@@ -519,6 +563,22 @@ const docTemplate = `{
                 "requestId": {
                     "type": "string",
                     "example": "b8974256-1f17-477f-8638-c7ebbac656d7"
+                }
+            }
+        },
+        "types.HttpWalletDepositReq": {
+            "type": "object",
+            "required": [
+                "amount"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "usd"
                 }
             }
         },

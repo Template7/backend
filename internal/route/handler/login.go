@@ -12,7 +12,7 @@ import (
 
 // NativeLogin
 // @Summary Native login
-// @Tags V1,login
+// @Tags V1,Login
 // @version 1.0
 // @Param request body types.HttpLoginReq true "Request"
 // @produce json
