@@ -172,6 +172,17 @@ definitions:
         example: b8974256-1f17-477f-8638-c7ebbac656d7
         type: string
     type: object
+  types.HttpWalletWithdrawReq:
+    properties:
+      amount:
+        example: 100
+        type: integer
+      currency:
+        example: usd
+        type: string
+    required:
+    - amount
+    type: object
 info:
   contact: {}
   description: API Documentation
@@ -239,7 +250,7 @@ paths:
             $ref: '#/definitions/types.HttpRespError'
       summary: Native login
       tags:
-      - v1
+      - V1
       - login
   /api/v1/user/info:
     get:
@@ -300,7 +311,7 @@ paths:
   /api/v1/wallets/{walletId}:
     get:
       parameters:
-      - description: wallet id
+      - description: Wallet ID
         in: path
         name: walletId
         required: true
@@ -316,6 +327,35 @@ paths:
             $ref: '#/definitions/types.HttpRespError'
       summary: Get wallet
       tags:
-      - v1
-      - wallet
+      - V1
+      - Wallet
+  /api/v1/wallets/{walletId}/withdraw:
+    post:
+      parameters:
+      - description: Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.HttpWalletWithdrawReq'
+      - description: Wallet ID
+        in: path
+        name: walletId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response
+          schema:
+            $ref: '#/definitions/types.HttpRespBase'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
+      summary: Wallet withdraw
+      tags:
+      - V1
+      - Wallet
 swagger: "2.0"

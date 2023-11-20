@@ -12,7 +12,7 @@ import (
 
 // NativeLogin
 // @Summary Native login
-// @Tags v1,login
+// @Tags V1,login
 // @version 1.0
 // @Param request body types.HttpLoginReq true "Request"
 // @produce json
@@ -24,7 +24,7 @@ func NativeLogin(c *gin.Context) {
 	log.Debug("handle native login")
 
 	var req types.HttpLoginReq
-	if err := c.ShouldBindJSON(req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		log.WithError(err).Warn("invalid body")
 		c.JSON(http.StatusBadRequest, types.HttpRespBase{
 			RequestId: c.GetHeader(middleware.HeaderRequestId),
