@@ -53,7 +53,6 @@ func New() Auth {
 			panic(err)
 		}
 
-		// TODO: refine
 		ms := "[request_definition]\nr = sub, obj, act\n\n[policy_definition]\np = sub, obj, act\n\n[role_definition]\ng = _, _\n\n[policy_effect]\ne = some(where (p.eft == allow))\n\n[matchers]\nm = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act || checkAdmin(r.sub)"
 		md, err := model.NewModelFromString(ms)
 		if err != nil {
@@ -88,12 +87,12 @@ func New() Auth {
 
 func (s *service) loadDefaultPolicies() {
 	pPolicy := [][]string{
-		{v1.Role_User.String(), "/api/v1/users/:userId/info", http.MethodGet},
-		{v1.Role_User.String(), "/api/v1/users/:userId/info", http.MethodPut},
-		{v1.Role_User.String(), "/api/v1/wallets/:walletId", http.MethodGet},
-		{v1.Role_User.String(), "/api/v1/wallets/:walletId/deposit", http.MethodPost},
-		{v1.Role_User.String(), "/api/v1/wallets/:walletId/withdraw", http.MethodPost},
-		{v1.Role_User.String(), "/api/v1/transaction", http.MethodPost},
+		{v1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodGet},
+		{v1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodPut},
+		{v1.Role_user.String(), "/api/v1/wallets/:walletId", http.MethodGet},
+		{v1.Role_user.String(), "/api/v1/wallets/:walletId/deposit", http.MethodPost},
+		{v1.Role_user.String(), "/api/v1/wallets/:walletId/withdraw", http.MethodPost},
+		{v1.Role_user.String(), "/api/v1/transaction", http.MethodPost},
 	}
 
 	for _, p := range pPolicy {

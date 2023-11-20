@@ -1,6 +1,9 @@
 log:
   level: DEBUG
 
+service:
+  port: 8000
+
 db:
   sql:
     db: template7

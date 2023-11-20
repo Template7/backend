@@ -20,42 +20,42 @@ func Test_wallet(t *testing.T) {
 		return
 	}
 
-	if err := wallet.New().Deposit(ctx, wId, v1.Currency_NTD, 123); err != nil {
+	if err := wallet.New().Deposit(ctx, wId, v1.Currency_ntd, 123); err != nil {
 		t.Error(err)
 		return
 	}
-	if err := wallet.New().Deposit(ctx, wId, v1.Currency_USD, 45); err != nil {
+	if err := wallet.New().Deposit(ctx, wId, v1.Currency_ntd, 45); err != nil {
 		t.Error(err)
 		return
 	}
-	if err := wallet.New().Deposit(ctx, wId, v1.Currency_JPY, 678); err != nil {
+	if err := wallet.New().Deposit(ctx, wId, v1.Currency_jpy, 678); err != nil {
 		t.Error(err)
 		return
 	}
-	if err := wallet.New().Deposit(ctx, wId, v1.Currency_CNY, 90); err != nil {
+	if err := wallet.New().Deposit(ctx, wId, v1.Currency_cny, 90); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if err := wallet.New().Withdraw(ctx, wId, v1.Currency_NTD, 23); err != nil {
+	if err := wallet.New().Withdraw(ctx, wId, v1.Currency_ntd, 23); err != nil {
 		t.Error(err)
 		return
 	}
-	if err := wallet.New().Withdraw(ctx, wId, v1.Currency_USD, 45); err != nil {
+	if err := wallet.New().Withdraw(ctx, wId, v1.Currency_usd, 45); err != nil {
 		t.Error(err)
 		return
 	}
-	if err := wallet.New().Withdraw(ctx, wId, v1.Currency_JPY, 67); err != nil {
+	if err := wallet.New().Withdraw(ctx, wId, v1.Currency_jpy, 67); err != nil {
 		t.Error(err)
 		return
 	}
-	if err := wallet.New().Withdraw(ctx, wId, v1.Currency_CNY, 89); err != nil {
+	if err := wallet.New().Withdraw(ctx, wId, v1.Currency_cny, 89); err != nil {
 		t.Error(err)
 		return
 	}
 
 	tw := "bd159a64-5a20-493b-93a0-8fcc9b0c607d"
-	if err := wallet.New().Transfer(ctx, wId, tw, v1.Currency_NTD, 7); err != nil {
+	if err := wallet.New().Transfer(ctx, wId, tw, v1.Currency_ntd, 7); err != nil {
 		t.Error(err)
 		return
 	}
@@ -72,7 +72,7 @@ func Test_transfer(t *testing.T) {
 
 	//wallet.New().Deposit(ctx, fw, v1.Currency_NTD, 7)
 
-	if err := wallet.New().Transfer(ctx, fw, tw, v1.Currency_NTD, 7); err != nil {
+	if err := wallet.New().Transfer(ctx, fw, tw, v1.Currency_ntd, 7); err != nil {
 		t.Error(err)
 		return
 	}

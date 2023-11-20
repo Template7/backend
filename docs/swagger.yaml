@@ -1,86 +1,5 @@
 definitions:
-  github_com_Template7_backend_internal_t7Error.Code:
-    enum:
-    - 1024
-    - 1025
-    - 1026
-    - 1027
-    - 1028
-    - 1029
-    - 1030
-    - 1031
-    - 1032
-    - 1033
-    - 1034
-    - 1035
-    - 1036
-    - 1037
-    - 1038
-    - 1039
-    - 1040
-    - 1041
-    - 1042
-    - 1043
-    - 1044
-    - 1045
-    type: integer
-    x-enum-varnames:
-    - codeUnAuthorized
-    - codeInvalidBody
-    - codeDbConnectionFail
-    - codeDbOperationFail
-    - codeInvalidDocumentId
-    - codeHttpOperationFail
-    - codeHttpUnexpectedResponseCode
-    - codeHashFail
-    - codeUserNotfound
-    - codeUserAlreadyExist
-    - codeSignInFail
-    - codeVerifyCodeExpired
-    - codeIncorrectVerifyCode
-    - codeRedisOperationFail
-    - codeTokenSignFail
-    - codeTokenAssertionFail
-    - codeInvalidToken
-    - codeDecodeFail
-    - codeWalletNotFound
-    - codePasswordIncorrect
-    - codeUserHasNoRole
-    - codeUnknown
-  github_com_Template7_backend_internal_t7Error.Error:
-    properties:
-      code:
-        allOf:
-        - $ref: '#/definitions/github_com_Template7_backend_internal_t7Error.Code'
-        example: 1024
-      detail:
-        example: empty token
-        type: string
-      message:
-        example: token unauthorized
-        type: string
-      type:
-        allOf:
-        - $ref: '#/definitions/github_com_Template7_backend_internal_t7Error.Type'
-        example: 32
-    type: object
-  github_com_Template7_backend_internal_t7Error.Type:
-    enum:
-    - 32
-    - 33
-    - 34
-    - 35
-    - 36
-    - 37
-    type: integer
-    x-enum-varnames:
-    - typeAuth
-    - typeInvalidData
-    - typeDb
-    - typeRedis
-    - typeNetwork
-    - typeOther
-  internal_route_handler.hello:
+  handler.hello:
     properties:
       message:
         example: Hello
@@ -89,19 +8,191 @@ definitions:
         example: "2021-07-24T20:01:25.874565+08:00"
         type: string
     type: object
-  v1.LoginRequest:
+  types.HttpCreateUserReq:
     properties:
+      email:
+        example: example@email.com
+        type: string
+      nickname:
+        example: nickname
+        type: string
       password:
-        description: password
+        example: password
+        type: string
+      role:
+        enum:
+        - admin
+        example: user
         type: string
       username:
-        description: username
+        example: username
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  types.HttpGetUserWalletsResp:
+    properties:
+      code:
+        example: 3000
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/types.HttpGetUserWalletsRespData'
+        type: array
+      message:
+        example: ok
+        type: string
+      requestId:
+        example: b8974256-1f17-477f-8638-c7ebbac656d7
         type: string
     type: object
-  v1.LoginResponse:
+  types.HttpGetUserWalletsRespData:
     properties:
-      token:
+      balances:
+        items:
+          $ref: '#/definitions/types.HttpGetUserWalletsRespDataBalance'
+        type: array
+      id:
+        example: af68a360-d035-469c-8ae9-a8640c2ffd19
         type: string
+    type: object
+  types.HttpGetUserWalletsRespDataBalance:
+    properties:
+      amount:
+        example: "100"
+        type: string
+      currency:
+        example: usd
+        type: string
+    type: object
+  types.HttpGetWalletResp:
+    properties:
+      code:
+        example: 3000
+        type: integer
+      data:
+        $ref: '#/definitions/types.HttpGetUserWalletsRespData'
+      message:
+        example: ok
+        type: string
+      requestId:
+        example: b8974256-1f17-477f-8638-c7ebbac656d7
+        type: string
+    type: object
+  types.HttpLoginReq:
+    properties:
+      password:
+        example: password
+        type: string
+      username:
+        example: username
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  types.HttpLoginResp:
+    properties:
+      code:
+        example: 3000
+        type: integer
+      data:
+        properties:
+          token:
+            example: 70596484-67d3-46bd-94bf-08f7c9fb7ac1
+            type: string
+        type: object
+      message:
+        example: ok
+        type: string
+      requestId:
+        example: b8974256-1f17-477f-8638-c7ebbac656d7
+        type: string
+    type: object
+  types.HttpRespBase:
+    properties:
+      code:
+        example: 3000
+        type: integer
+      message:
+        example: ok
+        type: string
+      requestId:
+        example: b8974256-1f17-477f-8638-c7ebbac656d7
+        type: string
+    type: object
+  types.HttpRespError:
+    properties:
+      code:
+        example: 1024
+        type: integer
+      message:
+        example: token unauthorized
+        type: string
+      requestId:
+        example: 27c0a70e-59ab-4a94-872c-5f014aaa047f
+        type: string
+    type: object
+  types.HttpUpdateUserInfoReq:
+    properties:
+      nickname:
+        example: nickname
+        type: string
+    required:
+    - nickname
+    type: object
+  types.HttpUserInfoResp:
+    properties:
+      code:
+        example: 3000
+        type: integer
+      data:
+        properties:
+          email:
+            example: example@email.com
+            type: string
+          nickname:
+            example: example
+            type: string
+          role:
+            example: user
+            type: string
+          status:
+            example: activated
+            type: string
+          userId:
+            example: userId001
+            type: string
+        type: object
+      message:
+        example: ok
+        type: string
+      requestId:
+        example: b8974256-1f17-477f-8638-c7ebbac656d7
+        type: string
+    type: object
+  types.HttpWalletDepositReq:
+    properties:
+      amount:
+        example: 100
+        type: integer
+      currency:
+        example: usd
+        type: string
+    required:
+    - amount
+    type: object
+  types.HttpWalletWithdrawReq:
+    properties:
+      amount:
+        example: 100
+        type: integer
+      currency:
+        example: usd
+        type: string
+    required:
+    - amount
     type: object
 info:
   contact: {}
@@ -120,10 +211,34 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_route_handler.hello'
+            $ref: '#/definitions/handler.hello'
       summary: Hello Page
       tags:
       - Hello
+  /admin/v1/user:
+    post:
+      parameters:
+      - description: Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.HttpCreateUserReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response
+          schema:
+            $ref: '#/definitions/types.HttpLoginResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
+      summary: Create user
+      tags:
+      - V1
+      - User
   /api/v1/login/native:
     post:
       parameters:
@@ -132,20 +247,155 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/v1.LoginRequest'
+          $ref: '#/definitions/types.HttpLoginReq'
       produces:
       - application/json
       responses:
         "200":
           description: Response
           schema:
-            $ref: '#/definitions/v1.LoginResponse'
+            $ref: '#/definitions/types.HttpLoginResp'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_Template7_backend_internal_t7Error.Error'
+            $ref: '#/definitions/types.HttpRespError'
       summary: Native login
       tags:
-      - v1
-      - login
+      - V1
+      - Login
+  /api/v1/user/info:
+    get:
+      responses:
+        "200":
+          description: Response
+          schema:
+            $ref: '#/definitions/types.HttpUserInfoResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
+      summary: Get user Info
+      tags:
+      - V1
+      - User
+    put:
+      parameters:
+      - description: Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.HttpUpdateUserInfoReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response
+          schema:
+            $ref: '#/definitions/types.HttpRespBase'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
+      summary: Update user info
+      tags:
+      - V1
+      - User
+  /api/v1/user/wallets:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response
+          schema:
+            $ref: '#/definitions/types.HttpGetUserWalletsResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
+      summary: Get user wallets
+      tags:
+      - V1
+      - User
+      - Wallet
+  /api/v1/wallets/{walletId}:
+    get:
+      parameters:
+      - description: Wallet ID
+        in: path
+        name: walletId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Response
+          schema:
+            $ref: '#/definitions/types.HttpGetWalletResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
+      summary: Get wallet
+      tags:
+      - V1
+      - Wallet
+  /api/v1/wallets/{walletId}/deposit:
+    post:
+      parameters:
+      - description: Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.HttpWalletDepositReq'
+      - description: Wallet ID
+        in: path
+        name: walletId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response
+          schema:
+            $ref: '#/definitions/types.HttpRespBase'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
+      summary: Wallet deposit
+      tags:
+      - V1
+      - Wallet
+  /api/v1/wallets/{walletId}/withdraw:
+    post:
+      parameters:
+      - description: Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.HttpWalletWithdrawReq'
+      - description: Wallet ID
+        in: path
+        name: walletId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response
+          schema:
+            $ref: '#/definitions/types.HttpRespBase'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
+      summary: Wallet withdraw
+      tags:
+      - V1
+      - Wallet
 swagger: "2.0"
