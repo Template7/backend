@@ -73,12 +73,14 @@ func GetUserInfo(c *gin.Context) {
 			Code:      types.HttpRespCodeOk,
 			Message:   types.HttpRespMsgOk,
 		},
+		Data: types.HttpUserInfoRespData{
+			UserId:   info.GetUserId(),
+			Role:     authV1.Role_name[int32(info.GetRole())],
+			Status:   authV1.AccountStatus_name[int32(info.GetStatus())],
+			Nickname: info.GetNickname(),
+			Email:    info.GetEmail(),
+		},
 	}
-	resp.Data.UserId = info.GetUserId()
-	resp.Data.Role = authV1.Role_name[int32(info.GetRole())]
-	resp.Data.Status = authV1.AccountStatus_name[int32(info.GetStatus())]
-	resp.Data.Nickname = info.GetNickname()
-	resp.Data.Email = info.GetEmail()
 	c.JSON(http.StatusOK, resp)
 }
 
