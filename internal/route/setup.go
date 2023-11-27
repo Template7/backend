@@ -33,8 +33,8 @@ func Setup(r *gin.Engine) {
 	wallet.POST("/withdraw", handler.Withdraw)
 
 	// transfer
-	transaction := apiV1.Group("/transfer")
-	transaction.POST("", handler.Transfer)
+	transfer := apiV1.Group("/transfer")
+	transfer.POST("", handler.Transfer)
 
 	// admin
 	adminV1 := r.Group("/admin/v1", middleware.Permission)

@@ -71,7 +71,7 @@ func New() Auth {
 		}
 		e.AddFunction("checkAdmin", func(args ...interface{}) (interface{}, error) {
 			username := args[0].(string)
-			return e.HasRoleForUser(username, "admin")
+			return e.HasRoleForUser(username, v1.Role_name[int32(v1.Role_admin)])
 		})
 
 		instance = &service{

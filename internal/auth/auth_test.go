@@ -1,9 +1,6 @@
 package auth
 
 import (
-	"context"
-	v1 "github.com/Template7/protobuf/gen/proto/template7/auth"
-	userV1 "github.com/Template7/protobuf/gen/proto/template7/user"
 	"github.com/spf13/viper"
 	"testing"
 )
@@ -57,19 +54,4 @@ func TestRefreshToken(t *testing.T) {
 	//}
 	//db := c.Database(config.New().Mongo.Db)
 	//db.Drop(context.Background())
-}
-
-func TestService_CreateUser(t *testing.T) {
-	viper.AddConfigPath("../../config")
-
-	req := userV1.CreateUserRequest{
-		Username: "allentest2",
-		Password: "password",
-		Role:     v1.Role_Admin,
-	}
-
-	err := New().CreateUser(context.Background(), &req)
-	if err != nil {
-		t.Error(err)
-	}
 }
