@@ -12,7 +12,7 @@ const (
 )
 
 type Auth interface {
-	ParseToken(ctx context.Context, token string) (data *v1.TokenClaims, err error)
+	ParseToken(ctx context.Context, token string) (data *UserTokenClaims, err error)
 	CheckPermission(ctx context.Context, sub, obj, act string) bool
 	Login(ctx context.Context, username string, password string) (token string, err error)
 	GetUserRole(ctx context.Context, username string) v1.Role

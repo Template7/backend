@@ -37,7 +37,7 @@ func Setup(r *gin.Engine) {
 	transaction.POST("", handler.Transfer)
 
 	// admin
-	adminV1 := r.Group("/admin/v1", middleware.Permission)
+	adminV1 := r.Group("/admin/v1", middleware.AuthToken, middleware.Permission)
 	adminV1.POST("/user", handler.CreateUser)
 	//adminV1.DELETE("/user", handler.DeleteUser)
 

@@ -36,28 +36,6 @@ func Permission(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	_, ok = c.Get(Role)
-	if !ok {
-		log.Warn("no user role from the previous middleware")
-		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
-			RequestId: c.GetHeader(HeaderRequestId),
-			Code:      int(t7Error.InvalidToken.Code),
-			Message:   t7Error.InvalidToken.Message,
-		})
-		c.Abort()
-		return
-	}
-	_, ok = c.Get(Status)
-	if !ok {
-		log.Warn("no user status from the previous middleware")
-		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
-			RequestId: c.GetHeader(HeaderRequestId),
-			Code:      int(t7Error.InvalidToken.Code),
-			Message:   t7Error.InvalidToken.Message,
-		})
-		c.Abort()
-		return
-	}
 
 	if !auth.New().CheckPermission(c, userId, c.Request.URL.Path, c.Request.Method) {
 		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
@@ -107,8 +85,6 @@ func AuthToken(c *gin.Context) {
 	}
 
 	c.Set(UserId, claims.UserId)
-	c.Set(Role, claims.Role)
-	c.Set(Status, claims.Status)
 
 	log.With("userId", claims.UserId).Debug("user token authorized")
 	c.Next()

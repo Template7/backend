@@ -128,7 +128,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusNoContent, types.HttpLoginResp{
+	c.JSON(http.StatusOK, types.HttpLoginResp{
 		HttpRespBase: types.HttpRespBase{
 			RequestId: c.GetHeader(middleware.HeaderRequestId),
 			Code:      types.HttpRespCodeOk,

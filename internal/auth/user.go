@@ -19,8 +19,8 @@ func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest)
 		return t7Error.DecodeFail.WithDetail(err.Error())
 	}
 
-	userId := uuid.New()
-	ok, err := s.core.AddRoleForUser(userId.String(), req.Role.String())
+	userId := uuid.NewString()
+	ok, err := s.core.AddRoleForUser(userId, req.Role.String())
 	if err != nil {
 		log.WithError(err).Error("fail to add role for user")
 		return t7Error.Unknown.WithDetail(err.Error())

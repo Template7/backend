@@ -19,7 +19,7 @@ func (c *client) CreateUser(ctx context.Context, data entity.User) (err error) {
 
 	w := entity.Wallet{
 		Id:     uuid.NewString(),
-		UserId: data.Id.String(),
+		UserId: data.Id,
 	}
 	if err = tx.Create(&w).Error; err != nil {
 		log.WithError(err).Error("fail to create default user wallet")
