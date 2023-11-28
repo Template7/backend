@@ -21,7 +21,7 @@ type HttpUserInfoRespData struct {
 type HttpCreateUserReq struct {
 	Username string `json:"username" binding:"required" example:"username"`
 	Password string `json:"password" binding:"required" example:"password"`
-	Role     string `json:"role" binding:"oneof=admin,operator,user" example:"user"`
+	Role     string `json:"role" binding:"oneof=admin operator user" example:"user"`
 	Nickname string `json:"nickname" example:"nickname"`
 	Email    string `json:"email" example:"example@email.com"`
 }

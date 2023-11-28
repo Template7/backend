@@ -18,8 +18,8 @@ func (s *Service) GetInfo(ctx context.Context, userId string) (*userV1.UserInfoR
 	}
 
 	resp := userV1.UserInfoResponse{
-		UserId:   data.Id.String(),
-		Role:     s.authSvc.GetUserRole(ctx, data.Id.String()),
+		UserId:   data.Id,
+		Role:     s.authSvc.GetUserRole(ctx, data.Id),
 		Status:   data.Status,
 		Nickname: data.Info.Nickname,
 		Email:    data.Email,

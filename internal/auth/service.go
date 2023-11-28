@@ -5,7 +5,7 @@ import (
 	"github.com/Template7/backend/internal/db"
 	"github.com/Template7/common/config"
 	"github.com/Template7/common/logger"
-	v1 "github.com/Template7/protobuf/gen/proto/template7/auth"
+	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	gormadapter "github.com/casbin/gorm-adapter/v2"
@@ -26,7 +26,7 @@ var (
 
 type UserTokenClaims struct {
 	jwt.StandardClaims
-	v1.TokenClaims
+	UserId string `json:"userId"`
 }
 
 type service struct {
@@ -64,6 +64,12 @@ func New() Auth {
 			panic(err)
 		}
 
+		//e, err := casbin.NewEnforcer("./config/rbac_model.conf", adapter)
+		//if err != nil {
+		//	log.WithError(err).Error("fail to new enforcer")
+		//	panic(err)
+		//}
+
 		err = e.LoadPolicy()
 		if err != nil {
 			log.WithError(err).Panic("fail to load policy")
@@ -87,12 +93,12 @@ func New() Auth {
 
 func (s *service) loadDefaultPolicies() {
 	pPolicy := [][]string{
-		{v1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodGet},
-		{v1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodPut},
-		{v1.Role_user.String(), "/api/v1/wallets/:walletId", http.MethodGet},
-		{v1.Role_user.String(), "/api/v1/wallets/:walletId/deposit", http.MethodPost},
-		{v1.Role_user.String(), "/api/v1/wallets/:walletId/withdraw", http.MethodPost},
-		{v1.Role_user.String(), "/api/v1/transaction", http.MethodPost},
+		{authV1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodGet},
+		{authV1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodPut},
+		{authV1.Role_user.String(), "/api/v1/wallets/:walletId", http.MethodGet},
+		{authV1.Role_user.String(), "/api/v1/wallets/:walletId/deposit", http.MethodPost},
+		{authV1.Role_user.String(), "/api/v1/wallets/:walletId/withdraw", http.MethodPost},
+		{authV1.Role_user.String(), "/api/v1/transaction", http.MethodPost},
 	}
 
 	for _, p := range pPolicy {
