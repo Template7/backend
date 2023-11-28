@@ -90,7 +90,7 @@ func GetUserInfo(c *gin.Context) {
 // @version 1.0
 // @Param request body types.HttpCreateUserReq true "Request"
 // @produce json
-// @Success 200 {object} types.HttpLoginResp "Response"
+// @Success 200 {object} types.HttpRespBase "Response"
 // @failure 400 {object} types.HttpRespError
 // @Router /admin/v1/user [post]
 func CreateUser(c *gin.Context) {
@@ -128,12 +128,10 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, types.HttpLoginResp{
-		HttpRespBase: types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      types.HttpRespCodeOk,
-			Message:   types.HttpRespMsgOk,
-		},
+	c.JSON(http.StatusOK, types.HttpRespBase{
+		RequestId: c.GetHeader(middleware.HeaderRequestId),
+		Code:      types.HttpRespCodeOk,
+		Message:   types.HttpRespMsgOk,
 	})
 }
 
@@ -271,5 +269,56 @@ func GetUserWallets(c *gin.Context) {
 			Message:   types.HttpRespMsgOk,
 		},
 		Data: rd,
+	})
+}
+
+// DeleteUser
+// @Summary Delete user
+// @Tags V1,User
+// @version 1.0
+// @produce json
+// @Success 200 {object} types.HttpRespBase "Response"
+// @failure 400 {object} types.HttpRespError
+// @Param userId path string true "User ID"
+// @Router /admin/v1/users/{userId} [delete]
+func DeleteUser(c *gin.Context) {
+	log := logger.New().WithContext(c)
+	log.Debug("handle delete user")
+
+	userId := c.Param("userId")
+	if userId == "" {
+		log.Warn("empty user id")
+		c.JSON(http.StatusBadRequest, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidBody.Code),
+			Message:   t7Error.InvalidBody.Message,
+		})
+		return
+	}
+
+	if err := auth.New().DeleteUser(c, userId); err != nil {
+		log.WithError(err).Error("fail to create user")
+		t7Err, ok := t7Error.ToT7Error(err)
+		if !ok {
+			log.WithError(err).Error("unknown error")
+			c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+				RequestId: c.GetHeader(middleware.HeaderRequestId),
+				Code:      int(t7Error.Unknown.Code),
+				Message:   t7Error.Unknown.Message,
+			})
+			return
+		}
+		c.JSON(t7Err.GetStatus(), types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Err.Code),
+			Message:   t7Err.Message,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, types.HttpRespBase{
+		RequestId: c.GetHeader(middleware.HeaderRequestId),
+		Code:      types.HttpRespCodeOk,
+		Message:   types.HttpRespMsgOk,
 	})
 }

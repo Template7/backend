@@ -12,6 +12,7 @@ type Client interface {
 	GetUserById(ctx context.Context, userId string) (data entity.User, err error)
 	UpdateUserInfo(ctx context.Context, userId string, info entity.UserInfo) (err error)
 	GetUserWallets(ctx context.Context, userId string) (data []entity.Wallet)
+	DeleteUser(ctx context.Context, userId string) (err error)
 
 	// wallet
 	GetWallet(ctx context.Context, walletId string) (data entity.Wallet, err error)

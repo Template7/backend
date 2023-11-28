@@ -48,6 +48,23 @@ func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest)
 	return nil
 }
 
+func (s *service) DeleteUser(ctx context.Context, userId string) error {
+	log := s.log.WithContext(ctx).With("userId", userId)
+	log.Debug("delete user")
+
+	_, err := s.core.DeleteUser(userId)
+	if err != nil {
+		log.WithError(err).Error("fail to delete user from casbin api")
+	}
+
+	if err := s.db.DeleteUser(ctx, userId); err != nil {
+		log.WithError(err).Error("fail to delete user")
+		return t7Error.DbOperationFail.WithDetail(err.Error())
+	}
+
+	return nil
+}
+
 func (s *service) GetUserRole(ctx context.Context, username string) authV1.Role {
 	log := s.log.WithContext(ctx).With("username", username)
 	log.Debug("get user role")
