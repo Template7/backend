@@ -72,3 +72,14 @@ func (c *client) GetUserWallets(ctx context.Context, userId string) (data []enti
 	}
 	return
 }
+
+func (c *client) DeleteUser(ctx context.Context, userId string) (err error) {
+	log := c.log.WithContext(ctx).With("userId", userId)
+	log.Debug("delete user")
+
+	if err = c.sql.core.WithContext(ctx).Where("id = ?", userId).Delete(&entity.User{}).Error; err != nil {
+		log.WithError(err).Error("fail to delete user")
+	}
+
+	return
+}
