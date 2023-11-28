@@ -80,6 +80,9 @@ func (c *client) DeleteUser(ctx context.Context, userId string) (err error) {
 	if err = c.sql.core.WithContext(ctx).Where("id = ?", userId).Delete(&entity.User{}).Error; err != nil {
 		log.WithError(err).Error("fail to delete user")
 	}
+	if err = c.sql.core.WithContext(ctx).Where("user_id = ?", userId).Delete(&entity.Wallet{}).Error; err != nil {
+		log.WithError(err).Error("fail to delete wallet")
+	}
 
 	return
 }
