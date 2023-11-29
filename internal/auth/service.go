@@ -59,8 +59,10 @@ func New() Auth {
 			panic(err)
 		}
 		e.AddFunction("checkAdmin", func(args ...interface{}) (interface{}, error) {
-			username := args[0].(string)
-			return e.HasRoleForUser(username, authV1.Role_name[int32(authV1.Role_admin)])
+			log.With("args", args).Debug("check admin")
+
+			role := args[0].(string)
+			return role == authV1.Role_admin.String(), nil
 		})
 
 		instance = &service{
@@ -83,7 +85,7 @@ func (s *service) loadDefaultPolicies() {
 		{authV1.Role_user.String(), "/api/v1/wallets/:walletId", http.MethodGet},
 		{authV1.Role_user.String(), "/api/v1/wallets/:walletId/deposit", http.MethodPost},
 		{authV1.Role_user.String(), "/api/v1/wallets/:walletId/withdraw", http.MethodPost},
-		{authV1.Role_user.String(), "/api/v1/transaction", http.MethodPost},
+		{authV1.Role_user.String(), "/api/v1/transfer", http.MethodPost},
 	}
 
 	for _, p := range pPolicy {
@@ -96,6 +98,8 @@ func (s *service) loadDefaultPolicies() {
 			s.log.With("policy", p).Info("policy already exists")
 		}
 	}
+
+	s.log.With("policy", s.core.GetPolicy()).Debug("show policies")
 }
 
 func hashedPassword(password string) (string, error) {
