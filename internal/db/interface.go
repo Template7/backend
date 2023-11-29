@@ -11,10 +11,11 @@ type Client interface {
 	GetUser(ctx context.Context, username string) (data entity.User, err error)
 	GetUserById(ctx context.Context, userId string) (data entity.User, err error)
 	UpdateUserInfo(ctx context.Context, userId string, info entity.UserInfo) (err error)
-	GetUserWallets(ctx context.Context, userId string) (data []entity.Wallet)
+	GetUserWallets(ctx context.Context, userId string) (data []entity.UserWalletBalance)
+	DeleteUser(ctx context.Context, userId string) (err error)
 
 	// wallet
-	GetWallet(ctx context.Context, walletId string) (data entity.Wallet, err error)
+	GetWalletBalances(ctx context.Context, walletId string) (data []entity.WalletBalance, err error)
 	Deposit(ctx context.Context, walletId string, money entity.Money) (err error)
 	Withdraw(ctx context.Context, walletId string, money entity.Money) (err error)
 	Transfer(ctx context.Context, fromWalletId string, toWalletId string, money entity.Money) (err error)

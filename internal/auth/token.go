@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-func (s *service) ParseToken(ctx context.Context, token string) (data *v1.TokenClaims, err error) {
+func (s *service) ParseToken(ctx context.Context, token string) (data *UserTokenClaims, err error) {
 	log := s.log.WithContext(ctx)
 	log.Debug("parse token")
 
 	tk, err := jwt.ParseWithClaims(token, &UserTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return jwtSign, nil
+		return []byte(jwtSign), nil
 	})
 	if err != nil {
 		log.WithError(err).Error("fail to parse token")
@@ -28,7 +28,7 @@ func (s *service) ParseToken(ctx context.Context, token string) (data *v1.TokenC
 		return
 	}
 
-	return &claims.TokenClaims, nil
+	return claims, nil
 }
 
 func (s *service) genUserToken(ctx context.Context, userId string, role v1.Role) (string, error) {
@@ -39,10 +39,8 @@ func (s *service) genUserToken(ctx context.Context, userId string, role v1.Role)
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(userTokenTtl).Unix(),
 		},
-		TokenClaims: v1.TokenClaims{
-			UserId: userId,
-			Role:   role,
-		},
+		UserId: userId,
+		Role:   role.String(),
 	}
 
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, &utc)

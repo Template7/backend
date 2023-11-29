@@ -7,12 +7,12 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func (c *client) GetWallet(ctx context.Context, walletId string) (data entity.Wallet, err error) {
+func (c *client) GetWalletBalances(ctx context.Context, walletId string) (data []entity.WalletBalance, err error) {
 	log := c.log.WithContext(ctx).With("walletId", walletId)
-	log.Debug("get wallet")
+	log.Debug("get wallet balances")
 
-	if err = c.sql.core.WithContext(ctx).Where("id = ?", walletId).Preload("Balance").Take(&data).Error; err != nil {
-		log.WithError(err).Error("fail to get wallet")
+	if err = c.sql.core.WithContext(ctx).Raw("select w.id as wallet_id, b.currency, b.amount from wallet w join balance b on w.id = b.wallet_id where w.id = ?", walletId).Scan(&data).Error; err != nil {
+		log.WithError(err).Error("fail to get wallet balances")
 	}
 	return
 }
@@ -88,39 +88,6 @@ func (c *client) Transfer(ctx context.Context, fromWalletId string, toWalletId s
 func (c *client) deposit(ctx context.Context, tx *gorm.DB, walletId string, money entity.Money) (err error) {
 	log := c.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("do deposit")
-
-	//res := tx.Model(&entity.Balance{}).Where("wallet_id = ?", walletId).Update("amount", gorm.Expr("amount + ?", money.Amount))
-	//if res.RowsAffected == 1 {
-	//	log.Debug("finish deposit")
-	//	return nil
-	//}
-	//if err = res.Error; err != nil {
-	//	log.WithError(err).Error("fail to update record")
-	//	return err
-	//}
-	//if res.RowsAffected == 0 {
-	//	log.Info("no affected rows, insert new money")
-	//	err := tx.Model(&entity.Balance{}).Create(&entity.Balance{
-	//		WalletId: walletId,
-	//		Money:    money,
-	//	}).Error
-	//	if err != nil {
-	//		var msErr *mysql.MySQLError
-	//		if errors.As(err, &msErr) && msErr.Number != 1062 {
-	//			log.WithError(err).With("msErr", msErr).Error("fail to create balance")
-	//			return msErr
-	//		}
-	//		if err = tx.Model(&entity.Balance{}).Where("wallet_id = ?", walletId).Update("amount", gorm.Expr("amount + ?", money.Amount)).Error; err != nil {
-	//			log.WithError(err).Error("fail to create balance after duplicated entry")
-	//			return err
-	//		}
-	//	}
-	//	log.Debug("finish deposit with new money")
-	//	return nil
-	//}
-	//
-	//log.With("rowsAffected", res.RowsAffected).Warn("unexpected row affected")
-	//return nil
 
 	err = tx.Model(&entity.Balance{}).Clauses(
 		clause.OnConflict{

@@ -33,14 +33,13 @@ func Setup(r *gin.Engine) {
 	wallet.POST("/withdraw", handler.Withdraw)
 
 	// transfer
-	transaction := apiV1.Group("/transfer")
-	transaction.POST("", handler.Transfer)
+	transfer := apiV1.Group("/transfer")
+	transfer.POST("", handler.Transfer)
 
 	// admin
-	// TODO: auth admin middleware
-	adminV1 := r.Group("/admin/v1")
+	adminV1 := r.Group("/admin/v1", middleware.AuthToken, middleware.Permission)
 	adminV1.POST("/user", handler.CreateUser)
-	//adminV1.DELETE("/user", handler.DeleteUser)
+	adminV1.DELETE("/users/:userId", handler.DeleteUser)
 
 	if gin.Mode() == gin.DebugMode {
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

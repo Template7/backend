@@ -5,9 +5,8 @@ import (
 	"github.com/Template7/backend/internal/db"
 	"github.com/Template7/common/config"
 	"github.com/Template7/common/logger"
-	v1 "github.com/Template7/protobuf/gen/proto/template7/auth"
+	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/casbin/casbin/v2"
-	"github.com/casbin/casbin/v2/model"
 	gormadapter "github.com/casbin/gorm-adapter/v2"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
@@ -26,7 +25,8 @@ var (
 
 type UserTokenClaims struct {
 	jwt.StandardClaims
-	v1.TokenClaims
+	UserId string `json:"userId"`
+	Role   string `json:"role"`
 }
 
 type service struct {
@@ -47,20 +47,9 @@ func New() Auth {
 			panic(err)
 		}
 
-		e, err := casbin.NewEnforcer()
+		e, err := casbin.NewEnforcer("./config/rbac_model.conf", adapter)
 		if err != nil {
-			log.WithError(err).Panic("fail to new enforcer")
-			panic(err)
-		}
-
-		ms := "[request_definition]\nr = sub, obj, act\n\n[policy_definition]\np = sub, obj, act\n\n[role_definition]\ng = _, _\n\n[policy_effect]\ne = some(where (p.eft == allow))\n\n[matchers]\nm = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act || checkAdmin(r.sub)"
-		md, err := model.NewModelFromString(ms)
-		if err != nil {
-			log.WithError(err).Panic("fail to new model")
-			panic(err)
-		}
-		if err := e.InitWithModelAndAdapter(md, adapter); err != nil {
-			log.WithError(err).Panic("fail to init enforcer")
+			log.WithError(err).Error("fail to new enforcer")
 			panic(err)
 		}
 
@@ -70,8 +59,10 @@ func New() Auth {
 			panic(err)
 		}
 		e.AddFunction("checkAdmin", func(args ...interface{}) (interface{}, error) {
-			username := args[0].(string)
-			return e.HasRoleForUser(username, "admin")
+			log.With("args", args).Debug("check admin")
+
+			role := args[0].(string)
+			return role == authV1.Role_admin.String(), nil
 		})
 
 		instance = &service{
@@ -79,6 +70,7 @@ func New() Auth {
 			db:   db.New(),
 			log:  logger.New().WithService("auth"),
 		}
+		instance.loadDefaultPolicies()
 		instance.log.Debug("auth service initialized")
 	})
 
@@ -87,12 +79,13 @@ func New() Auth {
 
 func (s *service) loadDefaultPolicies() {
 	pPolicy := [][]string{
-		{v1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodGet},
-		{v1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodPut},
-		{v1.Role_user.String(), "/api/v1/wallets/:walletId", http.MethodGet},
-		{v1.Role_user.String(), "/api/v1/wallets/:walletId/deposit", http.MethodPost},
-		{v1.Role_user.String(), "/api/v1/wallets/:walletId/withdraw", http.MethodPost},
-		{v1.Role_user.String(), "/api/v1/transaction", http.MethodPost},
+		{authV1.Role_user.String(), "/api/v1/user/wallets", http.MethodGet},
+		{authV1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodGet},
+		{authV1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodPut},
+		{authV1.Role_user.String(), "/api/v1/wallets/:walletId", http.MethodGet},
+		{authV1.Role_user.String(), "/api/v1/wallets/:walletId/deposit", http.MethodPost},
+		{authV1.Role_user.String(), "/api/v1/wallets/:walletId/withdraw", http.MethodPost},
+		{authV1.Role_user.String(), "/api/v1/transfer", http.MethodPost},
 	}
 
 	for _, p := range pPolicy {
@@ -105,6 +98,8 @@ func (s *service) loadDefaultPolicies() {
 			s.log.With("policy", p).Info("policy already exists")
 		}
 	}
+
+	s.log.With("policy", s.core.GetPolicy()).Debug("show policies")
 }
 
 func hashedPassword(password string) (string, error) {

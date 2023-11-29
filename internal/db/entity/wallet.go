@@ -1,9 +1,6 @@
 package entity
 
 import (
-	"context"
-	"github.com/Template7/common/logger"
-	v1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 	"github.com/shopspring/decimal"
 	"time"
 )
@@ -13,32 +10,23 @@ type Wallet struct {
 	UserId    string    `gorm:"uniqueIndex:user_id;type:varchar(36);not null"`
 	CreatedAt time.Time `gorm:"autoCreateTime:milli"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime:milli"`
-
-	Balance []Balance `gorm:"foreignKey:WalletId;references:Id"`
 }
 
 func (w *Wallet) TableName() string {
 	return "wallet"
 }
 
-func (w *Wallet) ToProto(ctx context.Context) *v1.Wallet {
-	log := logger.New().WithContext(ctx)
+type WalletBalance struct {
+	WalletId string
+	Currency string
+	Amount   decimal.Decimal
+}
 
-	var blc []*v1.Balance
-	for _, b := range w.Balance {
-		if _, ok := v1.Currency_value[b.Currency]; !ok {
-			log.With("currency", b.Currency).Warn("unsupported currency")
-			continue
-		}
-		blc = append(blc, &v1.Balance{
-			Currency: v1.Currency(v1.Currency_value[b.Currency]),
-			Amount:   b.Amount.String(),
-		})
-	}
-	return &v1.Wallet{
-		Id:       w.Id,
-		Balances: blc,
-	}
+type UserWalletBalance struct {
+	UserId   string
+	WalletId string
+	Currency string
+	Amount   decimal.Decimal
 }
 
 type Balance struct {

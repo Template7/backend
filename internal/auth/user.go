@@ -19,8 +19,8 @@ func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest)
 		return t7Error.DecodeFail.WithDetail(err.Error())
 	}
 
-	userId := uuid.New()
-	ok, err := s.core.AddRoleForUser(userId.String(), req.Role.String())
+	userId := uuid.NewString()
+	ok, err := s.core.AddRoleForUser(userId, req.Role.String())
 	if err != nil {
 		log.WithError(err).Error("fail to add role for user")
 		return t7Error.Unknown.WithDetail(err.Error())
@@ -45,6 +45,23 @@ func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest)
 	}
 
 	log.Debug("user created")
+	return nil
+}
+
+func (s *service) DeleteUser(ctx context.Context, userId string) error {
+	log := s.log.WithContext(ctx).With("userId", userId)
+	log.Debug("delete user")
+
+	_, err := s.core.DeleteUser(userId)
+	if err != nil {
+		log.WithError(err).Error("fail to delete user from casbin api")
+	}
+
+	if err := s.db.DeleteUser(ctx, userId); err != nil {
+		log.WithError(err).Error("fail to delete user")
+		return t7Error.DbOperationFail.WithDetail(err.Error())
+	}
+
 	return nil
 }
 

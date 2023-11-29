@@ -7,19 +7,21 @@ import (
 
 type HttpUserInfoResp struct {
 	HttpRespBase
-	Data struct {
-		UserId   string `json:"userId" example:"userId001"`
-		Role     string `json:"role" example:"user"`
-		Status   string `json:"status" example:"activated"`
-		Nickname string `json:"nickname" example:"example"`
-		Email    string `json:"email" example:"example@email.com"`
-	} `json:"data"`
+	Data HttpUserInfoRespData `json:"data"`
+}
+
+type HttpUserInfoRespData struct {
+	UserId   string `json:"userId" example:"userId001"`
+	Role     string `json:"role" example:"user"`
+	Status   string `json:"status" example:"activated"`
+	Nickname string `json:"nickname" example:"example"`
+	Email    string `json:"email" example:"example@email.com"`
 }
 
 type HttpCreateUserReq struct {
 	Username string `json:"username" binding:"required" example:"username"`
 	Password string `json:"password" binding:"required" example:"password"`
-	Role     string `json:"role" binding:"oneof=admin,operator,user" example:"user"`
+	Role     string `json:"role" binding:"oneof=admin operator user" example:"user"`
 	Nickname string `json:"nickname" example:"nickname"`
 	Email    string `json:"email" example:"example@email.com"`
 }
