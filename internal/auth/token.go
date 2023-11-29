@@ -40,6 +40,7 @@ func (s *service) genUserToken(ctx context.Context, userId string, role v1.Role)
 			ExpiresAt: time.Now().Add(userTokenTtl).Unix(),
 		},
 		UserId: userId,
+		Role:   role.String(),
 	}
 
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, &utc)
