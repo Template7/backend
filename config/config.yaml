@@ -2,7 +2,7 @@ log:
   level: DEBUG
 
 service:
-  port: 8000
+  port: 8080
 
 db:
   sql:

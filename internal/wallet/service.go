@@ -33,17 +33,31 @@ func New() *Service {
 	return instance
 }
 
-func (s *Service) GetWallet(ctx context.Context, walletId string) (v1.Wallet, error) {
+func (s *Service) GetWallet(ctx context.Context, walletId string) (*v1.Wallet, error) {
 	log := s.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("get wallet")
 
-	wallet, err := s.db.GetWallet(ctx, walletId)
+	wbs, err := s.db.GetWalletBalances(ctx, walletId)
 	if err != nil {
-		log.WithError(err).Error("fail to get wallet")
-		return v1.Wallet{}, t7Error.DbOperationFail.WithDetail(err.Error())
+		log.WithError(err).Error("fail to get wallet balances")
+		return nil, t7Error.DbOperationFail.WithDetail(err.Error())
+	}
+	if len(wbs) == 0 {
+		log.Info("no balances")
+		return nil, nil
 	}
 
-	return *wallet.ToProto(ctx), nil
+	w := v1.Wallet{
+		Id: wbs[0].WalletId,
+	}
+	for _, wb := range wbs {
+		w.Balances = append(w.Balances, &v1.Balance{
+			Currency: v1.Currency(v1.Currency_value[wb.Currency]),
+			Amount:   wb.Amount.String(),
+		})
+	}
+
+	return &w, nil
 }
 
 func (s *Service) Deposit(ctx context.Context, walletId string, currency v1.Currency, amount uint32) error {

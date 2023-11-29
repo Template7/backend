@@ -6,6 +6,8 @@ import (
 	"github.com/Template7/backend/internal/db/entity"
 	"github.com/Template7/backend/internal/user"
 	"github.com/Template7/common/logger"
+	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
+	userV1 "github.com/Template7/protobuf/gen/proto/template7/user"
 	"github.com/google/uuid"
 	"github.com/spf13/viper"
 	"testing"
@@ -39,5 +41,20 @@ func Test_user(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 		return
+	}
+}
+
+func Test_service_CreateUser(t *testing.T) {
+	viper.AddConfigPath("../config")
+
+	ctx := context.WithValue(context.Background(), "traceId", uuid.NewString())
+
+	req := userV1.CreateUserRequest{
+		Username: "admin",
+		Password: "password",
+		Role:     authV1.Role_admin,
+	}
+	if err := auth.New().CreateUser(ctx, &req); err != nil {
+		t.Error(err)
 	}
 }
