@@ -79,13 +79,17 @@ func New() Auth {
 
 func (s *service) loadDefaultPolicies() {
 	pPolicy := [][]string{
+		{authV1.Role_user.String(), "/api/v1/user/info", http.MethodGet},
+		{authV1.Role_user.String(), "/api/v1/user/info", http.MethodPut},
 		{authV1.Role_user.String(), "/api/v1/user/wallets", http.MethodGet},
-		{authV1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodGet},
-		{authV1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodPut},
 		{authV1.Role_user.String(), "/api/v1/wallets/:walletId", http.MethodGet},
 		{authV1.Role_user.String(), "/api/v1/wallets/:walletId/deposit", http.MethodPost},
 		{authV1.Role_user.String(), "/api/v1/wallets/:walletId/withdraw", http.MethodPost},
 		{authV1.Role_user.String(), "/api/v1/transfer", http.MethodPost},
+	}
+
+	if _, err := s.core.RemovePolicy(authV1.Role_user.String()); err != nil {
+		s.log.WithError(err).Warn("fail to clear policies from db")
 	}
 
 	for _, p := range pPolicy {
