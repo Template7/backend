@@ -7,7 +7,6 @@ import (
 	"github.com/Template7/common/logger"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/casbin/casbin/v2"
-	"github.com/casbin/casbin/v2/model"
 	gormadapter "github.com/casbin/gorm-adapter/v2"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
@@ -48,28 +47,11 @@ func New() Auth {
 			panic(err)
 		}
 
-		e, err := casbin.NewEnforcer()
+		e, err := casbin.NewEnforcer("./config/rbac_model.conf", adapter)
 		if err != nil {
-			log.WithError(err).Panic("fail to new enforcer")
+			log.WithError(err).Error("fail to new enforcer")
 			panic(err)
 		}
-
-		ms := "[request_definition]\nr = sub, obj, act\n\n[policy_definition]\np = sub, obj, act\n\n[role_definition]\ng = _, _\n\n[policy_effect]\ne = some(where (p.eft == allow))\n\n[matchers]\nm = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act || checkAdmin(r.sub)"
-		md, err := model.NewModelFromString(ms)
-		if err != nil {
-			log.WithError(err).Panic("fail to new model")
-			panic(err)
-		}
-		if err := e.InitWithModelAndAdapter(md, adapter); err != nil {
-			log.WithError(err).Panic("fail to init enforcer")
-			panic(err)
-		}
-
-		//e, err := casbin.NewEnforcer("./config/rbac_model.conf", adapter)
-		//if err != nil {
-		//	log.WithError(err).Error("fail to new enforcer")
-		//	panic(err)
-		//}
 
 		err = e.LoadPolicy()
 		if err != nil {
