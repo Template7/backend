@@ -14,9 +14,32 @@ func Permission(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("check user permission")
 
-	uId, ok := c.Get(UserId)
+	//uId, ok := c.Get(UserId)
+	//if !ok {
+	//	log.Warn("no user id from the previous middleware")
+	//	c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+	//		RequestId: c.GetHeader(HeaderRequestId),
+	//		Code:      int(t7Error.InvalidToken.Code),
+	//		Message:   t7Error.InvalidToken.Message,
+	//	})
+	//	c.Abort()
+	//	return
+	//}
+	//userId, ok := uId.(string)
+	//if !ok {
+	//	log.With("uId", uId).Error("type assertion fail")
+	//	c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+	//		RequestId: c.GetHeader(HeaderRequestId),
+	//		Code:      int(t7Error.InvalidToken.Code),
+	//		Message:   t7Error.InvalidToken.Message,
+	//	})
+	//	c.Abort()
+	//	return
+	//}
+
+	role, ok := c.Get(Role)
 	if !ok {
-		log.Warn("no user id from the previous middleware")
+		log.Warn("no user role from the previous middleware")
 		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
 			RequestId: c.GetHeader(HeaderRequestId),
 			Code:      int(t7Error.InvalidToken.Code),
@@ -25,9 +48,9 @@ func Permission(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	userId, ok := uId.(string)
+	userRole, ok := role.(string)
 	if !ok {
-		log.With("uId", uId).Error("type assertion fail")
+		log.With("role", role).Error("type assertion fail")
 		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
 			RequestId: c.GetHeader(HeaderRequestId),
 			Code:      int(t7Error.InvalidToken.Code),
@@ -37,7 +60,7 @@ func Permission(c *gin.Context) {
 		return
 	}
 
-	if !auth.New().CheckPermission(c, userId, c.Request.URL.Path, c.Request.Method) {
+	if !auth.New().CheckPermission(c, userRole, c.Request.URL.Path, c.Request.Method) {
 		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
 			RequestId: c.GetHeader(HeaderRequestId),
 			Code:      int(t7Error.InvalidToken.Code),
@@ -85,6 +108,7 @@ func AuthToken(c *gin.Context) {
 	}
 
 	c.Set(UserId, claims.UserId)
+	c.Set(Role, claims.Role)
 
 	log.With("userId", claims.UserId).Debug("user token authorized")
 	c.Next()

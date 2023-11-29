@@ -27,6 +27,7 @@ var (
 type UserTokenClaims struct {
 	jwt.StandardClaims
 	UserId string `json:"userId"`
+	Role   string `json:"role"`
 }
 
 type service struct {
@@ -85,6 +86,7 @@ func New() Auth {
 			db:   db.New(),
 			log:  logger.New().WithService("auth"),
 		}
+		instance.loadDefaultPolicies()
 		instance.log.Debug("auth service initialized")
 	})
 
@@ -93,6 +95,7 @@ func New() Auth {
 
 func (s *service) loadDefaultPolicies() {
 	pPolicy := [][]string{
+		{authV1.Role_user.String(), "/api/v1/user/wallets", http.MethodGet},
 		{authV1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodGet},
 		{authV1.Role_user.String(), "/api/v1/users/:userId/info", http.MethodPut},
 		{authV1.Role_user.String(), "/api/v1/wallets/:walletId", http.MethodGet},
