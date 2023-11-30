@@ -19,4 +19,9 @@ type Client interface {
 	Deposit(ctx context.Context, walletId string, money entity.Money) (err error)
 	Withdraw(ctx context.Context, walletId string, money entity.Money) (err error)
 	Transfer(ctx context.Context, fromWalletId string, toWalletId string, money entity.Money) (err error)
+
+	// history
+	CreateDepositHistory(ctx context.Context, data entity.DepositHistory) (err error)
+	CreateWithdrawHistory(ctx context.Context, data entity.WithdrawHistory) (err error)
+	CreateTransferHistory(ctx context.Context, data entity.TransferHistory) (err error)
 }
