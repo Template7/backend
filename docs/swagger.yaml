@@ -22,6 +22,8 @@ definitions:
       role:
         enum:
         - admin
+        - operator
+        - user
         example: user
         type: string
       username:
@@ -140,6 +142,11 @@ definitions:
         example: 100
         type: integer
       currency:
+        enum:
+        - usd
+        - ntd
+        - cny
+        - jpy
         example: usd
         type: string
       fromWalletId:
@@ -150,6 +157,7 @@ definitions:
         type: string
     required:
     - amount
+    - currency
     - fromWalletId
     - toWalletId
     type: object
@@ -167,28 +175,30 @@ definitions:
         example: 3000
         type: integer
       data:
-        properties:
-          email:
-            example: example@email.com
-            type: string
-          nickname:
-            example: example
-            type: string
-          role:
-            example: user
-            type: string
-          status:
-            example: activated
-            type: string
-          userId:
-            example: userId001
-            type: string
-        type: object
+        $ref: '#/definitions/types.HttpUserInfoRespData'
       message:
         example: ok
         type: string
       requestId:
         example: b8974256-1f17-477f-8638-c7ebbac656d7
+        type: string
+    type: object
+  types.HttpUserInfoRespData:
+    properties:
+      email:
+        example: example@email.com
+        type: string
+      nickname:
+        example: example
+        type: string
+      role:
+        example: user
+        type: string
+      status:
+        example: activated
+        type: string
+      userId:
+        example: userId001
         type: string
     type: object
   types.HttpWalletDepositReq:
@@ -197,10 +207,16 @@ definitions:
         example: 100
         type: integer
       currency:
+        enum:
+        - usd
+        - ntd
+        - cny
+        - jpy
         example: usd
         type: string
     required:
     - amount
+    - currency
     type: object
   types.HttpWalletWithdrawReq:
     properties:
@@ -208,10 +224,16 @@ definitions:
         example: 100
         type: integer
       currency:
+        enum:
+        - usd
+        - ntd
+        - cny
+        - jpy
         example: usd
         type: string
     required:
     - amount
+    - currency
     type: object
 info:
   contact: {}
@@ -249,12 +271,35 @@ paths:
         "200":
           description: Response
           schema:
-            $ref: '#/definitions/types.HttpLoginResp'
+            $ref: '#/definitions/types.HttpRespBase'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/types.HttpRespError'
       summary: Create user
+      tags:
+      - V1
+      - User
+  /admin/v1/users/{userId}:
+    delete:
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response
+          schema:
+            $ref: '#/definitions/types.HttpRespBase'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
+      summary: Delete user
       tags:
       - V1
       - User
