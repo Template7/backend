@@ -2,12 +2,16 @@ package handler
 
 import (
 	"github.com/Template7/backend/api/types"
+	"github.com/Template7/backend/internal/db"
+	"github.com/Template7/backend/internal/db/entity"
 	middleware "github.com/Template7/backend/internal/route/middleWare"
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/backend/internal/wallet"
 	"github.com/Template7/common/logger"
+	"github.com/Template7/common/t7Id"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 	"github.com/gin-gonic/gin"
+	"github.com/shopspring/decimal"
 	"net/http"
 )
 
@@ -80,6 +84,29 @@ func Deposit(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("handle deposit")
 
+	uId, ok := c.Get(middleware.UserId)
+	if !ok {
+		log.Warn("no user id from the previous middleware")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		c.Abort()
+		return
+	}
+	userId, ok := uId.(string)
+	if !ok {
+		log.With("uId", uId).Error("type assertion fail")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		c.Abort()
+		return
+	}
+
 	var req types.HttpWalletDepositReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.WithError(err).Warn("invalid body")
@@ -91,7 +118,8 @@ func Deposit(c *gin.Context) {
 		return
 	}
 
-	if err := wallet.New().Deposit(c, c.Param("walletId"), v1.Currency(v1.Currency_value[req.Currency]), req.Amount); err != nil {
+	wId := c.Param("walletId")
+	if err := wallet.New().Deposit(c, wId, v1.Currency(v1.Currency_value[req.Currency]), req.Amount); err != nil {
 		defer c.Abort()
 		log.WithError(err).Error("fail to deposit")
 		t7Err, ok := t7Error.ToT7Error(err)
@@ -108,6 +136,25 @@ func Deposit(c *gin.Context) {
 			RequestId: c.GetHeader(middleware.HeaderRequestId),
 			Code:      int(t7Err.Code),
 			Message:   t7Err.Message,
+		})
+		return
+	}
+
+	// write deposit record
+	err := db.New().CreateDepositHistory(c, entity.DepositHistory{
+		Id:       t7Id.New().Generate().Int64(),
+		UserId:   userId,
+		WalletId: wId,
+		Currency: req.Currency,
+		Amount:   decimal.NewFromInt32(int32(req.Amount)),
+		Note:     req.Note,
+	})
+	if err != nil {
+		log.WithError(err).Error("fail to create deposit history")
+		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.DbOperationFail.Code),
+			Message:   t7Error.DbOperationFail.Message,
 		})
 		return
 	}
@@ -133,6 +180,29 @@ func Withdraw(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("handle withdraw")
 
+	uId, ok := c.Get(middleware.UserId)
+	if !ok {
+		log.Warn("no user id from the previous middleware")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		c.Abort()
+		return
+	}
+	userId, ok := uId.(string)
+	if !ok {
+		log.With("uId", uId).Error("type assertion fail")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		c.Abort()
+		return
+	}
+
 	var req types.HttpWalletWithdrawReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.WithError(err).Warn("invalid body")
@@ -144,7 +214,8 @@ func Withdraw(c *gin.Context) {
 		return
 	}
 
-	if err := wallet.New().Withdraw(c, c.Param("walletId"), v1.Currency(v1.Currency_value[req.Currency]), req.Amount); err != nil {
+	wId := c.Param("walletId")
+	if err := wallet.New().Withdraw(c, wId, v1.Currency(v1.Currency_value[req.Currency]), req.Amount); err != nil {
 		defer c.Abort()
 		log.WithError(err).Error("fail to withdraw")
 		t7Err, ok := t7Error.ToT7Error(err)
@@ -161,6 +232,25 @@ func Withdraw(c *gin.Context) {
 			RequestId: c.GetHeader(middleware.HeaderRequestId),
 			Code:      int(t7Err.Code),
 			Message:   t7Err.Message,
+		})
+		return
+	}
+
+	// write withdraw record
+	err := db.New().CreateWithdrawHistory(c, entity.WithdrawHistory{
+		Id:       t7Id.New().Generate().Int64(),
+		UserId:   userId,
+		WalletId: wId,
+		Currency: req.Currency,
+		Amount:   decimal.NewFromInt32(int32(req.Amount)),
+		Note:     req.Note,
+	})
+	if err != nil {
+		log.WithError(err).Error("fail to create withdraw history")
+		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.DbOperationFail.Code),
+			Message:   t7Error.DbOperationFail.Message,
 		})
 		return
 	}
@@ -184,6 +274,29 @@ func Withdraw(c *gin.Context) {
 func Transfer(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.WithContext(c).Debug("handle make transfer")
+
+	uId, ok := c.Get(middleware.UserId)
+	if !ok {
+		log.Warn("no user id from the previous middleware")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		c.Abort()
+		return
+	}
+	userId, ok := uId.(string)
+	if !ok {
+		log.With("uId", uId).Error("type assertion fail")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		c.Abort()
+		return
+	}
 
 	var req types.HttpTransferMoneyReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -213,6 +326,26 @@ func Transfer(c *gin.Context) {
 			RequestId: c.GetHeader(middleware.HeaderRequestId),
 			Code:      int(t7Err.Code),
 			Message:   t7Err.Message,
+		})
+		return
+	}
+
+	// write transfer record
+	err := db.New().CreateTransferHistory(c, entity.TransferHistory{
+		Id:           t7Id.New().Generate().Int64(),
+		UserId:       userId,
+		FromWalletId: req.FromWalletId,
+		ToWalletId:   req.ToWalletId,
+		Currency:     req.Currency,
+		Amount:       decimal.NewFromInt32(int32(req.Amount)),
+		Note:         req.Note,
+	})
+	if err != nil {
+		log.WithError(err).Error("fail to create withdraw history")
+		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.DbOperationFail.Code),
+			Message:   t7Error.DbOperationFail.Message,
 		})
 		return
 	}
