@@ -4,7 +4,7 @@
 
 # Template7-Backend
 
-![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)
+[![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./resource/readme/LICENSE)
 
 Template of REST API server write by go.
 
