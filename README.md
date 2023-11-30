@@ -4,7 +4,7 @@
 
 # Template7-Backend
 
-[![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
+[![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./resource/readme/LICENSE)
 
 Template of REST API server write by go.
 
