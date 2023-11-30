@@ -63,7 +63,42 @@ const docTemplate = `{
                     "200": {
                         "description": "Response",
                         "schema": {
-                            "$ref": "#/definitions/types.HttpLoginResp"
+                            "$ref": "#/definitions/types.HttpRespBase"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpRespError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/v1/users/{userId}": {
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V1",
+                    "User"
+                ],
+                "summary": "Delete user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpRespBase"
                         }
                     },
                     "400": {
@@ -391,7 +426,9 @@ const docTemplate = `{
                 "role": {
                     "type": "string",
                     "enum": [
-                        "admin"
+                        "admin",
+                        "operator",
+                        "user"
                     ],
                     "example": "user"
                 },
@@ -553,6 +590,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "amount",
+                "currency",
                 "fromWalletId",
                 "toWalletId"
             ],
@@ -563,6 +601,12 @@ const docTemplate = `{
                 },
                 "currency": {
                     "type": "string",
+                    "enum": [
+                        "usd",
+                        "ntd",
+                        "cny",
+                        "jpy"
+                    ],
                     "example": "usd"
                 },
                 "fromWalletId": {
@@ -595,29 +639,7 @@ const docTemplate = `{
                     "example": 3000
                 },
                 "data": {
-                    "type": "object",
-                    "properties": {
-                        "email": {
-                            "type": "string",
-                            "example": "example@email.com"
-                        },
-                        "nickname": {
-                            "type": "string",
-                            "example": "example"
-                        },
-                        "role": {
-                            "type": "string",
-                            "example": "user"
-                        },
-                        "status": {
-                            "type": "string",
-                            "example": "activated"
-                        },
-                        "userId": {
-                            "type": "string",
-                            "example": "userId001"
-                        }
-                    }
+                    "$ref": "#/definitions/types.HttpUserInfoRespData"
                 },
                 "message": {
                     "type": "string",
@@ -629,10 +651,36 @@ const docTemplate = `{
                 }
             }
         },
+        "types.HttpUserInfoRespData": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "example@email.com"
+                },
+                "nickname": {
+                    "type": "string",
+                    "example": "example"
+                },
+                "role": {
+                    "type": "string",
+                    "example": "user"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "activated"
+                },
+                "userId": {
+                    "type": "string",
+                    "example": "userId001"
+                }
+            }
+        },
         "types.HttpWalletDepositReq": {
             "type": "object",
             "required": [
-                "amount"
+                "amount",
+                "currency"
             ],
             "properties": {
                 "amount": {
@@ -641,6 +689,12 @@ const docTemplate = `{
                 },
                 "currency": {
                     "type": "string",
+                    "enum": [
+                        "usd",
+                        "ntd",
+                        "cny",
+                        "jpy"
+                    ],
                     "example": "usd"
                 }
             }
@@ -648,7 +702,8 @@ const docTemplate = `{
         "types.HttpWalletWithdrawReq": {
             "type": "object",
             "required": [
-                "amount"
+                "amount",
+                "currency"
             ],
             "properties": {
                 "amount": {
@@ -657,6 +712,12 @@ const docTemplate = `{
                 },
                 "currency": {
                     "type": "string",
+                    "enum": [
+                        "usd",
+                        "ntd",
+                        "cny",
+                        "jpy"
+                    ],
                     "example": "usd"
                 }
             }
