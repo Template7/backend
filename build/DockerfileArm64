@@ -16,6 +16,5 @@ ENV PROJECT=backend
 
 WORKDIR /$PROJECT
 COPY --from=builder /$PROJECT/$PROJECT ./
-COPY ./resource/template ./resource/template
 
 CMD ["sh", "-c", "./$PROJECT"]
