@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"github.com/Template7/backend/internal/db/entity"
+	"github.com/shopspring/decimal"
 )
 
 type Client interface {
@@ -19,4 +20,11 @@ type Client interface {
 	Deposit(ctx context.Context, walletId string, money entity.Money) (err error)
 	Withdraw(ctx context.Context, walletId string, money entity.Money) (err error)
 	Transfer(ctx context.Context, fromWalletId string, toWalletId string, money entity.Money) (err error)
+	GetBalance(ctx context.Context, walletId string, currency string) (decimal.Decimal, error)
+	GetWalletsBalance(ctx context.Context, walletId []string, currency string) (data []entity.Balance, err error)
+
+	// history
+	CreateDepositHistory(ctx context.Context, data entity.DepositHistory) (err error)
+	CreateWithdrawHistory(ctx context.Context, data entity.WithdrawHistory) (err error)
+	CreateTransferHistory(ctx context.Context, data entity.TransferHistory) (err error)
 }

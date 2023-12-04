@@ -8,11 +8,13 @@ type HttpGetWalletResp struct {
 type HttpWalletWithdrawReq struct {
 	Currency string `json:"currency" binding:"required,oneof=usd ntd cny jpy" example:"usd"`
 	Amount   uint32 `json:"amount" binding:"required" example:"100"`
+	Note     string `json:"note"`
 }
 
 type HttpWalletDepositReq struct {
 	Currency string `json:"currency" binding:"required,oneof=usd ntd cny jpy" example:"usd"`
 	Amount   uint32 `json:"amount" binding:"required" example:"100"`
+	Note     string `json:"note"`
 }
 
 type HttpTransferMoneyReq struct {
@@ -20,4 +22,5 @@ type HttpTransferMoneyReq struct {
 	ToWalletId   string `json:"toWalletId" binding:"required" example:"d53ce74f-5f74-4c78-b3ca-1e1d2f7fa43d"`
 	Currency     string `json:"currency" binding:"required,oneof=usd ntd cny jpy" example:"usd"`
 	Amount       uint32 `json:"amount" binding:"required" example:"100"`
+	Note         string `json:"note"`
 }

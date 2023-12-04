@@ -10,7 +10,13 @@ import (
 func TestNew(t *testing.T) {
 	viper.AddConfigPath("../../config")
 
-	if err := db.NewSql().Debug().AutoMigrate(&entity.User{}, &entity.Wallet{}, &entity.Balance{}); err != nil {
+	if err := db.NewSql().Debug().AutoMigrate(
+		&entity.User{},
+		&entity.Wallet{},
+		&entity.Balance{},
+		&entity.DepositHistory{},
+		&entity.WithdrawHistory{},
+		&entity.TransferHistory{}); err != nil {
 		t.Error(err)
 	}
 }
