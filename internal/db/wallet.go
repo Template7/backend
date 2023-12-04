@@ -109,7 +109,7 @@ func (c *client) GetWalletsBalance(ctx context.Context, walletId []string, curre
 	log := c.log.WithContext(ctx).With("walletId", walletId).With("currency", currency)
 	log.Debug("get balances")
 
-	if err = c.sql.core.WithContext(ctx).Where(&entity.Balance{}).Select("wallet_id", "amount").Where("wallet_id in ? and currency = ?", walletId, currency).Take(&data).Error; err != nil {
+	if err = c.sql.core.WithContext(ctx).Where(&entity.Balance{}).Select("wallet_id", "amount").Where("wallet_id in ? and currency = ?", walletId, currency).Find(&data).Error; err != nil {
 		log.WithError(err).Error("fail to get balance")
 	}
 
