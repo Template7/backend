@@ -119,6 +119,17 @@ func Deposit(c *gin.Context) {
 	}
 
 	wId := c.Param("walletId")
+	bb, err := db.New().GetBalance(c, wId, req.Currency)
+	if err != nil {
+		log.WithError(err).Error("fail to get balance before withdraw")
+		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.DbOperationFail.Code),
+			Message:   t7Error.DbOperationFail.Message,
+		})
+		return
+	}
+
 	if err := wallet.New().Deposit(c, wId, v1.Currency(v1.Currency_value[req.Currency]), req.Amount); err != nil {
 		defer c.Abort()
 		log.WithError(err).Error("fail to deposit")
@@ -140,15 +151,29 @@ func Deposit(c *gin.Context) {
 		return
 	}
 
+	ba, err := db.New().GetBalance(c, wId, req.Currency)
+	if err != nil {
+		log.WithError(err).Error("fail to get balance after withdraw")
+		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.DbOperationFail.Code),
+			Message:   t7Error.DbOperationFail.Message,
+		})
+		return
+	}
+
 	// write deposit record
-	err := db.New().CreateDepositHistory(c, entity.DepositHistory{
-		Id:       t7Id.New().Generate().Int64(),
-		UserId:   userId,
-		WalletId: wId,
-		Currency: req.Currency,
-		Amount:   decimal.NewFromInt32(int32(req.Amount)),
-		Note:     req.Note,
+	err = db.New().CreateDepositHistory(c, entity.DepositHistory{
+		Id:            t7Id.New().Generate().Int64(),
+		UserId:        userId,
+		WalletId:      wId,
+		Currency:      req.Currency,
+		Amount:        decimal.NewFromInt32(int32(req.Amount)),
+		BalanceBefore: bb,
+		BalanceAfter:  ba,
+		Note:          req.Note,
 	})
+
 	if err != nil {
 		log.WithError(err).Error("fail to create deposit history")
 		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
@@ -215,6 +240,17 @@ func Withdraw(c *gin.Context) {
 	}
 
 	wId := c.Param("walletId")
+	bb, err := db.New().GetBalance(c, wId, req.Currency)
+	if err != nil {
+		log.WithError(err).Error("fail to get balance before withdraw")
+		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.DbOperationFail.Code),
+			Message:   t7Error.DbOperationFail.Message,
+		})
+		return
+	}
+
 	if err := wallet.New().Withdraw(c, wId, v1.Currency(v1.Currency_value[req.Currency]), req.Amount); err != nil {
 		defer c.Abort()
 		log.WithError(err).Error("fail to withdraw")
@@ -236,14 +272,27 @@ func Withdraw(c *gin.Context) {
 		return
 	}
 
+	ba, err := db.New().GetBalance(c, wId, req.Currency)
+	if err != nil {
+		log.WithError(err).Error("fail to get balance after withdraw")
+		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.DbOperationFail.Code),
+			Message:   t7Error.DbOperationFail.Message,
+		})
+		return
+	}
+
 	// write withdraw record
-	err := db.New().CreateWithdrawHistory(c, entity.WithdrawHistory{
-		Id:       t7Id.New().Generate().Int64(),
-		UserId:   userId,
-		WalletId: wId,
-		Currency: req.Currency,
-		Amount:   decimal.NewFromInt32(int32(req.Amount)),
-		Note:     req.Note,
+	err = db.New().CreateWithdrawHistory(c, entity.WithdrawHistory{
+		Id:            t7Id.New().Generate().Int64(),
+		UserId:        userId,
+		WalletId:      wId,
+		Currency:      req.Currency,
+		Amount:        decimal.NewFromInt32(int32(req.Amount)),
+		BalanceBefore: bb,
+		BalanceAfter:  ba,
+		Note:          req.Note,
 	})
 	if err != nil {
 		log.WithError(err).Error("fail to create withdraw history")
@@ -309,6 +358,17 @@ func Transfer(c *gin.Context) {
 		return
 	}
 
+	bb, err := db.New().GetWalletsBalance(c, []string{req.FromWalletId, req.ToWalletId}, req.Currency)
+	if err != nil {
+		log.WithError(err).Error("fail to get wallets balance before transfer")
+		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.DbOperationFail.Code),
+			Message:   t7Error.DbOperationFail.Message,
+		})
+		return
+	}
+
 	if err := wallet.New().Transfer(c, req.FromWalletId, req.ToWalletId, v1.Currency(v1.Currency_value[req.Currency]), req.Amount); err != nil {
 		defer c.Abort()
 		log.WithError(err).Error("fail to transfer")
@@ -330,15 +390,46 @@ func Transfer(c *gin.Context) {
 		return
 	}
 
+	ba, err := db.New().GetWalletsBalance(c, []string{req.FromWalletId, req.ToWalletId}, req.Currency)
+	if err != nil {
+		log.WithError(err).Error("fail to get wallets balance after transfer")
+		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.DbOperationFail.Code),
+			Message:   t7Error.DbOperationFail.Message,
+		})
+		return
+	}
+
+	var sbb, sba, rbb, rba decimal.Decimal
+	if bb[0].WalletId == req.FromWalletId {
+		sbb = bb[0].Amount
+		rbb = bb[1].Amount
+	} else {
+		rbb = bb[0].Amount
+		sbb = bb[1].Amount
+	}
+	if ba[0].WalletId == req.FromWalletId {
+		sba = ba[0].Amount
+		rba = ba[1].Amount
+	} else {
+		rba = ba[0].Amount
+		sba = ba[1].Amount
+	}
+
 	// write transfer record
-	err := db.New().CreateTransferHistory(c, entity.TransferHistory{
-		Id:           t7Id.New().Generate().Int64(),
-		UserId:       userId,
-		FromWalletId: req.FromWalletId,
-		ToWalletId:   req.ToWalletId,
-		Currency:     req.Currency,
-		Amount:       decimal.NewFromInt32(int32(req.Amount)),
-		Note:         req.Note,
+	err = db.New().CreateTransferHistory(c, entity.TransferHistory{
+		Id:                    t7Id.New().Generate().Int64(),
+		UserId:                userId,
+		FromWalletId:          req.FromWalletId,
+		ToWalletId:            req.ToWalletId,
+		Currency:              req.Currency,
+		Amount:                decimal.NewFromInt32(int32(req.Amount)),
+		SenderBalanceBefore:   sbb,
+		SenderBalanceAfter:    sba,
+		ReceiverBalanceBefore: rbb,
+		ReceiverBalanceAfter:  rba,
+		Note:                  req.Note,
 	})
 	if err != nil {
 		log.WithError(err).Error("fail to create withdraw history")
