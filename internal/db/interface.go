@@ -27,4 +27,5 @@ type Client interface {
 	CreateDepositHistory(ctx context.Context, data entity.DepositHistory) (err error)
 	CreateWithdrawHistory(ctx context.Context, data entity.WithdrawHistory) (err error)
 	CreateTransferHistory(ctx context.Context, data entity.TransferHistory) (err error)
+	GetWalletBalanceHistory(ctx context.Context, walletId string, currency string) []entity.WalletBalanceHistory
 }
