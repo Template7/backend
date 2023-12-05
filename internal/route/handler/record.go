@@ -20,7 +20,7 @@ import (
 // @failure 400 {object} types.HttpRespError
 // @Param walletId path string true "Wallet ID"
 // @Param currency path string true "Currency"
-// @Router /api/v1/wallets/{walletId}/currencies/{currency}/record [post]
+// @Router /api/v1/wallets/{walletId}/currencies/{currency}/record [get]
 func GetWalletBalanceRecord(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("handle get wallet balance record")
