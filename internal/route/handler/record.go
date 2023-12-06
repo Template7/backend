@@ -51,6 +51,7 @@ func GetWalletBalanceRecord(c *gin.Context) {
 		data[i] = types.HttpGetWalletBalanceRecordRespData{
 			RecordId:     r.RecordId,
 			Io:           r.Io,
+			Amount:       r.Amount,
 			AmountBefore: r.AmountBefore,
 			AmountAfter:  r.AmountAfter,
 			Timestamp:    r.Timestamp,

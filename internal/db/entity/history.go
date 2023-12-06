@@ -64,6 +64,7 @@ type WalletHistory struct {
 type WalletBalanceHistory struct {
 	RecordId     int64
 	Io           string // in/out
+	Amount       decimal.Decimal
 	AmountBefore decimal.Decimal
 	AmountAfter  decimal.Decimal
 	Timestamp    time.Time // record created_at
