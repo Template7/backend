@@ -31,6 +31,7 @@ func Setup(r *gin.Engine) {
 	wallet.GET("", handler.GetWallet)
 	wallet.POST("/deposit", handler.Deposit)
 	wallet.POST("/withdraw", handler.Withdraw)
+	wallet.GET("/currencies/:currency/record", handler.GetWalletBalanceRecord)
 
 	// transfer
 	transfer := apiV1.Group("/transfer")

@@ -301,6 +301,48 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/wallets/{walletId}/currencies/{currency}/record": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V1",
+                    "Wallet"
+                ],
+                "summary": "Get wallet balance record",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet ID",
+                        "name": "walletId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Currency",
+                        "name": "currency",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpGetWalletBalanceRecordResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpRespError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/wallets/{walletId}/deposit": {
             "post": {
                 "produces": [
@@ -489,6 +531,57 @@ const docTemplate = `{
                 }
             }
         },
+        "types.HttpGetWalletBalanceRecordResp": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 3000
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.HttpGetWalletBalanceRecordRespData"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "requestId": {
+                    "type": "string",
+                    "example": "b8974256-1f17-477f-8638-c7ebbac656d7"
+                }
+            }
+        },
+        "types.HttpGetWalletBalanceRecordRespData": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "amountAfter": {
+                    "type": "number"
+                },
+                "amountBefore": {
+                    "type": "number"
+                },
+                "io": {
+                    "description": "in/out",
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "recordId": {
+                    "type": "integer"
+                },
+                "timestamp": {
+                    "description": "record created_at",
+                    "type": "string"
+                }
+            }
+        },
         "types.HttpGetWalletResp": {
             "type": "object",
             "properties": {
@@ -613,6 +706,9 @@ const docTemplate = `{
                     "type": "string",
                     "example": "4eb4a439-af97-46e4-8a0c-6d568281c43a"
                 },
+                "note": {
+                    "type": "string"
+                },
                 "toWalletId": {
                     "type": "string",
                     "example": "d53ce74f-5f74-4c78-b3ca-1e1d2f7fa43d"
@@ -696,6 +792,9 @@ const docTemplate = `{
                         "jpy"
                     ],
                     "example": "usd"
+                },
+                "note": {
+                    "type": "string"
                 }
             }
         },
@@ -719,6 +818,9 @@ const docTemplate = `{
                         "jpy"
                     ],
                     "example": "usd"
+                },
+                "note": {
+                    "type": "string"
                 }
             }
         }
