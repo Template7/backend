@@ -85,6 +85,7 @@ func (s *service) loadDefaultPolicies() {
 		{authV1.Role_user.String(), "/api/v1/wallets/:walletId", http.MethodGet},
 		{authV1.Role_user.String(), "/api/v1/wallets/:walletId/deposit", http.MethodPost},
 		{authV1.Role_user.String(), "/api/v1/wallets/:walletId/withdraw", http.MethodPost},
+		{authV1.Role_user.String(), "/api/v1/wallets/:walletId/currencies/:currency/record", http.MethodGet},
 		{authV1.Role_user.String(), "/api/v1/transfer", http.MethodPost},
 	}
 
