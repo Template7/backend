@@ -74,6 +74,7 @@ func (c *client) GetWalletBalanceHistory(ctx context.Context, walletId string, c
 		wbh[i] = entity.WalletBalanceHistory{
 			RecordId:     h.Id,
 			Io:           "in",
+			Amount:       h.Amount,
 			AmountBefore: h.BalanceBefore,
 			AmountAfter:  h.BalanceAfter,
 			Timestamp:    h.CreatedAt,
@@ -84,6 +85,7 @@ func (c *client) GetWalletBalanceHistory(ctx context.Context, walletId string, c
 		wbh[i+len(dep)] = entity.WalletBalanceHistory{
 			RecordId:     h.Id,
 			Io:           "out",
+			Amount:       h.Amount,
 			AmountBefore: h.BalanceBefore,
 			AmountAfter:  h.BalanceAfter,
 			Timestamp:    h.CreatedAt,
@@ -94,6 +96,7 @@ func (c *client) GetWalletBalanceHistory(ctx context.Context, walletId string, c
 		wbh[i+len(dep)+len(wit)] = entity.WalletBalanceHistory{
 			RecordId:     h.Id,
 			Io:           "out",
+			Amount:       h.Amount,
 			AmountBefore: h.SenderBalanceBefore,
 			AmountAfter:  h.SenderBalanceAfter,
 			Timestamp:    h.CreatedAt,
@@ -104,6 +107,7 @@ func (c *client) GetWalletBalanceHistory(ctx context.Context, walletId string, c
 		wbh[i+len(dep)+len(wit)+len(trf)] = entity.WalletBalanceHistory{
 			RecordId:     h.Id,
 			Io:           "in",
+			Amount:       h.Amount,
 			AmountBefore: h.ReceiverBalanceBefore,
 			AmountAfter:  h.ReceiverBalanceAfter,
 			Timestamp:    h.CreatedAt,
