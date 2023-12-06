@@ -557,6 +557,9 @@ const docTemplate = `{
         "types.HttpGetWalletBalanceRecordRespData": {
             "type": "object",
             "properties": {
+                "amount": {
+                    "type": "number"
+                },
                 "amountAfter": {
                     "type": "number"
                 },
