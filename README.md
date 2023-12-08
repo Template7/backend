@@ -12,26 +12,23 @@ Template of REST API server write by go.
 
 ## Architecture
 
+Three layer architecture design: handler -> service -> repo
+
 <p >
   <img src="resource/readme/architecture.png">
 </p>
 
-For clean logic and easy-maintainable purpose, suggest each layer to access its next layer's function / method only,
-do not implement cross layer function call.
-
-For example: handler should not access db client directly, suggest to access by correspond component instead.  
-
-| Layer | Function |
-| :--- | :--- |
-| API / Route | Registered API endpoint. |
-| Middle ware | Common / routine functions such like token verification, body check, etc. |
-| Handler | Parse necessary variables from URI or body. |
-| Component | Core business logic, include third-party client. |
-| DB Client | DB manipulation functions. |
-| Redis Client | Redis client. |
-| Document / Struct | Definition of DB documents / structs, it could be referenced by any layer. |
+| Block             | Layer | Function                                                                   |
+|:------------------|:------|:---------------------------------------------------------------------------|
+| API / Route       | 0     | Registered API endpoint.                                                   |
+| Middle ware       | 0     | Common / routine functions such like token verify/generate, logging, etc.  |
+| Handler           | 1     | Parse necessary variables from URI and body,                               |
+| Service           | 2     | Core business logic, include third-party client.                           |
+| DB Client         | 3     | Repo layer.                                                                |
+| Redis Client      | 3     | Redis client.                                                              |
 
 ## Run
+
 ```
 $ make run
 ```
@@ -39,21 +36,25 @@ $ make run
 ## Build
 
 ### All (Swagger -> Binary -> Run)
+
 ```
 $ make all 
 ```
 
 ### Binary Only
+
 ```
 $ make build
 ```
 
 ### Swagger Document
+
 ```
 $ make swagger
 ```
 
 ### Docker
+
 ```
 $ docker-compose build
 ```
