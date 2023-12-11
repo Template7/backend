@@ -36,7 +36,17 @@ func GetWalletBalanceRecord(c *gin.Context) {
 		return
 	}
 
-	records := db.New().GetWalletBalanceHistory(c, wId, cur)
+	records, err := db.New().GetWalletBalanceHistory(c, wId, cur)
+	if err != nil {
+		log.WithError(err).Error("fail to get wallet balance history")
+		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.DbOperationFail.Code),
+			Message:   t7Error.DbOperationFail.Message,
+		})
+		return
+	}
+
 	if records == nil {
 		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
 			RequestId: c.GetHeader(middleware.HeaderRequestId),
