@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	_ "github.com/Template7/backend/docs"
 	"github.com/Template7/backend/internal/config"
@@ -36,7 +37,7 @@ func main() {
 
 	go func() {
 		log.With("port", config.New().Service.Port).Info("server started")
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.WithError(err).Panic(err.Error())
 		}
 	}()
