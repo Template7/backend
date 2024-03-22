@@ -7,7 +7,7 @@ RUN go mod download
 
 # install swag cli then build swagger document
 RUN go install github.com/swaggo/swag/cmd/swag@latest
-RUN swag init -g ./cmd/main.go --parseDependency --parseDepth 3
+RUN swag init -g ./cmd/main.go
 
 RUN go build -o $PROJECT ./cmd
 
