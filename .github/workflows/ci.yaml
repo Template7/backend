@@ -35,6 +35,7 @@ jobs:
         with:
           file: build/DockerfileArm64
           push: true
+          platforms: linux/arm64
           tags: allensyk/template7-backend:arm64
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

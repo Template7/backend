@@ -29,3 +29,15 @@ jobs:
           tags: allensyk/template7-backend:${{ steps.get_version.outputs.VERSION }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+
+      # for arm
+      - name: Build and push arm64
+        id: docker_build_arm64
+        uses: docker/build-push-action@v2
+        with:
+          file: build/DockerfileArm64
+          push: true
+          platforms: linux/arm64
+          tags: allensyk/template7-backend:arm64
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
