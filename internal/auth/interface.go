@@ -16,6 +16,6 @@ type Auth interface {
 	CheckPermission(ctx context.Context, sub, obj, act string) bool
 	Login(ctx context.Context, username string, password string) (token string, err error)
 	GetUserRole(ctx context.Context, username string) v1.Role
-	CreateUser(ctx context.Context, req *userV1.CreateUserRequest) error
+	CreateUser(ctx context.Context, req *userV1.CreateUserRequest) (string, error)
 	DeleteUser(ctx context.Context, userId string) error
 }

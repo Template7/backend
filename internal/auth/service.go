@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"github.com/Template7/backend/internal/cache"
 	"github.com/Template7/backend/internal/db"
 	"github.com/Template7/common/config"
 	"github.com/Template7/common/logger"
@@ -31,9 +32,10 @@ type UserTokenClaims struct {
 }
 
 type service struct {
-	core *casbin.Enforcer
-	db   db.Client
-	log  *logger.Logger
+	core  *casbin.Enforcer
+	db    db.Client
+	cache cache.Interface
+	log   *logger.Logger
 }
 
 func New() Auth {
@@ -67,9 +69,10 @@ func New() Auth {
 		})
 
 		instance = &service{
-			core: e,
-			db:   db.New(),
-			log:  logger.New().WithService("auth"),
+			core:  e,
+			db:    db.New(),
+			cache: cache.New(),
+			log:   logger.New().WithService("auth"),
 		}
 		instance.loadDefaultPolicies()
 		instance.log.Debug("auth service initialized")

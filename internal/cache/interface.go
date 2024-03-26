@@ -1,9 +1,12 @@
 package cache
 
+import "context"
+
 var (
-	cacheKeyMatch       = "tp:match:hash"
-	cacheKeyUserSetting = "tp:user:setting"
+	cacheKeyUserActivationCode = "activationCode"
 )
 
 type Interface interface {
+	SetUserActivationCode(ctx context.Context, userId string, code string) error
+	GetUserActivationCode(ctx context.Context, userId string) (string, error)
 }

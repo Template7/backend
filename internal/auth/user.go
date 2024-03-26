@@ -9,26 +9,27 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest) error {
+func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest) (string, error) {
 	log := s.log.WithContext(ctx).With("data", req.Username)
 	log.Debug("create user")
 
 	hp, err := hashedPassword(req.Password)
 	if err != nil {
 		log.WithError(err).With("password", req.Password).Error("fail to hash password")
-		return t7Error.DecodeFail.WithDetail(err.Error())
+		return "", t7Error.DecodeFail.WithDetail(err.Error())
 	}
 
 	userId := uuid.NewString()
 	ok, err := s.core.AddRoleForUser(userId, req.Role.String())
 	if err != nil {
 		log.WithError(err).Error("fail to add role for user")
-		return t7Error.Unknown.WithDetail(err.Error())
+		return "", t7Error.Unknown.WithDetail(err.Error())
 	}
 	if !ok {
 		log.Warn("user already exist")
-		return t7Error.UserAlreadyExist
+		return "", t7Error.UserAlreadyExist
 	}
+
 	data := entity.User{
 		Id:       userId,
 		Username: req.Username,
@@ -41,11 +42,17 @@ func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest)
 	}
 	if err := s.db.CreateUser(ctx, data); err != nil {
 		log.WithError(err).Error("fail to create user")
-		return t7Error.DbOperationFail.WithDetail(err.Error())
+		return "", t7Error.DbOperationFail.WithDetail(err.Error())
+	}
+
+	actCode := uuid.NewString()
+	if err := s.cache.SetUserActivationCode(ctx, userId, actCode); err != nil {
+		log.WithError(err).Error("fail to get user activation code")
+		return "", t7Error.RedisOperationFail.WithDetail(err.Error())
 	}
 
 	log.Debug("user created")
-	return nil
+	return actCode, nil
 }
 
 func (s *service) DeleteUser(ctx context.Context, userId string) error {
@@ -97,4 +104,9 @@ func (s *service) GetUserStatus(ctx context.Context, userId string) authV1.Accou
 	}
 
 	return data.Status
+}
+
+func (s *service) ActiveUser(ctx context.Context, userId string) error {
+	// TODO
+	return nil
 }
