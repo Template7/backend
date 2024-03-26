@@ -44,8 +44,8 @@ github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6Xge
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
 github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
-github.com/Template7/common v1.0.0 h1:lnkttvEeMm9oSqbjeWBPAxBnaNDCqvnYnm12S7WNPeo=
-github.com/Template7/common v1.0.0/go.mod h1:MekKPWXH+gqJ06n9k17VIDuUR+NsObm95WBTZBqEiTM=
+github.com/Template7/common v1.0.1 h1:otjCuSGCrCPpcruX0LU8V75JwbIaXH0xVVR1OAe2WiI=
+github.com/Template7/common v1.0.1/go.mod h1:MekKPWXH+gqJ06n9k17VIDuUR+NsObm95WBTZBqEiTM=
 github.com/Template7/protobuf v0.1.13 h1:xZ3NshPpzFaQrvUg3oLs+ahMqFB6W1bcSYX+nYvjE8s=
 github.com/Template7/protobuf v0.1.13/go.mod h1:3QQRRrGU++a/Ig1RDfDsvkQMcCAMLvL3VZNyeRtY0zc=
 github.com/agiledragon/gomonkey/v2 v2.3.1/go.mod h1:ap1AmDzcVOAz1YpeJ3TCzIgstoaWLA6jbbgxfB4w2iY=
