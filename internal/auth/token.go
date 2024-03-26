@@ -41,6 +41,7 @@ func (s *service) genUserToken(ctx context.Context, userId string, role v1.Role)
 		},
 		UserId: userId,
 		Role:   role.String(),
+		Status: int(s.GetUserStatus(ctx, userId)),
 	}
 
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, &utc)

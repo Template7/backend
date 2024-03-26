@@ -27,6 +27,7 @@ type UserTokenClaims struct {
 	jwt.StandardClaims
 	UserId string `json:"userId"`
 	Role   string `json:"role"`
+	Status int    `json:"status"`
 }
 
 type service struct {

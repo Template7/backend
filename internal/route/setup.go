@@ -22,19 +22,19 @@ func Setup(r *gin.Engine) {
 
 	// user
 	user := apiV1.Group("/user")
-	user.GET("/info", handler.GetUserInfo)
-	user.GET("/wallets", handler.GetUserWallets)
-	user.PUT("/info", handler.UpdateUser)
+	user.GET("/info", middleware.CheckAccountStatusInitialized, handler.GetUserInfo)
+	user.GET("/wallets", middleware.CheckAccountStatusInitialized, handler.GetUserWallets)
+	user.PUT("/info", middleware.CheckAccountStatusActivated, handler.UpdateUser)
 
 	// wallet
 	wallet := apiV1.Group("/wallets/:walletId", middleware.AuthUserWallet)
-	wallet.GET("", handler.GetWallet)
-	wallet.POST("/deposit", handler.Deposit)
-	wallet.POST("/withdraw", handler.Withdraw)
-	wallet.GET("/currencies/:currency/record", handler.GetWalletBalanceRecord)
+	wallet.GET("", middleware.CheckAccountStatusInitialized, handler.GetWallet)
+	wallet.POST("/deposit", middleware.CheckAccountStatusActivated, handler.Deposit)
+	wallet.POST("/withdraw", middleware.CheckAccountStatusActivated, handler.Withdraw)
+	wallet.GET("/currencies/:currency/record", middleware.CheckAccountStatusActivated, handler.GetWalletBalanceRecord)
 
 	// transfer
-	transfer := apiV1.Group("/transfer")
+	transfer := apiV1.Group("/transfer", middleware.CheckAccountStatusActivated)
 	transfer.POST("", handler.Transfer)
 
 	// admin

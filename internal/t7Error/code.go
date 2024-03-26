@@ -1,5 +1,7 @@
 package t7Error
 
+import "net/http"
+
 const (
 	codeUnAuthorized Code = iota + 1024
 	codeInvalidBody
@@ -22,6 +24,7 @@ const (
 	codeWalletNotFound
 	codePasswordIncorrect
 	codeUserHasNoRole
+	codeBlockedAccount
 	codeUnknown
 )
 
@@ -39,6 +42,13 @@ var (
 		Code:    codeUnknown,
 		Message: "unknown",
 		Type:    typeOther,
+	}
+
+	BlockedAccount = &Error{
+		Code:    codeBlockedAccount,
+		Message: "blocked account",
+		Type:    typeAuth,
+		status:  http.StatusForbidden,
 	}
 
 	UserHasNoRole = &Error{

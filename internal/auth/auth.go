@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 	"github.com/Template7/backend/internal/t7Error"
-	v1 "github.com/Template7/protobuf/gen/proto/template7/auth"
+	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 )
 
 func (s *service) Login(ctx context.Context, username string, password string) (string, error) {
@@ -21,7 +21,7 @@ func (s *service) Login(ctx context.Context, username string, password string) (
 		return "", t7Error.PasswordIncorrect
 	}
 	role := s.GetUserRole(ctx, user.Id)
-	if _, ok := v1.Role_name[int32(role)]; !ok {
+	if _, ok := authV1.Role_name[int32(role)]; !ok {
 		log.With("role", role).Warn("invalid user role")
 		return "", t7Error.UserHasNoRole
 	}

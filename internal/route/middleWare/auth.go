@@ -6,6 +6,7 @@ import (
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/backend/internal/user"
 	"github.com/Template7/common/logger"
+	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -13,29 +14,6 @@ import (
 func Permission(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("check user permission")
-
-	//uId, ok := c.Get(UserId)
-	//if !ok {
-	//	log.Warn("no user id from the previous middleware")
-	//	c.JSON(http.StatusUnauthorized, types.HttpRespBase{
-	//		RequestId: c.GetHeader(HeaderRequestId),
-	//		Code:      int(t7Error.InvalidToken.Code),
-	//		Message:   t7Error.InvalidToken.Message,
-	//	})
-	//	c.Abort()
-	//	return
-	//}
-	//userId, ok := uId.(string)
-	//if !ok {
-	//	log.With("uId", uId).Error("type assertion fail")
-	//	c.JSON(http.StatusUnauthorized, types.HttpRespBase{
-	//		RequestId: c.GetHeader(HeaderRequestId),
-	//		Code:      int(t7Error.InvalidToken.Code),
-	//		Message:   t7Error.InvalidToken.Message,
-	//	})
-	//	c.Abort()
-	//	return
-	//}
 
 	role, ok := c.Get(Role)
 	if !ok {
@@ -107,8 +85,19 @@ func AuthToken(c *gin.Context) {
 		return
 	}
 
+	if claims.Status == int(authV1.AccountStatus_blocked) {
+		log.With("userId", claims.UserId).Info("blocked account")
+		c.JSON(t7Error.BlockedAccount.GetStatus(), types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.BlockedAccount.Code),
+			Message:   t7Error.BlockedAccount.Message,
+		})
+		return
+	}
+
 	c.Set(UserId, claims.UserId)
 	c.Set(Role, claims.Role)
+	c.Set(Status, claims.Status)
 
 	log.With("userId", claims.UserId).Debug("user token authorized")
 	c.Next()
@@ -171,4 +160,84 @@ func AuthUserWallet(c *gin.Context) {
 	})
 	c.Abort()
 	return
+}
+
+func CheckAccountStatusActivated(c *gin.Context) {
+	log := logger.New().WithContext(c)
+	log.Debug("check account status activated")
+
+	status, ok := c.Get(Status)
+	if !ok {
+		log.Warn("no user status from the previous middleware")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		c.Abort()
+		return
+	}
+
+	s, ok := status.(int)
+	if !ok {
+		log.With("status", status).Warn("type assertion fail")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		c.Abort()
+		return
+	}
+
+	if s != int(authV1.AccountStatus_activated) {
+		log.With("status", status).Warn("invalid account status")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		c.Abort()
+		return
+	}
+}
+
+func CheckAccountStatusInitialized(c *gin.Context) {
+	log := logger.New().WithContext(c)
+	log.Debug("check account status initialized")
+
+	status, ok := c.Get(Status)
+	if !ok {
+		log.Warn("no user status from the previous middleware")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		c.Abort()
+		return
+	}
+
+	s, ok := status.(int)
+	if !ok {
+		log.With("status", status).Warn("type assertion fail")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		c.Abort()
+		return
+	}
+
+	if s < int(authV1.AccountStatus_initialized) {
+		log.With("status", status).Warn("invalid account status")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		c.Abort()
+		return
+	}
 }
