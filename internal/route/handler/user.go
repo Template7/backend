@@ -108,7 +108,8 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	if err := auth.New().CreateUser(c, req.ToProto()); err != nil {
+	actCode, err := auth.New().CreateUser(c, req.ToProto())
+	if err != nil {
 		log.WithError(err).Error("fail to create user")
 		t7Err, ok := t7Error.ToT7Error(err)
 		if !ok {
@@ -128,10 +129,15 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, types.HttpRespBase{
-		RequestId: c.GetHeader(middleware.HeaderRequestId),
-		Code:      types.HttpRespCodeOk,
-		Message:   types.HttpRespMsgOk,
+	c.JSON(http.StatusOK, types.HttpCreateUserResp{
+		HttpRespBase: types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      types.HttpRespCodeOk,
+			Message:   types.HttpRespMsgOk,
+		},
+		Data: types.HttpCreateUserRespData{
+			ActivationCode: actCode,
+		},
 	})
 }
 

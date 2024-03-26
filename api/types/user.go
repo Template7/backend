@@ -36,6 +36,15 @@ func (h HttpCreateUserReq) ToProto() *userV1.CreateUserRequest {
 	}
 }
 
+type HttpCreateUserResp struct {
+	HttpRespBase
+	Data HttpCreateUserRespData `json:"data"`
+}
+
+type HttpCreateUserRespData struct {
+	ActivationCode string `json:"activationCode"`
+}
+
 type HttpUpdateUserInfoReq struct {
 	Nickname string `json:"nickname" binding:"required" example:"nickname"`
 }

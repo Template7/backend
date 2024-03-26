@@ -19,7 +19,7 @@ func Test_service_CreateUser(t *testing.T) {
 		Password: "password",
 		Role:     authV1.Role_admin,
 	}
-	if err := New().CreateUser(ctx, &req); err != nil {
+	if _, err := New().CreateUser(ctx, &req); err != nil {
 		t.Error(err)
 	}
 }

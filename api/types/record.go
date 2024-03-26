@@ -7,7 +7,7 @@ import (
 
 type HttpGetWalletBalanceRecordResp struct {
 	HttpRespBase
-	Data []HttpGetWalletBalanceRecordRespData
+	Data []HttpGetWalletBalanceRecordRespData `json:"data"`
 }
 
 type HttpGetWalletBalanceRecordRespData struct {
