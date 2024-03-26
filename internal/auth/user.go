@@ -65,11 +65,11 @@ func (s *service) DeleteUser(ctx context.Context, userId string) error {
 	return nil
 }
 
-func (s *service) GetUserRole(ctx context.Context, username string) authV1.Role {
-	log := s.log.WithContext(ctx).With("username", username)
+func (s *service) GetUserRole(ctx context.Context, userId string) authV1.Role {
+	log := s.log.WithContext(ctx).With("userId", userId)
 	log.Debug("get user role")
 
-	roles, err := s.core.GetRolesForUser(username)
+	roles, err := s.core.GetRolesForUser(userId)
 	if err != nil {
 		log.WithError(err).Error("unable to get user role")
 		return -1
@@ -84,4 +84,17 @@ func (s *service) GetUserRole(ctx context.Context, username string) authV1.Role 
 
 	log.With("role", roles).Debug("got user role")
 	return authV1.Role(authV1.Role_value[roles[0]])
+}
+
+func (s *service) GetUserStatus(ctx context.Context, userId string) authV1.AccountStatus {
+	log := s.log.WithContext(ctx).With("userId", userId)
+	log.Debug("get user status")
+
+	data, err := s.db.GetUserById(ctx, userId)
+	if err != nil {
+		log.WithError(err).Error("fail to get user")
+		return -1
+	}
+
+	return data.Status
 }
