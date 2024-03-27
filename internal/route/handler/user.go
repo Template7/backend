@@ -90,7 +90,7 @@ func GetUserInfo(c *gin.Context) {
 // @version 1.0
 // @Param request body types.HttpCreateUserReq true "Request"
 // @produce json
-// @Success 200 {object} types.HttpRespBase "Response"
+// @Success 200 {object} types.HttpCreateUserResp "Response"
 // @failure 400 {object} types.HttpRespError
 // @Router /admin/v1/user [post]
 func CreateUser(c *gin.Context) {

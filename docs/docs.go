@@ -63,7 +63,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Response",
                         "schema": {
-                            "$ref": "#/definitions/types.HttpRespBase"
+                            "$ref": "#/definitions/types.HttpCreateUserResp"
                         }
                     },
                     "400": {
@@ -477,6 +477,34 @@ const docTemplate = `{
                 "username": {
                     "type": "string",
                     "example": "username"
+                }
+            }
+        },
+        "types.HttpCreateUserResp": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 3000
+                },
+                "data": {
+                    "$ref": "#/definitions/types.HttpCreateUserRespData"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "requestId": {
+                    "type": "string",
+                    "example": "b8974256-1f17-477f-8638-c7ebbac656d7"
+                }
+            }
+        },
+        "types.HttpCreateUserRespData": {
+            "type": "object",
+            "properties": {
+                "activationCode": {
+                    "type": "string"
                 }
             }
         },
