@@ -141,6 +141,44 @@ func CreateUser(c *gin.Context) {
 	})
 }
 
+func ActivateUser(c *gin.Context) {
+	log := logger.New().WithContext(c)
+	log.Debug("activate user")
+
+	var req types.HttpActivateUserReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.WithError(err).Warn("invalid body")
+		c.JSON(http.StatusBadRequest, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidBody.Code),
+			Message:   t7Error.InvalidBody.Message,
+		})
+		return
+	}
+
+	uId, ok := c.Get(middleware.UserId)
+	if !ok {
+		log.Warn("no user id from the previous middleware")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		return
+	}
+	userId, ok := uId.(string)
+	if !ok {
+		log.With("uId", uId).Error("type assertion fail")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		return
+	}
+
+}
+
 // UpdateUser
 // @Summary Update user info
 // @Tags V1,User

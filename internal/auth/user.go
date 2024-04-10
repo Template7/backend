@@ -55,6 +55,25 @@ func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest)
 	return actCode, nil
 }
 
+func (s *service) ActivateUser(ctx context.Context, userId string, actCode string) bool {
+	log := s.log.WithContext(ctx).With("userId", userId)
+	log.Debug("activate user")
+
+	code, err := s.cache.GetUserActivationCode(ctx, userId)
+	if err != nil {
+		log.WithError(err).Error("fail to get user activation code")
+		return false
+	}
+
+	if code != actCode {
+		log.Warn("invalid activation code")
+		return false
+	}
+
+	log.Debug("user activated")
+	return true
+}
+
 func (s *service) DeleteUser(ctx context.Context, userId string) error {
 	log := s.log.WithContext(ctx).With("userId", userId)
 	log.Debug("delete user")
