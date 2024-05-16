@@ -67,3 +67,12 @@ type HttpGetUserWalletsRespDataBalance struct {
 type HttpActivateUserReq struct {
 	ActivationCode string `json:"activationCode"`
 }
+
+type HttpActivateUserResp struct {
+	HttpRespBase
+	Data HttpActivateUserRespData `json:"data"`
+}
+
+type HttpActivateUserRespData struct {
+	Success bool `json:"success"`
+}

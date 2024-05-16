@@ -168,7 +168,7 @@ func ActivateUser(c *gin.Context) {
 	}
 	userId, ok := uId.(string)
 	if !ok {
-		log.With("uId", uId).Error("type assertion fail")
+		log.With("userId", uId).Error("type assertion fail")
 		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
 			RequestId: c.GetHeader(middleware.HeaderRequestId),
 			Code:      int(t7Error.InvalidToken.Code),
@@ -177,6 +177,23 @@ func ActivateUser(c *gin.Context) {
 		return
 	}
 
+	act := auth.New().ActivateUser(c, userId, req.ActivationCode)
+	if !act {
+		log.With("userId", uId).Info("user activate fail")
+	} else {
+		log.With("userId", uId).Info("user activated")
+	}
+
+	c.JSON(http.StatusOK, types.HttpActivateUserResp{
+		HttpRespBase: types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      types.HttpRespCodeOk,
+			Message:   types.HttpRespMsgOk,
+		},
+		Data: types.HttpActivateUserRespData{
+			Success: act,
+		},
+	})
 }
 
 // UpdateUser

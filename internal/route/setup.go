@@ -41,6 +41,7 @@ func Setup(r *gin.Engine) {
 	adminV1 := r.Group("/admin/v1", middleware.AuthToken, middleware.Permission)
 	adminV1.POST("/user", handler.CreateUser)
 	adminV1.DELETE("/users/:userId", handler.DeleteUser)
+	adminV1.POST("/users/:userId/activate", handler.ActivateUser)
 
 	if gin.Mode() == gin.DebugMode {
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
