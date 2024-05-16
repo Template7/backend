@@ -63,3 +63,16 @@ type HttpGetUserWalletsRespDataBalance struct {
 	Currency string `json:"currency" example:"usd"`
 	Amount   string `json:"amount" example:"100"`
 }
+
+type HttpActivateUserReq struct {
+	ActivationCode string `json:"activationCode"`
+}
+
+type HttpActivateUserResp struct {
+	HttpRespBase
+	Data HttpActivateUserRespData `json:"data"`
+}
+
+type HttpActivateUserRespData struct {
+	Success bool `json:"success"`
+}

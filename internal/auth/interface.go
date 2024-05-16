@@ -18,4 +18,5 @@ type Auth interface {
 	GetUserRole(ctx context.Context, username string) v1.Role
 	CreateUser(ctx context.Context, req *userV1.CreateUserRequest) (string, error)
 	DeleteUser(ctx context.Context, userId string) error
+	ActivateUser(ctx context.Context, userId string, actCode string) bool
 }

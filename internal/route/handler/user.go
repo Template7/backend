@@ -141,6 +141,61 @@ func CreateUser(c *gin.Context) {
 	})
 }
 
+func ActivateUser(c *gin.Context) {
+	log := logger.New().WithContext(c)
+	log.Debug("activate user")
+
+	var req types.HttpActivateUserReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.WithError(err).Warn("invalid body")
+		c.JSON(http.StatusBadRequest, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidBody.Code),
+			Message:   t7Error.InvalidBody.Message,
+		})
+		return
+	}
+
+	uId, ok := c.Get(middleware.UserId)
+	if !ok {
+		log.Warn("no user id from the previous middleware")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		return
+	}
+	userId, ok := uId.(string)
+	if !ok {
+		log.With("userId", uId).Error("type assertion fail")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		return
+	}
+
+	act := auth.New().ActivateUser(c, userId, req.ActivationCode)
+	if !act {
+		log.With("userId", uId).Info("user activate fail")
+	} else {
+		log.With("userId", uId).Info("user activated")
+	}
+
+	c.JSON(http.StatusOK, types.HttpActivateUserResp{
+		HttpRespBase: types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      types.HttpRespCodeOk,
+			Message:   types.HttpRespMsgOk,
+		},
+		Data: types.HttpActivateUserRespData{
+			Success: act,
+		},
+	})
+}
+
 // UpdateUser
 // @Summary Update user info
 // @Tags V1,User
