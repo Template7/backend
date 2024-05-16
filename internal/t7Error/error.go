@@ -1,6 +1,7 @@
 package t7Error
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -45,7 +46,8 @@ func (e Error) WithDetailAndStatus(d string, s int) *Error {
 }
 
 func ToT7Error(err error) (*Error, bool) {
-	if t7Err, ok := err.(*Error); ok {
+	var t7Err *Error
+	if errors.As(err, &t7Err) {
 		return t7Err, true
 	}
 	return nil, false

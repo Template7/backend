@@ -45,13 +45,20 @@ func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest)
 		return "", t7Error.DbOperationFail.WithDetail(err.Error())
 	}
 
+	log.Debug("user created")
+	return userId, nil
+}
+
+func (s *service) GenActivationCode(ctx context.Context, userId string) (string, error) {
+	log := s.log.WithContext(ctx).With("userId", userId)
+	log.Debug("gen user activation code")
+
 	actCode := uuid.NewString()
 	if err := s.cache.SetUserActivationCode(ctx, userId, actCode); err != nil {
 		log.WithError(err).Error("fail to get user activation code")
 		return "", t7Error.RedisOperationFail.WithDetail(err.Error())
 	}
 
-	log.Debug("user created")
 	return actCode, nil
 }
 

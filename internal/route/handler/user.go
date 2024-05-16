@@ -14,6 +14,8 @@ import (
 	"net/http"
 )
 
+const pendingUserId = "pendingUserId"
+
 // GetUserInfo
 // @Summary Get user Info
 // @Tags V1,User
@@ -108,9 +110,60 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	actCode, err := auth.New().CreateUser(c, req.ToProto())
+	userId, err := auth.New().CreateUser(c, req.ToProto())
 	if err != nil {
 		log.WithError(err).Error("fail to create user")
+		t7Err, ok := t7Error.ToT7Error(err)
+		if !ok {
+			log.WithError(err).Error("unknown error")
+			c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+				RequestId: c.GetHeader(middleware.HeaderRequestId),
+				Code:      int(t7Error.Unknown.Code),
+				Message:   t7Error.Unknown.Message,
+			})
+			return
+		}
+		c.JSON(t7Err.GetStatus(), types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Err.Code),
+			Message:   t7Err.Message,
+		})
+		return
+	}
+
+	c.Set(pendingUserId, userId)
+}
+
+func HandleActivationCode(c *gin.Context) {
+	log := logger.New().WithContext(c)
+	log.Debug("handle user activation code")
+
+	uId, ok := c.Get(pendingUserId)
+	if !ok {
+		log.Warn("no pending user id from the previous middleware")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		return
+	}
+
+	userId, ok := uId.(string)
+	if !ok {
+		log.With("userId", uId).Error("type assertion fail")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		c.Abort()
+		return
+	}
+
+	actCode, err := auth.New().GenActivationCode(c, userId)
+	if err != nil {
+		log.WithError(err).Error("fail to gen user activation code")
 		t7Err, ok := t7Error.ToT7Error(err)
 		if !ok {
 			log.WithError(err).Error("unknown error")
@@ -136,6 +189,7 @@ func CreateUser(c *gin.Context) {
 			Message:   types.HttpRespMsgOk,
 		},
 		Data: types.HttpCreateUserRespData{
+			UserId:         userId,
 			ActivationCode: actCode,
 		},
 	})

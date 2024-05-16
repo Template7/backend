@@ -103,6 +103,8 @@ func AuthToken(c *gin.Context) {
 	c.Next()
 }
 
+// AuthUserWallet
+// verify the user have permission to the wallet
 func AuthUserWallet(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("check user wallet")

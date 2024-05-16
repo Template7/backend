@@ -496,7 +496,12 @@
             "type": "object",
             "properties": {
                 "activationCode": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "0b25b3a8-2e85-452b-8d54-527f7e68a875"
+                },
+                "userId": {
+                    "type": "string",
+                    "example": "f47ac10b-58cc-0372-8567-0e02b2c3d479"
                 }
             }
         },
