@@ -13,7 +13,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"net/http"
+	"sort"
 )
+
+type WalletController struct {
+	service wallet.Service
+	log     *logger.Logger
+}
+
+func NewWalletController(service wallet.Service, log *logger.Logger) *WalletController {
+	return &WalletController{
+		service: service,
+		log:     log.With("userService", "walletController"),
+	}
+}
 
 // GetWallet
 // @Summary Get wallet
@@ -23,11 +36,11 @@ import (
 // @failure 400 {object} types.HttpRespError
 // @Param walletId path string true "Wallet ID"
 // @Router /api/v1/wallets/{walletId} [get]
-func GetWallet(c *gin.Context) {
-	log := logger.New().WithContext(c)
+func (w *WalletController) GetWallet(c *gin.Context) {
+	log := w.log.WithContext(c)
 	log.Debug("handle get wallet")
 
-	data, err := wallet.New().GetWallet(c, c.Param("walletId"))
+	data, err := w.service.GetWallet(c, c.Param("walletId"))
 	if err != nil {
 		defer c.Abort()
 		log.WithError(err).Error("fail to get wallet")
@@ -80,8 +93,8 @@ func GetWallet(c *gin.Context) {
 // @failure 400 {object} types.HttpRespError
 // @Param walletId path string true "Wallet ID"
 // @Router /api/v1/wallets/{walletId}/deposit [post]
-func Deposit(c *gin.Context) {
-	log := logger.New().WithContext(c)
+func (w *WalletController) Deposit(c *gin.Context) {
+	log := w.log.WithContext(c)
 	log.Debug("handle deposit")
 
 	uId, ok := c.Get(middleware.UserId)
@@ -162,6 +175,7 @@ func Deposit(c *gin.Context) {
 		return
 	}
 
+	// TODO: refine by use mysql trigger
 	// write deposit record
 	err = db.New().CreateDepositHistory(c, entity.DepositHistory{
 		Id:            t7Id.New().Generate().Int64(),
@@ -201,8 +215,8 @@ func Deposit(c *gin.Context) {
 // @failure 400 {object} types.HttpRespError
 // @Param walletId path string true "Wallet ID"
 // @Router /api/v1/wallets/{walletId}/withdraw [post]
-func Withdraw(c *gin.Context) {
-	log := logger.New().WithContext(c)
+func (w *WalletController) Withdraw(c *gin.Context) {
+	log := w.log.WithContext(c)
 	log.Debug("handle withdraw")
 
 	uId, ok := c.Get(middleware.UserId)
@@ -251,7 +265,7 @@ func Withdraw(c *gin.Context) {
 		return
 	}
 
-	if err := wallet.New().Withdraw(c, wId, v1.Currency(v1.Currency_value[req.Currency]), req.Amount); err != nil {
+	if err := w.service.Withdraw(c, wId, v1.Currency(v1.Currency_value[req.Currency]), req.Amount); err != nil {
 		defer c.Abort()
 		log.WithError(err).Error("fail to withdraw")
 		t7Err, ok := t7Error.ToT7Error(err)
@@ -320,8 +334,8 @@ func Withdraw(c *gin.Context) {
 // @Success 200 {object} types.HttpRespBase "Response"
 // @failure 400 {object} types.HttpRespError
 // @Router /api/v1/transfer [post]
-func Transfer(c *gin.Context) {
-	log := logger.New().WithContext(c)
+func (w *WalletController) Transfer(c *gin.Context) {
+	log := w.log.WithContext(c)
 	log.WithContext(c).Debug("handle make transfer")
 
 	uId, ok := c.Get(middleware.UserId)
@@ -369,7 +383,7 @@ func Transfer(c *gin.Context) {
 		return
 	}
 
-	if err := wallet.New().Transfer(c, req.FromWalletId, req.ToWalletId, v1.Currency(v1.Currency_value[req.Currency]), req.Amount); err != nil {
+	if err := w.service.Transfer(c, req.FromWalletId, req.ToWalletId, v1.Currency(v1.Currency_value[req.Currency]), req.Amount); err != nil {
 		defer c.Abort()
 		log.WithError(err).Error("fail to transfer")
 		t7Err, ok := t7Error.ToT7Error(err)
@@ -445,5 +459,76 @@ func Transfer(c *gin.Context) {
 		RequestId: c.GetHeader(middleware.HeaderRequestId),
 		Code:      types.HttpRespCodeOk,
 		Message:   types.HttpRespMsgOk,
+	})
+}
+
+// GetWalletBalanceRecord
+// @Summary Get wallet balance record
+// @Tags V1,Wallet
+// @version 1.0
+// @produce json
+// @Success 200 {object} types.HttpGetWalletBalanceRecordResp "Response"
+// @failure 400 {object} types.HttpRespError
+// @Param walletId path string true "Wallet ID"
+// @Param currency path string true "Currency"
+// @Router /api/v1/wallets/{walletId}/currencies/{currency}/record [get]
+func (w *WalletController) GetWalletBalanceRecord(c *gin.Context) {
+	log := w.log.WithContext(c)
+	log.Debug("handle get wallet balance record")
+
+	wId := c.Param("walletId")
+	cur := c.Param("currency")
+	if wId == "" || cur == "" {
+		c.JSON(http.StatusBadRequest, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidBody.Code),
+			Message:   t7Error.InvalidBody.Message,
+		})
+		return
+	}
+
+	records, err := db.New().GetWalletBalanceHistory(c, wId, cur)
+	if err != nil {
+		log.WithError(err).Error("fail to get wallet balance history")
+		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.DbOperationFail.Code),
+			Message:   t7Error.DbOperationFail.Message,
+		})
+		return
+	}
+
+	if records == nil {
+		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.DbOperationFail.Code),
+			Message:   t7Error.DbOperationFail.Message,
+		})
+		return
+	}
+
+	data := make([]types.HttpGetWalletBalanceRecordRespData, len(records))
+	for i, r := range records {
+		data[i] = types.HttpGetWalletBalanceRecordRespData{
+			RecordId:     r.RecordId,
+			Io:           r.Io,
+			Amount:       r.Amount,
+			AmountBefore: r.AmountBefore,
+			AmountAfter:  r.AmountAfter,
+			Timestamp:    r.Timestamp,
+			Note:         r.Note,
+		}
+	}
+	sort.Slice(data, func(i, j int) bool {
+		return data[i].Timestamp.Before(data[j].Timestamp)
+	})
+
+	c.JSON(http.StatusOK, types.HttpGetWalletBalanceRecordResp{
+		HttpRespBase: types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      types.HttpRespCodeOk,
+			Message:   types.HttpRespMsgOk,
+		},
+		Data: data,
 	})
 }

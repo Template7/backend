@@ -16,6 +16,19 @@ import (
 
 const pendingUserId = "pendingUserId"
 
+type UserController struct {
+	userService user.Service
+	authService auth.Auth
+	log         *logger.Logger
+}
+
+func NewUserController(service user.Service, log *logger.Logger) *UserController {
+	return &UserController{
+		userService: service,
+		log:         log.With("userService", "userController"),
+	}
+}
+
 // GetUserInfo
 // @Summary Get user Info
 // @Tags V1,User
@@ -23,8 +36,8 @@ const pendingUserId = "pendingUserId"
 // @Success 200 {object} types.HttpUserInfoResp "Response"
 // @failure 400 {object} types.HttpRespError
 // @Router /api/v1/user/info [get]
-func GetUserInfo(c *gin.Context) {
-	log := logger.New().WithContext(c)
+func (u *UserController) GetUserInfo(c *gin.Context) {
+	log := u.log.WithContext(c)
 	log.Debug("handle get user info")
 
 	uId, ok := c.Get(middleware.UserId)
@@ -48,7 +61,7 @@ func GetUserInfo(c *gin.Context) {
 		return
 	}
 
-	info, err := user.New().GetInfo(c, userId)
+	info, err := u.userService.GetInfo(c, userId)
 	if err != nil {
 		log.WithError(err).Error("fail to get user info")
 		defer c.Abort()
@@ -95,8 +108,8 @@ func GetUserInfo(c *gin.Context) {
 // @Success 200 {object} types.HttpCreateUserResp "Response"
 // @failure 400 {object} types.HttpRespError
 // @Router /admin/v1/user [post]
-func CreateUser(c *gin.Context) {
-	log := logger.New().WithContext(c)
+func (u *UserController) CreateUser(c *gin.Context) {
+	log := u.log.WithContext(c)
 	log.Debug("handle create user")
 
 	var req types.HttpCreateUserReq
@@ -110,7 +123,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	userId, err := auth.New().CreateUser(c, req.ToProto())
+	userId, err := u.authService.CreateUser(c, req.ToProto())
 	if err != nil {
 		log.WithError(err).Error("fail to create user")
 		t7Err, ok := t7Error.ToT7Error(err)
@@ -134,8 +147,8 @@ func CreateUser(c *gin.Context) {
 	c.Set(pendingUserId, userId)
 }
 
-func HandleActivationCode(c *gin.Context) {
-	log := logger.New().WithContext(c)
+func (u *UserController) HandleActivationCode(c *gin.Context) {
+	log := u.log.WithContext(c)
 	log.Debug("handle user activation code")
 
 	uId, ok := c.Get(pendingUserId)
@@ -161,7 +174,7 @@ func HandleActivationCode(c *gin.Context) {
 		return
 	}
 
-	actCode, err := auth.New().GenActivationCode(c, userId)
+	actCode, err := u.authService.GenActivationCode(c, userId)
 	if err != nil {
 		log.WithError(err).Error("fail to gen user activation code")
 		t7Err, ok := t7Error.ToT7Error(err)
@@ -195,8 +208,8 @@ func HandleActivationCode(c *gin.Context) {
 	})
 }
 
-func ActivateUser(c *gin.Context) {
-	log := logger.New().WithContext(c)
+func (u *UserController) ActivateUser(c *gin.Context) {
+	log := u.log.WithContext(c)
 	log.Debug("activate user")
 
 	var req types.HttpActivateUserReq
@@ -231,7 +244,7 @@ func ActivateUser(c *gin.Context) {
 		return
 	}
 
-	act := auth.New().ActivateUser(c, userId, req.ActivationCode)
+	act := u.authService.ActivateUser(c, userId, req.ActivationCode)
 	if !act {
 		log.With("userId", uId).Info("user activate fail")
 	} else {
@@ -259,8 +272,8 @@ func ActivateUser(c *gin.Context) {
 // @Success 200 {object} types.HttpRespBase "Response"
 // @failure 400 {object} types.HttpRespError
 // @Router /api/v1/user/info [put]
-func UpdateUser(c *gin.Context) {
-	log := logger.New().WithContext(c)
+func (u *UserController) UpdateUser(c *gin.Context) {
+	log := u.log.WithContext(c)
 	log.Debug("handle update user")
 
 	var req types.HttpUpdateUserInfoReq
@@ -298,7 +311,7 @@ func UpdateUser(c *gin.Context) {
 	data := entity.UserInfo{
 		Nickname: req.Nickname,
 	}
-	if err := user.New().UpdateInfo(c, userId, data); err != nil {
+	if err := u.userService.UpdateInfo(c, userId, data); err != nil {
 		defer c.Abort()
 		log.WithError(err).Error("fail to update user info")
 		t7Err, ok := t7Error.ToT7Error(err)
@@ -334,8 +347,8 @@ func UpdateUser(c *gin.Context) {
 // @Success 200 {object} types.HttpGetUserWalletsResp "Response"
 // @failure 400 {object} types.HttpRespError
 // @Router /api/v1/user/wallets [get]
-func GetUserWallets(c *gin.Context) {
-	log := logger.New().WithContext(c)
+func (u *UserController) GetUserWallets(c *gin.Context) {
+	log := u.log.WithContext(c)
 	log.Debug("handle get user wallets")
 
 	uId, ok := c.Get(middleware.UserId)
@@ -359,7 +372,7 @@ func GetUserWallets(c *gin.Context) {
 		return
 	}
 
-	uws := user.New().GetUserWallets(c, userId)
+	uws := u.userService.GetUserWallets(c, userId)
 	rd := make([]types.HttpGetUserWalletsRespData, len(uws))
 	for i, uw := range uws {
 		rd[i] = types.HttpGetUserWalletsRespData{
@@ -396,8 +409,8 @@ func GetUserWallets(c *gin.Context) {
 // @failure 400 {object} types.HttpRespError
 // @Param userId path string true "User ID"
 // @Router /admin/v1/users/{userId} [delete]
-func DeleteUser(c *gin.Context) {
-	log := logger.New().WithContext(c)
+func (u *UserController) DeleteUser(c *gin.Context) {
+	log := u.log.WithContext(c)
 	log.Debug("handle delete user")
 
 	userId := c.Param("userId")
@@ -411,7 +424,7 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 
-	if err := auth.New().DeleteUser(c, userId); err != nil {
+	if err := u.authService.DeleteUser(c, userId); err != nil {
 		log.WithError(err).Error("fail to create user")
 		t7Err, ok := t7Error.ToT7Error(err)
 		if !ok {
