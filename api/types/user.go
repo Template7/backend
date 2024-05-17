@@ -42,7 +42,8 @@ type HttpCreateUserResp struct {
 }
 
 type HttpCreateUserRespData struct {
-	ActivationCode string `json:"activationCode"`
+	UserId         string `json:"userId" example:"f47ac10b-58cc-0372-8567-0e02b2c3d479"`
+	ActivationCode string `json:"activationCode" example:"0b25b3a8-2e85-452b-8d54-527f7e68a875"`
 }
 
 type HttpUpdateUserInfoReq struct {
