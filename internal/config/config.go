@@ -12,6 +12,7 @@ const (
 )
 
 type Config struct {
+	Env     string
 	Service struct {
 		Port int
 	}

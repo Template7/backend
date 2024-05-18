@@ -10,6 +10,18 @@ import (
 	"net/http"
 )
 
+type AuthController struct {
+	service auth.Auth
+	log     *logger.Logger
+}
+
+func NewAuthController(service auth.Auth, log *logger.Logger) *AuthController {
+	return &AuthController{
+		service: service,
+		log:     log.With("service", "authController"),
+	}
+}
+
 // NativeLogin
 // @Summary Native login
 // @Tags V1,Login
@@ -19,7 +31,7 @@ import (
 // @Success 200 {object} types.HttpLoginResp "Response"
 // @failure 400 {object} types.HttpRespError
 // @Router /api/v1/login/native [post]
-func NativeLogin(c *gin.Context) {
+func (a *AuthController) NativeLogin(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("handle native login")
 
@@ -34,7 +46,7 @@ func NativeLogin(c *gin.Context) {
 		return
 	}
 
-	token, err := auth.New().Login(c, req.Username, req.Password)
+	token, err := a.service.Login(c, req.Username, req.Password)
 	if err != nil {
 		defer c.Abort()
 		t7Err, ok := t7Error.ToT7Error(err)
