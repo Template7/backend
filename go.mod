@@ -10,13 +10,14 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.8.2
 	github.com/google/uuid v1.4.0
+	github.com/google/wire v0.6.0
 	github.com/redis/go-redis/v9 v9.1.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/spf13/viper v1.16.0
 	github.com/swaggo/gin-swagger v1.4.0
 	github.com/swaggo/swag v1.16.2
 	go.mongodb.org/mongo-driver v1.8.2
-	golang.org/x/crypto v0.13.0
+	golang.org/x/crypto v0.18.0
 	gorm.io/gorm v1.25.4
 )
 
@@ -70,11 +71,11 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
-	golang.org/x/net v0.15.0 // indirect
-	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
-	golang.org/x/tools v0.13.0 // indirect
+	golang.org/x/net v0.20.0 // indirect
+	golang.org/x/sync v0.6.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/tools v0.17.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
