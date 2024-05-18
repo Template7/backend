@@ -17,11 +17,11 @@ import (
 )
 
 type WalletController struct {
-	service wallet.Service
+	service *wallet.Service
 	log     *logger.Logger
 }
 
-func NewWalletController(service wallet.Service, log *logger.Logger) *WalletController {
+func NewWalletController(service *wallet.Service, log *logger.Logger) *WalletController {
 	return &WalletController{
 		service: service,
 		log:     log.With("userService", "walletController"),
@@ -175,7 +175,7 @@ func (w *WalletController) Deposit(c *gin.Context) {
 		return
 	}
 
-	// TODO: refine by use mysql trigger
+	// TODO: refine by use transaction
 	// write deposit record
 	err = db.New().CreateDepositHistory(c, entity.DepositHistory{
 		Id:            t7Id.New().Generate().Int64(),

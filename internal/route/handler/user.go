@@ -17,12 +17,12 @@ import (
 const pendingUserId = "pendingUserId"
 
 type UserController struct {
-	userService user.Service
+	userService *user.Service
 	authService auth.Auth
 	log         *logger.Logger
 }
 
-func NewUserController(service user.Service, log *logger.Logger) *UserController {
+func NewUserController(service *user.Service, log *logger.Logger) *UserController {
 	return &UserController{
 		userService: service,
 		log:         log.With("userService", "userController"),

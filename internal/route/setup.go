@@ -1,7 +1,10 @@
 package route
 
 import (
+	"github.com/Template7/backend/internal/route/handler"
 	"github.com/gin-gonic/gin"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 func Setup(r *gin.Engine) {
@@ -39,8 +42,8 @@ func Setup(r *gin.Engine) {
 	//adminV1.DELETE("/users/:userId", handler.DeleteUser)
 	//adminV1.POST("/users/:userId/activate", handler.ActivateUser)
 	//
-	//if gin.Mode() == gin.DebugMode {
-	//	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	//	r.GET("/test/graceful-shutdown", handler.TestGracefulShutdown)
-	//}
+	if gin.Mode() == gin.DebugMode {
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		r.GET("/test/graceful-shutdown", handler.TestGracefulShutdown)
+	}
 }

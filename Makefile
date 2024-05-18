@@ -2,7 +2,7 @@
 .PHONY: build swagger all
 
 build:
-	go build -o ./bin/backend ./cmd
+	 wire gen ./cmd; go build -o ./bin/backend ./cmd
 
 image:
 	docker-compose -f ./build/docker-compose.yaml build

@@ -6,9 +6,6 @@ import (
 	"fmt"
 	_ "github.com/Template7/backend/docs"
 	"github.com/Template7/backend/internal/config"
-	"github.com/Template7/backend/internal/route"
-	"github.com/Template7/common/logger"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
 	"os/signal"
@@ -25,20 +22,16 @@ import (
 
 // schemes http
 func main() {
-	log := logger.New().WithService("main")
-
-	r := gin.New()
-	route.Setup(r)
-
+	app := InitializeApp()
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.New().Service.Port),
-		Handler: r,
+		Handler: app.SetupRoutes(),
 	}
 
 	go func() {
-		log.With("port", config.New().Service.Port).Info("server started")
+		app.Log.With("port", config.New().Service.Port).Info("server started")
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.WithError(err).Panic(err.Error())
+			app.Log.WithError(err).Panic(err.Error())
 		}
 	}()
 
@@ -46,13 +39,13 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Info("shutdown server")
+	app.Log.Info("shutdown server")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.WithError(err).Panic("fail to shutdown server")
+		app.Log.WithError(err).Panic("fail to shutdown server")
 	}
 
-	log.Info("server exited properly")
+	app.Log.Info("server exited properly")
 }
