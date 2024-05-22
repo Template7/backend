@@ -8,12 +8,6 @@ import (
 	"github.com/Template7/common/logger"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 	"github.com/shopspring/decimal"
-	"sync"
-)
-
-var (
-	once     sync.Once
-	instance *Service
 )
 
 type Service struct {
@@ -21,16 +15,11 @@ type Service struct {
 	log *logger.Logger
 }
 
-func New() *Service {
-	once.Do(func() {
-		log := logger.New().WithService("wallet")
-		instance = &Service{
-			db:  db.New(),
-			log: log,
-		}
-		log.Info("wallet service initialized")
-	})
-	return instance
+func New(db db.Client, log *logger.Logger) *Service {
+	return &Service{
+		db:  db,
+		log: log.WithService("wallet"),
+	}
 }
 
 func (s *Service) GetWallet(ctx context.Context, walletId string) (*v1.Wallet, error) {

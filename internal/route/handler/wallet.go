@@ -143,7 +143,7 @@ func (w *WalletController) Deposit(c *gin.Context) {
 		return
 	}
 
-	if err := wallet.New().Deposit(c, wId, v1.Currency(v1.Currency_value[req.Currency]), req.Amount); err != nil {
+	if err := w.service.Deposit(c, wId, v1.Currency(v1.Currency_value[req.Currency]), req.Amount); err != nil {
 		defer c.Abort()
 		log.WithError(err).Error("fail to deposit")
 		t7Err, ok := t7Error.ToT7Error(err)

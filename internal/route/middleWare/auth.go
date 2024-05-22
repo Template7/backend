@@ -4,14 +4,13 @@ import (
 	"github.com/Template7/backend/api/types"
 	"github.com/Template7/backend/internal/auth"
 	"github.com/Template7/backend/internal/t7Error"
-	"github.com/Template7/backend/internal/user"
 	"github.com/Template7/common/logger"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func Permission(c *gin.Context) {
+func (m *Controller) Permission(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("check user permission")
 
@@ -50,7 +49,7 @@ func Permission(c *gin.Context) {
 	c.Next()
 }
 
-func AuthToken(c *gin.Context) {
+func (m *Controller) AuthToken(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("auth user token")
 
@@ -105,7 +104,7 @@ func AuthToken(c *gin.Context) {
 
 // AuthUserWallet
 // verify the user have permission to the wallet
-func AuthUserWallet(c *gin.Context) {
+func (m *Controller) AuthUserWallet(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("check user wallet")
 
@@ -146,7 +145,7 @@ func AuthUserWallet(c *gin.Context) {
 	}
 	log = log.With("userId", userId)
 
-	for _, uw := range user.New().GetUserWallets(c, userId) {
+	for _, uw := range m.userSvc.GetUserWallets(c, userId) {
 		if uw.Id == walletId {
 			log.Debug("user wallet check ok")
 			c.Next()
@@ -164,7 +163,7 @@ func AuthUserWallet(c *gin.Context) {
 	return
 }
 
-func CheckAccountStatusActivated(c *gin.Context) {
+func (m *Controller) CheckAccountStatusActivated(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("check account status activated")
 
@@ -204,7 +203,7 @@ func CheckAccountStatusActivated(c *gin.Context) {
 	}
 }
 
-func CheckAccountStatusInitialized(c *gin.Context) {
+func (m *Controller) CheckAccountStatusInitialized(c *gin.Context) {
 	log := logger.New().WithContext(c)
 	log.Debug("check account status initialized")
 
