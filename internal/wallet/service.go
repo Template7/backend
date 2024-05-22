@@ -49,7 +49,7 @@ func (s *Service) GetWallet(ctx context.Context, walletId string) (*v1.Wallet, e
 	return &w, nil
 }
 
-func (s *Service) Deposit(ctx context.Context, walletId string, currency v1.Currency, amount uint32) error {
+func (s *Service) Deposit(ctx context.Context, walletId string, currency v1.Currency, amount uint32, note string) error {
 	log := s.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("deposit")
 
@@ -57,7 +57,7 @@ func (s *Service) Deposit(ctx context.Context, walletId string, currency v1.Curr
 		Currency: v1.Currency_name[int32(currency)],
 		Amount:   decimal.NewFromInt32(int32(amount)),
 	}
-	if err := s.db.Deposit(ctx, walletId, m); err != nil {
+	if err := s.db.Deposit(ctx, walletId, m, note); err != nil {
 		log.WithError(err).Error("fail to deposit")
 		return t7Error.DbOperationFail.WithDetail(err.Error())
 	}
@@ -66,7 +66,7 @@ func (s *Service) Deposit(ctx context.Context, walletId string, currency v1.Curr
 	return nil
 }
 
-func (s *Service) Withdraw(ctx context.Context, walletId string, currency v1.Currency, amount uint32) error {
+func (s *Service) Withdraw(ctx context.Context, walletId string, currency v1.Currency, amount uint32, note string) error {
 	log := s.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("withdraw")
 
@@ -74,7 +74,7 @@ func (s *Service) Withdraw(ctx context.Context, walletId string, currency v1.Cur
 		Currency: v1.Currency_name[int32(currency)],
 		Amount:   decimal.NewFromInt32(int32(amount)),
 	}
-	if err := s.db.Withdraw(ctx, walletId, m); err != nil {
+	if err := s.db.Withdraw(ctx, walletId, m, note); err != nil {
 		log.WithError(err).Error("fail to withdraw")
 		return t7Error.DbOperationFail.WithDetail(err.Error())
 	}

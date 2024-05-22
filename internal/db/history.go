@@ -3,19 +3,20 @@ package db
 import (
 	"context"
 	"github.com/Template7/backend/internal/db/entity"
+	"gorm.io/gorm"
 )
 
-func (c *client) CreateDepositHistory(ctx context.Context, data entity.DepositHistory) (err error) {
+func (c *client) createDepositHistory(ctx context.Context, tx *gorm.DB, data entity.DepositHistory) (err error) {
 	log := c.log.WithContext(ctx)
 	log.Debug("create deposit history")
 
-	if err = c.sql.core.WithContext(ctx).Create(&data).Error; err != nil {
+	if err = tx.Create(&data).Error; err != nil {
 		log.WithError(err).Error("fail to create deposit history")
 	}
 	return
 }
 
-func (c *client) CreateWithdrawHistory(ctx context.Context, data entity.WithdrawHistory) (err error) {
+func (c *client) createWithdrawHistory(ctx context.Context, tx *gorm.DB, data entity.WithdrawHistory) (err error) {
 	log := c.log.WithContext(ctx)
 	log.Debug("create withdraw history")
 
