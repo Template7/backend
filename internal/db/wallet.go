@@ -132,7 +132,9 @@ func (c *client) Transfer(ctx context.Context, fromWalletId string, toWalletId s
 	if wsb[0].WalletId == fromWalletId {
 		sbb = wsb[0].Amount
 		rbb = wsb[1].Amount
-
+	} else {
+		sbb = wsb[1].Amount
+		rbb = wsb[0].Amount
 	}
 
 	err = c.withdraw(ctx, tx, fromWalletId, money)
@@ -155,6 +157,9 @@ func (c *client) Transfer(ctx context.Context, fromWalletId string, toWalletId s
 	if wsb[0].WalletId == fromWalletId {
 		sba = wsa[0].Amount
 		rba = wsa[1].Amount
+	} else {
+		sba = wsa[1].Amount
+		rba = wsa[0].Amount
 	}
 
 	th := entity.TransferHistory{
