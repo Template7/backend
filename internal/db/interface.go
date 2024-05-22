@@ -20,13 +20,13 @@ type Client interface {
 	GetWalletBalances(ctx context.Context, walletId string) (data []entity.WalletBalance, err error)
 	Deposit(ctx context.Context, walletId string, money entity.Money, note string) (err error)
 	Withdraw(ctx context.Context, walletId string, money entity.Money, note string) (err error)
-	Transfer(ctx context.Context, fromWalletId string, toWalletId string, money entity.Money) (err error)
+	Transfer(ctx context.Context, fromWalletId string, toWalletId string, money entity.Money, note string) (err error)
 	GetBalance(ctx context.Context, walletId string, currency string) (decimal.Decimal, error)
-	GetWalletsBalance(ctx context.Context, walletId []string, currency string) (data []entity.Balance, err error)
+	getWalletsBalance(ctx context.Context, tx *gorm.DB, walletId []string, currency string) (data []entity.Balance, err error)
 
 	// history
 	createDepositHistory(ctx context.Context, tx *gorm.DB, data entity.DepositHistory) (err error)
 	createWithdrawHistory(ctx context.Context, tx *gorm.DB, data entity.WithdrawHistory) (err error)
-	CreateTransferHistory(ctx context.Context, data entity.TransferHistory) (err error)
+	createTransferHistory(ctx context.Context, tx *gorm.DB, data entity.TransferHistory) (err error)
 	GetWalletBalanceHistory(ctx context.Context, walletId string, currency string) ([]entity.WalletBalanceHistory, error)
 }

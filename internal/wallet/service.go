@@ -83,7 +83,7 @@ func (s *Service) Withdraw(ctx context.Context, walletId string, currency v1.Cur
 	return nil
 }
 
-func (s *Service) Transfer(ctx context.Context, fromWalletId string, toWalletId string, currency v1.Currency, amount uint32) error {
+func (s *Service) Transfer(ctx context.Context, fromWalletId string, toWalletId string, currency v1.Currency, amount uint32, note string) error {
 	log := s.log.WithContext(ctx).With("fromWalletId", fromWalletId).With("toWalletId", toWalletId)
 	log.Debug("transfer")
 
@@ -91,7 +91,7 @@ func (s *Service) Transfer(ctx context.Context, fromWalletId string, toWalletId 
 		Currency: v1.Currency_name[int32(currency)],
 		Amount:   decimal.NewFromInt32(int32(amount)),
 	}
-	if err := s.db.Transfer(ctx, fromWalletId, toWalletId, m); err != nil {
+	if err := s.db.Transfer(ctx, fromWalletId, toWalletId, m, note); err != nil {
 		log.WithError(err).Error("fail to transfer")
 		return t7Error.DbOperationFail.WithDetail(err.Error())
 	}

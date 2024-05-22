@@ -26,7 +26,7 @@ func (c *client) createWithdrawHistory(ctx context.Context, tx *gorm.DB, data en
 	return
 }
 
-func (c *client) CreateTransferHistory(ctx context.Context, data entity.TransferHistory) (err error) {
+func (c *client) createTransferHistory(ctx context.Context, tx *gorm.DB, data entity.TransferHistory) (err error) {
 	log := c.log.WithContext(ctx)
 	log.Debug("create transfer history")
 
