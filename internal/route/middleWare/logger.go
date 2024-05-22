@@ -5,7 +5,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func Request(c *gin.Context) {
+func (m *Controller) Request(c *gin.Context) {
 	uId := uuid.New().String()
 	c.Request.Header.Add(HeaderRequestId, uId)
 	c.Set("traceId", uId)

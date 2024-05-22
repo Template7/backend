@@ -6,7 +6,9 @@ package main
 import (
 	"github.com/Template7/backend/internal/auth"
 	"github.com/Template7/backend/internal/config"
+	"github.com/Template7/backend/internal/db"
 	"github.com/Template7/backend/internal/route/handler"
+	middleware "github.com/Template7/backend/internal/route/middleWare"
 	"github.com/Template7/backend/internal/user"
 	"github.com/Template7/backend/internal/wallet"
 	"github.com/Template7/common/logger"
@@ -23,7 +25,8 @@ func InitializeApp() *App {
 		user.New,
 		wallet.New,
 		config.New,
-		//db.New,
+		middleware.New,
+		db.New,
 		logger.New,
 	)
 	return &App{}

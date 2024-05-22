@@ -9,7 +9,9 @@ package main
 import (
 	"github.com/Template7/backend/internal/auth"
 	"github.com/Template7/backend/internal/config"
+	"github.com/Template7/backend/internal/db"
 	"github.com/Template7/backend/internal/route/handler"
+	"github.com/Template7/backend/internal/route/middleWare"
 	"github.com/Template7/backend/internal/user"
 	"github.com/Template7/backend/internal/wallet"
 	"github.com/Template7/common/logger"
@@ -25,11 +27,13 @@ func InitializeApp() *App {
 	authAuth := auth.New()
 	loggerLogger := logger.New()
 	authController := handler.NewAuthController(authAuth, loggerLogger)
-	service := user.New()
+	client := db.New()
+	service := user.New(authAuth, client, loggerLogger)
 	userController := handler.NewUserController(service, loggerLogger)
-	walletService := wallet.New()
+	walletService := wallet.New(client, loggerLogger)
 	walletController := handler.NewWalletController(walletService, loggerLogger)
+	controller := middleware.New(service, loggerLogger)
 	configConfig := config.New()
-	app := NewApp(authController, userController, walletController, configConfig, loggerLogger)
+	app := NewApp(authController, userController, walletController, controller, configConfig, loggerLogger)
 	return app
 }

@@ -18,7 +18,7 @@ type AuthController struct {
 func NewAuthController(service auth.Auth, log *logger.Logger) *AuthController {
 	return &AuthController{
 		service: service,
-		log:     log.With("service", "authController"),
+		log:     log.WithService("authController"),
 	}
 }
 

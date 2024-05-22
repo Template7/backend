@@ -11,7 +11,8 @@ import (
 	"strings"
 )
 
-func RecoverMiddleware(c *gin.Context) {
+func (m *Controller) RecoverMiddleware(c *gin.Context) {
+	// TODO: refine
 	defer func() {
 		if err := recover(); err != nil {
 			httpRequest, _ := httputil.DumpRequest(c.Request, false)
@@ -24,7 +25,8 @@ func RecoverMiddleware(c *gin.Context) {
 			}
 
 			var brokenPipe bool
-			if ne, ok := err.(*net.OpError); ok {
+			var ne *net.OpError
+			if errors.As(err.(error), &ne) {
 				var se *os.SyscallError
 				if errors.As(ne, &se) {
 					if strings.Contains(strings.ToLower(se.Error()), "broken pipe") || strings.Contains(strings.ToLower(se.Error()), "connection reset by peer") {
