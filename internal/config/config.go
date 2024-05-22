@@ -1,10 +1,8 @@
 package config
 
 import (
-	"github.com/Template7/common/logger"
 	"github.com/spf13/viper"
 	"log"
-	"sync"
 )
 
 const (
@@ -21,25 +19,19 @@ type Config struct {
 	}
 }
 
-var (
-	once     sync.Once
-	instance *Config
-)
-
 func New() *Config {
-	once.Do(func() {
-		viper.SetConfigType("yaml")
-		instance = &Config{}
-		viper.AddConfigPath(configPath)
-		viper.SetConfigName("config")
-		if err := viper.ReadInConfig(); err != nil {
-			log.Fatal("fail to load config file: ", err.Error())
-		}
-		if err := viper.Unmarshal(&instance); err != nil {
-			log.Fatal(err)
-		}
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(configPath)
+	viper.SetConfigName("config")
 
-		logger.New().Info("config initialized")
-	})
-	return instance
+	cfg := &Config{}
+	if err := viper.ReadInConfig(); err != nil {
+		panic(err)
+	}
+	if err := viper.Unmarshal(cfg); err != nil {
+		panic(err)
+	}
+
+	log.Println("config initialized")
+	return cfg
 }

@@ -2,15 +2,13 @@ package handler
 
 import (
 	"github.com/Template7/backend/api/types"
-	"github.com/Template7/backend/internal/db"
 	middleware "github.com/Template7/backend/internal/route/middleWare"
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/backend/internal/wallet"
 	"github.com/Template7/common/logger"
-	v1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
+	walletV1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"sort"
 )
 
 type WalletController struct {
@@ -105,7 +103,7 @@ func (w *WalletController) Deposit(c *gin.Context) {
 		return
 	}
 
-	if err := w.service.Deposit(c, c.Param("walletId"), v1.Currency(v1.Currency_value[req.Currency]), req.Amount, req.Note); err != nil {
+	if err := w.service.Deposit(c, c.Param("walletId"), walletV1.Currency(walletV1.Currency_value[req.Currency]), req.Amount, req.Note); err != nil {
 		defer c.Abort()
 		log.WithError(err).Error("fail to deposit")
 		t7Err, ok := t7Error.ToT7Error(err)
@@ -158,7 +156,7 @@ func (w *WalletController) Withdraw(c *gin.Context) {
 		return
 	}
 
-	if err := w.service.Withdraw(c, c.Param("walletId"), v1.Currency(v1.Currency_value[req.Currency]), req.Amount, req.Note); err != nil {
+	if err := w.service.Withdraw(c, c.Param("walletId"), walletV1.Currency(walletV1.Currency_value[req.Currency]), req.Amount, req.Note); err != nil {
 		defer c.Abort()
 		log.WithError(err).Error("fail to withdraw")
 		t7Err, ok := t7Error.ToT7Error(err)
@@ -210,7 +208,7 @@ func (w *WalletController) Transfer(c *gin.Context) {
 		return
 	}
 
-	if err := w.service.Transfer(c, req.FromWalletId, req.ToWalletId, v1.Currency(v1.Currency_value[req.Currency]), req.Amount, req.Note); err != nil {
+	if err := w.service.Transfer(c, req.FromWalletId, req.ToWalletId, walletV1.Currency(walletV1.Currency_value[req.Currency]), req.Amount, req.Note); err != nil {
 		defer c.Abort()
 		log.WithError(err).Error("fail to transfer")
 		t7Err, ok := t7Error.ToT7Error(err)
@@ -263,16 +261,9 @@ func (w *WalletController) GetWalletBalanceRecord(c *gin.Context) {
 		return
 	}
 
-	records, err := db.New().GetWalletBalanceHistory(c, wId, cur)
-	if err != nil {
-		log.WithError(err).Error("fail to get wallet balance history")
-		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Error.DbOperationFail.Code),
-			Message:   t7Error.DbOperationFail.Message,
-		})
-		return
-	}
+	// TODO: refine
+
+	records := w.service.GetBalanceHistoryByCurrency(c, wId, walletV1.Currency(walletV1.Currency_value[cur]))
 
 	if records == nil {
 		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
@@ -283,28 +274,11 @@ func (w *WalletController) GetWalletBalanceRecord(c *gin.Context) {
 		return
 	}
 
-	data := make([]types.HttpGetWalletBalanceRecordRespData, len(records))
-	for i, r := range records {
-		data[i] = types.HttpGetWalletBalanceRecordRespData{
-			RecordId:     r.RecordId,
-			Io:           r.Io,
-			Amount:       r.Amount,
-			AmountBefore: r.AmountBefore,
-			AmountAfter:  r.AmountAfter,
-			Timestamp:    r.Timestamp,
-			Note:         r.Note,
-		}
-	}
-	sort.Slice(data, func(i, j int) bool {
-		return data[i].Timestamp.Before(data[j].Timestamp)
-	})
-
 	c.JSON(http.StatusOK, types.HttpGetWalletBalanceRecordResp{
 		HttpRespBase: types.HttpRespBase{
 			RequestId: c.GetHeader(middleware.HeaderRequestId),
 			Code:      types.HttpRespCodeOk,
 			Message:   types.HttpRespMsgOk,
 		},
-		Data: data,
 	})
 }

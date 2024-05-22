@@ -28,5 +28,5 @@ type Client interface {
 	createDepositHistory(ctx context.Context, tx *gorm.DB, data entity.DepositHistory) (err error)
 	createWithdrawHistory(ctx context.Context, tx *gorm.DB, data entity.WithdrawHistory) (err error)
 	createTransferHistory(ctx context.Context, tx *gorm.DB, data entity.TransferHistory) (err error)
-	GetWalletBalanceHistory(ctx context.Context, walletId string, currency string) ([]entity.WalletBalanceHistory, error)
+	GetWalletBalanceHistoryByCurrency(ctx context.Context, walletId string, currency string) ([]entity.WalletBalanceHistory, error)
 }

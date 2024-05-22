@@ -5,6 +5,7 @@ package main
 
 import (
 	"github.com/Template7/backend/internal/auth"
+	"github.com/Template7/backend/internal/cache"
 	"github.com/Template7/backend/internal/config"
 	"github.com/Template7/backend/internal/db"
 	"github.com/Template7/backend/internal/route/handler"
@@ -27,6 +28,7 @@ func InitializeApp() *App {
 		config.New,
 		middleware.New,
 		db.New,
+		cache.New,
 		logger.New,
 	)
 	return &App{}

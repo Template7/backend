@@ -48,6 +48,8 @@ github.com/Template7/common v1.0.1 h1:otjCuSGCrCPpcruX0LU8V75JwbIaXH0xVVR1OAe2Wi
 github.com/Template7/common v1.0.1/go.mod h1:MekKPWXH+gqJ06n9k17VIDuUR+NsObm95WBTZBqEiTM=
 github.com/Template7/protobuf v0.1.13 h1:xZ3NshPpzFaQrvUg3oLs+ahMqFB6W1bcSYX+nYvjE8s=
 github.com/Template7/protobuf v0.1.13/go.mod h1:3QQRRrGU++a/Ig1RDfDsvkQMcCAMLvL3VZNyeRtY0zc=
+github.com/Template7/protobuf v0.1.14 h1:g0ZizIE98g942SdJIA8FjRDHE7NQocp9dNC4c0/5sjc=
+github.com/Template7/protobuf v0.1.14/go.mod h1:3QQRRrGU++a/Ig1RDfDsvkQMcCAMLvL3VZNyeRtY0zc=
 github.com/agiledragon/gomonkey/v2 v2.3.1/go.mod h1:ap1AmDzcVOAz1YpeJ3TCzIgstoaWLA6jbbgxfB4w2iY=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=

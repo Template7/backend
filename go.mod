@@ -4,7 +4,7 @@ go 1.21.1
 
 require (
 	github.com/Template7/common v1.0.1
-	github.com/Template7/protobuf v0.1.13
+	github.com/Template7/protobuf v0.1.14
 	github.com/casbin/casbin/v2 v2.79.0
 	github.com/casbin/gorm-adapter/v2 v2.1.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible

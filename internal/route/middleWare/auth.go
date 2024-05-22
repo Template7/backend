@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"github.com/Template7/backend/api/types"
-	"github.com/Template7/backend/internal/auth"
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/common/logger"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
@@ -37,7 +36,7 @@ func (m *Controller) Permission(c *gin.Context) {
 		return
 	}
 
-	if !auth.New().CheckPermission(c, userRole, c.Request.URL.Path, c.Request.Method) {
+	if !m.authSvc.CheckPermission(c, userRole, c.Request.URL.Path, c.Request.Method) {
 		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
 			RequestId: c.GetHeader(HeaderRequestId),
 			Code:      int(t7Error.InvalidToken.Code),
@@ -63,7 +62,7 @@ func (m *Controller) AuthToken(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	claims, err := auth.New().ParseToken(c, token)
+	claims, err := m.authSvc.ParseToken(c, token)
 	if err != nil {
 		defer c.Abort()
 		t7Err, ok := t7Error.ToT7Error(err)

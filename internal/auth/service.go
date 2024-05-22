@@ -12,16 +12,10 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
-	"sync"
 )
 
 const (
 	jwtSign = "45519f46c06c8340a34f9a32982860c1a8d6bb57eaeb338b7f0119062b8a3b67"
-)
-
-var (
-	once     sync.Once
-	instance *service
 )
 
 type UserTokenClaims struct {
@@ -38,47 +32,39 @@ type service struct {
 	log   *logger.Logger
 }
 
-func New() Auth {
-	once.Do(func() {
-		log := logger.New().WithService("auth")
+func New(db db.Client, cache cache.Interface, log *logger.Logger) Auth {
+	cfg := config.New()
+	cs := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", cfg.Db.Sql.Username, cfg.Db.Sql.Password, cfg.Db.Sql.Host, cfg.Db.Sql.Port, cfg.Db.Sql.Db)
+	adapter, err := gormadapter.NewAdapter("mysql", cs, true)
+	if err != nil {
+		log.WithError(err).Panic("fail to new mysql adapter")
+		panic(err)
+	}
 
-		cfg := config.New()
-		cs := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", cfg.Db.Sql.Username, cfg.Db.Sql.Password, cfg.Db.Sql.Host, cfg.Db.Sql.Port, cfg.Db.Sql.Db)
-		adapter, err := gormadapter.NewAdapter("mysql", cs, true)
-		if err != nil {
-			log.WithError(err).Panic("fail to new mysql adapter")
-			panic(err)
-		}
+	e, err := casbin.NewEnforcer("./config/rbac_model.conf", adapter)
+	if err != nil {
+		log.WithError(err).Error("fail to new enforcer")
+		panic(err)
+	}
 
-		e, err := casbin.NewEnforcer("./config/rbac_model.conf", adapter)
-		if err != nil {
-			log.WithError(err).Error("fail to new enforcer")
-			panic(err)
-		}
+	err = e.LoadPolicy()
+	if err != nil {
+		log.WithError(err).Panic("fail to load policy")
+		panic(err)
+	}
+	e.AddFunction("checkAdmin", func(args ...interface{}) (interface{}, error) {
+		log.With("args", args).Debug("check admin")
 
-		err = e.LoadPolicy()
-		if err != nil {
-			log.WithError(err).Panic("fail to load policy")
-			panic(err)
-		}
-		e.AddFunction("checkAdmin", func(args ...interface{}) (interface{}, error) {
-			log.With("args", args).Debug("check admin")
-
-			role := args[0].(string)
-			return role == authV1.Role_admin.String(), nil
-		})
-
-		instance = &service{
-			core:  e,
-			db:    db.New(),
-			cache: cache.New(),
-			log:   logger.New().WithService("auth"),
-		}
-		instance.loadDefaultPolicies()
-		instance.log.Debug("auth service initialized")
+		role := args[0].(string)
+		return role == authV1.Role_admin.String(), nil
 	})
 
-	return instance
+	return &service{
+		core:  e,
+		db:    db,
+		cache: cache,
+		log:   log.WithService("auth"),
+	}
 }
 
 func (s *service) loadDefaultPolicies() {

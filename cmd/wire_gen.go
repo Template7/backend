@@ -8,6 +8,7 @@ package main
 
 import (
 	"github.com/Template7/backend/internal/auth"
+	"github.com/Template7/backend/internal/cache"
 	"github.com/Template7/backend/internal/config"
 	"github.com/Template7/backend/internal/db"
 	"github.com/Template7/backend/internal/route/handler"
@@ -24,15 +25,16 @@ import (
 // Injectors from wire.go:
 
 func InitializeApp() *App {
-	authAuth := auth.New()
 	loggerLogger := logger.New()
+	client := db.New(loggerLogger)
+	cacheInterface := cache.New(loggerLogger)
+	authAuth := auth.New(client, cacheInterface, loggerLogger)
 	authController := handler.NewAuthController(authAuth, loggerLogger)
-	client := db.New()
 	service := user.New(authAuth, client, loggerLogger)
 	userController := handler.NewUserController(service, loggerLogger)
 	walletService := wallet.New(client, loggerLogger)
 	walletController := handler.NewWalletController(walletService, loggerLogger)
-	controller := middleware.New(service, loggerLogger)
+	controller := middleware.New(service, authAuth, loggerLogger)
 	configConfig := config.New()
 	app := NewApp(authController, userController, walletController, controller, configConfig, loggerLogger)
 	return app
