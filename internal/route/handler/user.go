@@ -22,9 +22,10 @@ type UserController struct {
 	log         *logger.Logger
 }
 
-func NewUserController(service *user.Service, log *logger.Logger) *UserController {
+func NewUserController(service *user.Service, authService auth.Auth, log *logger.Logger) *UserController {
 	return &UserController{
 		userService: service,
+		authService: authService,
 		log:         log.With("userService", "userController"),
 	}
 }
@@ -120,11 +121,13 @@ func (u *UserController) CreateUser(c *gin.Context) {
 			Code:      int(t7Error.InvalidBody.Code),
 			Message:   t7Error.InvalidBody.Message,
 		})
+		c.Abort()
 		return
 	}
 
 	userId, err := u.authService.CreateUser(c, req.ToProto())
 	if err != nil {
+		defer c.Abort()
 		log.WithError(err).Error("fail to create user")
 		t7Err, ok := t7Error.ToT7Error(err)
 		if !ok {
@@ -223,32 +226,13 @@ func (u *UserController) ActivateUser(c *gin.Context) {
 		return
 	}
 
-	uId, ok := c.Get(middleware.UserId)
-	if !ok {
-		log.Warn("no user id from the previous middleware")
-		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Error.InvalidToken.Code),
-			Message:   t7Error.InvalidToken.Message,
-		})
-		return
-	}
-	userId, ok := uId.(string)
-	if !ok {
-		log.With("userId", uId).Error("type assertion fail")
-		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Error.InvalidToken.Code),
-			Message:   t7Error.InvalidToken.Message,
-		})
-		return
-	}
+	userId := c.Param("userId")
 
 	act := u.authService.ActivateUser(c, userId, req.ActivationCode)
 	if !act {
-		log.With("userId", uId).Info("user activate fail")
+		log.With("userId", userId).Info("user activate fail")
 	} else {
-		log.With("userId", uId).Info("user activated")
+		log.With("userId", userId).Info("user activated")
 	}
 
 	c.JSON(http.StatusOK, types.HttpActivateUserResp{

@@ -77,6 +77,11 @@ func (s *service) ActivateUser(ctx context.Context, userId string, actCode strin
 		return false
 	}
 
+	if err := s.db.SetUserStatus(ctx, userId, authV1.AccountStatus_activated); err != nil {
+		log.WithError(err).Error("fail to update user status")
+		return false
+	}
+
 	log.Debug("user activated")
 	return true
 }

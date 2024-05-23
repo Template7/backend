@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"github.com/Template7/backend/internal/db/entity"
+	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/shopspring/decimal"
 )
 
@@ -14,6 +15,7 @@ type Client interface {
 	UpdateUserInfo(ctx context.Context, userId string, info entity.UserInfo) (err error)
 	GetUserWallets(ctx context.Context, userId string) (data []entity.UserWalletBalance)
 	DeleteUser(ctx context.Context, userId string) (err error)
+	SetUserStatus(ctx context.Context, userId string, status authV1.AccountStatus) (err error)
 
 	// wallet
 	GetWalletBalances(ctx context.Context, walletId string) (data []entity.WalletBalance, err error)

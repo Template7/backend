@@ -34,7 +34,7 @@ func InitializeApp() *App {
 	authAuth := auth.New(client, gormDB, cacheInterface, loggerLogger, configConfig)
 	authController := handler.NewAuthController(authAuth, loggerLogger)
 	service := user.New(authAuth, client, loggerLogger)
-	userController := handler.NewUserController(service, loggerLogger)
+	userController := handler.NewUserController(service, authAuth, loggerLogger)
 	walletService := wallet.New(client, loggerLogger)
 	walletController := handler.NewWalletController(walletService, loggerLogger)
 	controller := middleware.New(service, authAuth, loggerLogger)

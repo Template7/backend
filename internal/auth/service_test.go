@@ -52,6 +52,10 @@ func (c *testDbClient) DeleteUser(ctx context.Context, userId string) error {
 	return errors.New("not implemented")
 }
 
+func (c *testDbClient) SetUserStatus(ctx context.Context, userId string, status authV1.AccountStatus) (err error) {
+	return nil
+}
+
 // wallet methods
 func (c *testDbClient) GetWalletBalances(ctx context.Context, walletId string) ([]entity.WalletBalance, error) {
 	return nil, errors.New("not implemented")
@@ -156,6 +160,10 @@ func Test_service_CreateUser(t *testing.T) {
 	if userId == "" {
 		t.Error("empty user id")
 	}
+
+	var data []entity.User
+	testDbCore.Find(&data)
+	fmt.Println(data)
 }
 
 func Test_service_GenActivationCode(t *testing.T) {
