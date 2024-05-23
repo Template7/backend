@@ -26,3 +26,6 @@ db:
 redis:
   host: "localhost:6379"
   password:
+
+auth:
+  rbacModelPath: "./config/rbac_model.conf"

@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"github.com/Template7/backend/internal/db/entity"
+	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 	"github.com/google/uuid"
 )
@@ -111,6 +112,17 @@ func (c *client) DeleteUser(ctx context.Context, userId string) (err error) {
 
 	if err = c.sql.core.WithContext(ctx).Exec("delete u, b, w from user u join wallet w on u.id = w.user_id join balance b on w.id = b.wallet_id where u.id = ?", userId).Error; err != nil {
 		log.WithError(err).Error("fail to delete user")
+	}
+
+	return
+}
+
+func (c *client) SetUserStatus(ctx context.Context, userId string, status authV1.AccountStatus) (err error) {
+	log := c.log.WithContext(ctx).With("userId", userId).With("status", status)
+	log.Debug("set account status")
+
+	if err = c.sql.core.WithContext(ctx).Model(&entity.User{}).Where("id = ?", userId).Update("status", status).Error; err != nil {
+		log.WithError(err).Error("fail to update account status")
 	}
 
 	return

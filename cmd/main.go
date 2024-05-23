@@ -29,7 +29,7 @@ func main() {
 	}
 
 	go func() {
-		app.Log.With("port", config.New().Service.Port).Info("server started")
+		app.Log.With("port", app.config.Service.Port).Info("server started")
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			app.Log.WithError(err).Panic(err.Error())
 		}
