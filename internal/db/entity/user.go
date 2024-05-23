@@ -6,14 +6,14 @@ import (
 )
 
 type User struct {
-	Id        string   `gorm:"type:char(36);primary_key;"`
-	Username  string   `gorm:"type:varchar(64);uniqueIndex;not_null"`
-	Password  string   `gorm:"type:varchar(64);not_null"`
-	Info      UserInfo `gorm:"embedded"`
-	Email     string   `gorm:"type:varchar(128)"`
-	Status    v1.AccountStatus
-	CreatedAt time.Time `gorm:"autoCreateTime:milli;not null"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime:milli;not null"`
+	Id        string           `gorm:"type:char(36);primary_key;"`
+	Username  string           `gorm:"type:varchar(64);uniqueIndex;not_null"`
+	Password  string           `gorm:"type:varchar(64);not_null"`
+	Info      UserInfo         `gorm:"embedded"`
+	Email     string           `gorm:"type:varchar(128)"`
+	Status    v1.AccountStatus `gorm:"type:TINYINT"`
+	CreatedAt time.Time        `gorm:"autoCreateTime:milli;not null"`
+	UpdatedAt time.Time        `gorm:"autoUpdateTime:milli;not null"`
 }
 
 // UserInfo

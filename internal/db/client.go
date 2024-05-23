@@ -7,7 +7,6 @@ import (
 	"github.com/Template7/common/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
-	"sync"
 )
 
 type client struct {
@@ -23,28 +22,23 @@ type client struct {
 	log *logger.Logger
 }
 
-var (
-	once     sync.Once
-	instance *client
-)
+func New(log *logger.Logger) Client {
+	c := &client{
+		log: log.WithService("db"),
+	}
 
-func New() Client {
-	once.Do(func() {
-		// nosql
-		mDb := db.NewNoSql().Database(config.New().Db.NoSql.Db)
-		instance = &client{}
-		instance.mongo.user = mDb.Collection("user")
-		instance.mongo.transactionHistory = mDb.Collection("transactionHistory")
-		instance.mongo.depositHistory = mDb.Collection("depositHistory")
-		instance.mongo.withdrawHistory = mDb.Collection("withdrawHistory")
+	// nosql
+	mDb := db.NewNoSql().Database(config.New().Db.NoSql.Db)
+	c.mongo.user = mDb.Collection("user")
+	c.mongo.transactionHistory = mDb.Collection("transactionHistory")
+	c.mongo.depositHistory = mDb.Collection("depositHistory")
+	c.mongo.withdrawHistory = mDb.Collection("withdrawHistory")
 
-		// sql
-		instance.sql.core = db.NewSql()
-		instance.log = logger.New().WithService("db")
+	// sql
+	c.sql.core = db.NewSql()
 
-		logger.New().Debug("db client initialized")
-	})
-	return instance
+	c.log.Info("config initialized")
+	return c
 }
 
 func (c *client) initIndex(db *mongo.Database) (err error) {

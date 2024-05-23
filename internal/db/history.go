@@ -36,7 +36,7 @@ func (c *client) createTransferHistory(ctx context.Context, tx *gorm.DB, data en
 	return
 }
 
-func (c *client) GetWalletBalanceHistory(ctx context.Context, walletId string, currency string) ([]entity.WalletBalanceHistory, error) {
+func (c *client) GetWalletBalanceHistoryByCurrency(ctx context.Context, walletId string, currency string) ([]entity.WalletBalanceHistory, error) {
 	log := c.log.WithContext(ctx).With("walletId", walletId).With("currency", currency)
 	log.Debug("get wallet balance history")
 

@@ -3,8 +3,8 @@ package db
 import (
 	"context"
 	"github.com/Template7/backend/internal/db/entity"
+	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/shopspring/decimal"
-	"gorm.io/gorm"
 )
 
 type Client interface {
@@ -15,6 +15,7 @@ type Client interface {
 	UpdateUserInfo(ctx context.Context, userId string, info entity.UserInfo) (err error)
 	GetUserWallets(ctx context.Context, userId string) (data []entity.UserWalletBalance)
 	DeleteUser(ctx context.Context, userId string) (err error)
+	SetUserStatus(ctx context.Context, userId string, status authV1.AccountStatus) (err error)
 
 	// wallet
 	GetWalletBalances(ctx context.Context, walletId string) (data []entity.WalletBalance, err error)
@@ -22,11 +23,7 @@ type Client interface {
 	Withdraw(ctx context.Context, walletId string, money entity.Money, note string) (err error)
 	Transfer(ctx context.Context, fromWalletId string, toWalletId string, money entity.Money, note string) (err error)
 	GetBalance(ctx context.Context, walletId string, currency string) (decimal.Decimal, error)
-	getWalletsBalance(ctx context.Context, tx *gorm.DB, walletId []string, currency string) (data []entity.Balance, err error)
 
 	// history
-	createDepositHistory(ctx context.Context, tx *gorm.DB, data entity.DepositHistory) (err error)
-	createWithdrawHistory(ctx context.Context, tx *gorm.DB, data entity.WithdrawHistory) (err error)
-	createTransferHistory(ctx context.Context, tx *gorm.DB, data entity.TransferHistory) (err error)
-	GetWalletBalanceHistory(ctx context.Context, walletId string, currency string) ([]entity.WalletBalanceHistory, error)
+	GetWalletBalanceHistoryByCurrency(ctx context.Context, walletId string, currency string) ([]entity.WalletBalanceHistory, error)
 }
