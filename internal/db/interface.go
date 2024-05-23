@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/Template7/backend/internal/db/entity"
 	"github.com/shopspring/decimal"
-	"gorm.io/gorm"
 )
 
 type Client interface {
@@ -22,11 +21,7 @@ type Client interface {
 	Withdraw(ctx context.Context, walletId string, money entity.Money, note string) (err error)
 	Transfer(ctx context.Context, fromWalletId string, toWalletId string, money entity.Money, note string) (err error)
 	GetBalance(ctx context.Context, walletId string, currency string) (decimal.Decimal, error)
-	getWalletsBalance(ctx context.Context, tx *gorm.DB, walletId []string, currency string) (data []entity.Balance, err error)
 
 	// history
-	createDepositHistory(ctx context.Context, tx *gorm.DB, data entity.DepositHistory) (err error)
-	createWithdrawHistory(ctx context.Context, tx *gorm.DB, data entity.WithdrawHistory) (err error)
-	createTransferHistory(ctx context.Context, tx *gorm.DB, data entity.TransferHistory) (err error)
 	GetWalletBalanceHistoryByCurrency(ctx context.Context, walletId string, currency string) ([]entity.WalletBalanceHistory, error)
 }

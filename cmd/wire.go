@@ -12,6 +12,7 @@ import (
 	middleware "github.com/Template7/backend/internal/route/middleWare"
 	"github.com/Template7/backend/internal/user"
 	"github.com/Template7/backend/internal/wallet"
+	commonDb "github.com/Template7/common/db"
 	"github.com/Template7/common/logger"
 	"github.com/google/wire"
 )
@@ -28,6 +29,7 @@ func InitializeApp() *App {
 		config.New,
 		middleware.New,
 		db.New,
+		commonDb.NewSql,
 		cache.New,
 		logger.New,
 	)

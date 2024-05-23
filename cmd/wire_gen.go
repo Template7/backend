@@ -15,6 +15,7 @@ import (
 	"github.com/Template7/backend/internal/route/middleWare"
 	"github.com/Template7/backend/internal/user"
 	"github.com/Template7/backend/internal/wallet"
+	db2 "github.com/Template7/common/db"
 	"github.com/Template7/common/logger"
 )
 
@@ -27,15 +28,16 @@ import (
 func InitializeApp() *App {
 	loggerLogger := logger.New()
 	client := db.New(loggerLogger)
+	gormDB := db2.NewSql()
 	cacheInterface := cache.New(loggerLogger)
-	authAuth := auth.New(client, cacheInterface, loggerLogger)
+	configConfig := config.New()
+	authAuth := auth.New(client, gormDB, cacheInterface, loggerLogger, configConfig)
 	authController := handler.NewAuthController(authAuth, loggerLogger)
 	service := user.New(authAuth, client, loggerLogger)
 	userController := handler.NewUserController(service, loggerLogger)
 	walletService := wallet.New(client, loggerLogger)
 	walletController := handler.NewWalletController(walletService, loggerLogger)
 	controller := middleware.New(service, authAuth, loggerLogger)
-	configConfig := config.New()
 	app := NewApp(authController, userController, walletController, controller, configConfig, loggerLogger)
 	return app
 }

@@ -1,16 +1,16 @@
 package auth
 
 import (
-	"fmt"
 	"github.com/Template7/backend/internal/cache"
+	"github.com/Template7/backend/internal/config"
 	"github.com/Template7/backend/internal/db"
-	"github.com/Template7/common/config"
 	"github.com/Template7/common/logger"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/casbin/casbin/v2"
-	gormadapter "github.com/casbin/gorm-adapter/v2"
+	"github.com/casbin/gorm-adapter/v3"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 	"net/http"
 )
 
@@ -26,22 +26,21 @@ type UserTokenClaims struct {
 }
 
 type service struct {
-	core  *casbin.Enforcer
-	db    db.Client
-	cache cache.Interface
-	log   *logger.Logger
+	core   *casbin.Enforcer
+	db     db.Client
+	dbCore *gorm.DB
+	cache  cache.Interface
+	log    *logger.Logger
 }
 
-func New(db db.Client, cache cache.Interface, log *logger.Logger) Auth {
-	cfg := config.New()
-	cs := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", cfg.Db.Sql.Username, cfg.Db.Sql.Password, cfg.Db.Sql.Host, cfg.Db.Sql.Port, cfg.Db.Sql.Db)
-	adapter, err := gormadapter.NewAdapter("mysql", cs, true)
+func New(db db.Client, dbCore *gorm.DB, cache cache.Interface, log *logger.Logger, cfg *config.Config) Auth {
+	adapter, err := gormadapter.NewAdapterByDB(dbCore)
 	if err != nil {
 		log.WithError(err).Panic("fail to new mysql adapter")
 		panic(err)
 	}
 
-	e, err := casbin.NewEnforcer("./config/rbac_model.conf", adapter)
+	e, err := casbin.NewEnforcer(cfg.Auth.RbacModelPath, adapter)
 	if err != nil {
 		log.WithError(err).Error("fail to new enforcer")
 		panic(err)
@@ -59,11 +58,14 @@ func New(db db.Client, cache cache.Interface, log *logger.Logger) Auth {
 		return role == authV1.Role_admin.String(), nil
 	})
 
+	log = log.WithService("auth")
+	log.Debug("auth service initialized")
+
 	return &service{
 		core:  e,
 		db:    db,
 		cache: cache,
-		log:   log.WithService("auth"),
+		log:   log,
 	}
 }
 
@@ -93,8 +95,6 @@ func (s *service) loadDefaultPolicies() {
 			s.log.With("policy", p).Info("policy already exists")
 		}
 	}
-
-	s.log.With("policy", s.core.GetPolicy()).Debug("show policies")
 }
 
 func hashedPassword(password string) (string, error) {

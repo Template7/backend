@@ -17,6 +17,9 @@ type Config struct {
 	Log struct {
 		Level string
 	}
+	Auth struct {
+		RbacModelPath string
+	}
 }
 
 func New() *Config {
