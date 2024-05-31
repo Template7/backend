@@ -236,23 +236,21 @@ func (w *WalletController) Transfer(c *gin.Context) {
 	})
 }
 
-// GetWalletBalanceRecord
+// GetWalletBalanceHistory
 // @Summary Get wallet balance record
 // @Tags V1,Wallet
 // @version 1.0
 // @produce json
-// @Success 200 {object} types.HttpGetWalletBalanceRecordResp "Response"
+// @Success 200 {object} types.HttpGetWalletBalanceHistoryResp "Response"
 // @failure 400 {object} types.HttpRespError
 // @Param walletId path string true "Wallet ID"
-// @Param currency path string true "Currency"
-// @Router /api/v1/wallets/{walletId}/currencies/{currency}/record [get]
-func (w *WalletController) GetWalletBalanceRecord(c *gin.Context) {
+// @Router /api/v1/wallets/{walletId}/history [get]
+func (w *WalletController) GetWalletBalanceHistory(c *gin.Context) {
 	log := w.log.WithContext(c)
 	log.Debug("handle get wallet balance record")
 
 	wId := c.Param("walletId")
-	cur := c.Param("currency")
-	if wId == "" || cur == "" {
+	if wId == "" {
 		c.JSON(http.StatusBadRequest, types.HttpRespBase{
 			RequestId: c.GetHeader(middleware.HeaderRequestId),
 			Code:      int(t7Error.InvalidBody.Code),
@@ -261,11 +259,9 @@ func (w *WalletController) GetWalletBalanceRecord(c *gin.Context) {
 		return
 	}
 
-	// TODO: refine
+	history := w.service.GetBalanceHistory(c, wId)
 
-	records := w.service.GetBalanceHistoryByCurrency(c, wId, walletV1.Currency(walletV1.Currency_value[cur]))
-
-	if records == nil {
+	if history == nil {
 		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
 			RequestId: c.GetHeader(middleware.HeaderRequestId),
 			Code:      int(t7Error.DbOperationFail.Code),
@@ -274,11 +270,25 @@ func (w *WalletController) GetWalletBalanceRecord(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, types.HttpGetWalletBalanceRecordResp{
+	data := make([]types.HttpGetWalletBalanceHistoryData, len(history))
+	for i, h := range history {
+		data[i] = types.HttpGetWalletBalanceHistoryData{
+			Direction:     h.Direction.String(),
+			Currency:      h.Currency.String(),
+			Amount:        h.Amount,
+			BalanceBefore: h.BalanceBefore,
+			BalanceAfter:  h.BalanceAfter,
+			Timestamp:     h.Timestamp,
+			Note:          h.Note,
+		}
+	}
+
+	c.JSON(http.StatusOK, types.HttpGetWalletBalanceHistoryResp{
 		HttpRespBase: types.HttpRespBase{
 			RequestId: c.GetHeader(middleware.HeaderRequestId),
 			Code:      types.HttpRespCodeOk,
 			Message:   types.HttpRespMsgOk,
 		},
+		Data: data,
 	})
 }

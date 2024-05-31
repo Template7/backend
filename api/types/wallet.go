@@ -24,3 +24,18 @@ type HttpTransferMoneyReq struct {
 	Amount       uint32 `json:"amount" binding:"required" example:"100"`
 	Note         string `json:"note"`
 }
+
+type HttpGetWalletBalanceHistoryResp struct {
+	HttpRespBase
+	Data []HttpGetWalletBalanceHistoryData `json:"data"`
+}
+
+type HttpGetWalletBalanceHistoryData struct {
+	Direction     string `json:"direction" example:"deposit"` // one of deposit, withdraw, transferIn, transferOut
+	Currency      string `json:"currency" example:"ntd"`
+	Amount        string `json:"amount" example:"100"`
+	BalanceBefore string `json:"balanceBefore" example:"10"`
+	BalanceAfter  string `json:"balanceAfter" example:"110"`
+	Timestamp     int64  `json:"timestamp"`
+	Note          string `json:"note"`
+}
