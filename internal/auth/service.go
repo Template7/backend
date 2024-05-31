@@ -58,15 +58,16 @@ func New(db db.Client, dbCore *gorm.DB, cache cache.Interface, log *logger.Logge
 		return role == authV1.Role_admin.String(), nil
 	})
 
-	log = log.WithService("auth")
-	log.Debug("auth service initialized")
-
-	return &service{
+	s := service{
 		core:  e,
 		db:    db,
 		cache: cache,
-		log:   log,
+		log:   log.WithService("auth"),
 	}
+	s.loadDefaultPolicies()
+
+	s.log.Debug("auth service initialized")
+	return &s
 }
 
 func (s *service) loadDefaultPolicies() {
