@@ -91,39 +91,43 @@ definitions:
         example: usd
         type: string
     type: object
-  types.HttpGetWalletBalanceRecordResp:
+  types.HttpGetWalletBalanceHistoryData:
+    properties:
+      amount:
+        example: "100"
+        type: string
+      balanceAfter:
+        example: "110"
+        type: string
+      balanceBefore:
+        example: "10"
+        type: string
+      currency:
+        example: ntd
+        type: string
+      direction:
+        description: one of deposit, withdraw, transferIn, transferOut
+        example: deposit
+        type: string
+      note:
+        type: string
+      timestamp:
+        type: integer
+    type: object
+  types.HttpGetWalletBalanceHistoryResp:
     properties:
       code:
         example: 3000
         type: integer
       data:
         items:
-          $ref: '#/definitions/types.HttpGetWalletBalanceRecordRespData'
+          $ref: '#/definitions/types.HttpGetWalletBalanceHistoryData'
         type: array
       message:
         example: ok
         type: string
       requestId:
         example: b8974256-1f17-477f-8638-c7ebbac656d7
-        type: string
-    type: object
-  types.HttpGetWalletBalanceRecordRespData:
-    properties:
-      amount:
-        type: number
-      amountAfter:
-        type: number
-      amountBefore:
-        type: number
-      io:
-        description: in/out
-        type: string
-      note:
-        type: string
-      recordId:
-        type: integer
-      timestamp:
-        description: record created_at
         type: string
     type: object
   types.HttpGetWalletResp:
@@ -492,34 +496,6 @@ paths:
       tags:
       - V1
       - Wallet
-  /api/v1/wallets/{walletId}/currencies/{currency}/record:
-    get:
-      parameters:
-      - description: Wallet ID
-        in: path
-        name: walletId
-        required: true
-        type: string
-      - description: Currency
-        in: path
-        name: currency
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Response
-          schema:
-            $ref: '#/definitions/types.HttpGetWalletBalanceRecordResp'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/types.HttpRespError'
-      summary: Get wallet balance record
-      tags:
-      - V1
-      - Wallet
   /api/v1/wallets/{walletId}/deposit:
     post:
       parameters:
@@ -546,6 +522,29 @@ paths:
           schema:
             $ref: '#/definitions/types.HttpRespError'
       summary: Wallet deposit
+      tags:
+      - V1
+      - Wallet
+  /api/v1/wallets/{walletId}/history:
+    get:
+      parameters:
+      - description: Wallet ID
+        in: path
+        name: walletId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response
+          schema:
+            $ref: '#/definitions/types.HttpGetWalletBalanceHistoryResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
+      summary: Get wallet balance record
       tags:
       - V1
       - Wallet

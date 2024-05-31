@@ -301,48 +301,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/wallets/{walletId}/currencies/{currency}/record": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "V1",
-                    "Wallet"
-                ],
-                "summary": "Get wallet balance record",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet ID",
-                        "name": "walletId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Currency",
-                        "name": "currency",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Response",
-                        "schema": {
-                            "$ref": "#/definitions/types.HttpGetWalletBalanceRecordResp"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/types.HttpRespError"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/wallets/{walletId}/deposit": {
             "post": {
                 "produces": [
@@ -376,6 +334,41 @@ const docTemplate = `{
                         "description": "Response",
                         "schema": {
                             "$ref": "#/definitions/types.HttpRespBase"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpRespError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/wallets/{walletId}/history": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V1",
+                    "Wallet"
+                ],
+                "summary": "Get wallet balance record",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet ID",
+                        "name": "walletId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpGetWalletBalanceHistoryResp"
                         }
                     },
                     "400": {
@@ -564,7 +557,39 @@ const docTemplate = `{
                 }
             }
         },
-        "types.HttpGetWalletBalanceRecordResp": {
+        "types.HttpGetWalletBalanceHistoryData": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "string",
+                    "example": "100"
+                },
+                "balanceAfter": {
+                    "type": "string",
+                    "example": "110"
+                },
+                "balanceBefore": {
+                    "type": "string",
+                    "example": "10"
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "ntd"
+                },
+                "direction": {
+                    "description": "one of deposit, withdraw, transferIn, transferOut",
+                    "type": "string",
+                    "example": "deposit"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.HttpGetWalletBalanceHistoryResp": {
             "type": "object",
             "properties": {
                 "code": {
@@ -574,7 +599,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/types.HttpGetWalletBalanceRecordRespData"
+                        "$ref": "#/definitions/types.HttpGetWalletBalanceHistoryData"
                     }
                 },
                 "message": {
@@ -584,34 +609,6 @@ const docTemplate = `{
                 "requestId": {
                     "type": "string",
                     "example": "b8974256-1f17-477f-8638-c7ebbac656d7"
-                }
-            }
-        },
-        "types.HttpGetWalletBalanceRecordRespData": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "amountAfter": {
-                    "type": "number"
-                },
-                "amountBefore": {
-                    "type": "number"
-                },
-                "io": {
-                    "description": "in/out",
-                    "type": "string"
-                },
-                "note": {
-                    "type": "string"
-                },
-                "recordId": {
-                    "type": "integer"
-                },
-                "timestamp": {
-                    "description": "record created_at",
-                    "type": "string"
                 }
             }
         },
