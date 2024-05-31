@@ -25,5 +25,6 @@ type Client interface {
 	GetBalance(ctx context.Context, walletId string, currency string) (decimal.Decimal, error)
 
 	// history
+	GetWalletBalanceHistory(ctx context.Context, walletId string) ([]entity.WalletBalanceHistory, error)
 	GetWalletBalanceHistoryByCurrency(ctx context.Context, walletId string, currency string) ([]entity.WalletBalanceHistory, error)
 }

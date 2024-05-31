@@ -58,12 +58,15 @@ type WalletHistory struct {
 	Balance  WalletBalanceHistory
 }
 
+// WalletBalanceHistory
+// data structure only
 type WalletBalanceHistory struct {
-	RecordId     int64
-	Io           string // in/out
-	Amount       decimal.Decimal
-	AmountBefore decimal.Decimal
-	AmountAfter  decimal.Decimal
-	Timestamp    time.Time // record created_at
-	Note         string
+	Id            int64           `json:"id"`
+	Direction     string          `json:"direction"`
+	Currency      string          `json:"currency"`
+	Amount        decimal.Decimal `json:"amount"`
+	BalanceBefore decimal.Decimal `json:"balanceBefore"`
+	BalanceAfter  decimal.Decimal `json:"balanceAfter"`
+	CreatedAt     time.Time       `json:"createdAt"` // record created_at
+	Note          string          `json:"note"`
 }
