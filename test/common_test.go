@@ -1,4 +1,4 @@
-package auth
+package test
 
 import (
 	"context"
@@ -8,19 +8,16 @@ import (
 	"github.com/Template7/backend/internal/config"
 	"github.com/Template7/backend/internal/db"
 	"github.com/Template7/backend/internal/db/entity"
-	"github.com/Template7/common/logger"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
-	userV1 "github.com/Template7/protobuf/gen/proto/template7/user"
 	"github.com/glebarez/sqlite"
 	"github.com/shopspring/decimal"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 	"sync"
-	"testing"
 )
 
 func init() {
-	viper.AddConfigPath("../../config")
+	viper.AddConfigPath("../config")
 }
 
 type testDbClient struct {
@@ -143,43 +140,4 @@ func newTestConfig() *config.Config {
 	cfg := config.Config{}
 	cfg.Auth.RbacModelPath = "../../config/rbac_model.conf"
 	return &cfg
-}
-
-func Test_service_CreateUser(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "traceId", "Test_service_CreateUser")
-
-	req := userV1.CreateUserRequest{
-		Username: "admin",
-		Password: "password",
-		Role:     authV1.Role_admin,
-	}
-
-	authAvc := New(newTestDbClient(), newTestDbCore(), newTestCache(), logger.New(), newTestConfig())
-
-	userId, err := authAvc.CreateUser(ctx, &req)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if userId == "" {
-		t.Error("empty user id")
-	}
-
-	var data []entity.User
-	testDbCore.Find(&data)
-	fmt.Println(data)
-}
-
-func Test_service_GenActivationCode(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "traceId", "Test_service_GenActivationCode")
-	authAvc := New(newTestDbClient(), newTestDbCore(), newTestCache(), logger.New(), newTestConfig())
-
-	code, err := authAvc.GenActivationCode(ctx, "testUserId")
-	if err != nil {
-		t.Error(err)
-	}
-
-	if code == "" {
-		t.Error("empty act code")
-	}
 }
