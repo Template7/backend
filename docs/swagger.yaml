@@ -91,6 +91,42 @@ definitions:
         example: usd
         type: string
     type: object
+  types.HttpGetWalletBalanceHistoryByCurrencyData:
+    properties:
+      amount:
+        example: "100"
+        type: string
+      balanceAfter:
+        example: "110"
+        type: string
+      balanceBefore:
+        example: "10"
+        type: string
+      direction:
+        description: one of deposit, withdraw, transferIn, transferOut
+        example: deposit
+        type: string
+      note:
+        type: string
+      timestamp:
+        type: integer
+    type: object
+  types.HttpGetWalletBalanceHistoryByCurrencyResp:
+    properties:
+      code:
+        example: 3000
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/types.HttpGetWalletBalanceHistoryByCurrencyData'
+        type: array
+      message:
+        example: ok
+        type: string
+      requestId:
+        example: b8974256-1f17-477f-8638-c7ebbac656d7
+        type: string
+    type: object
   types.HttpGetWalletBalanceHistoryData:
     properties:
       amount:
@@ -493,6 +529,39 @@ paths:
           schema:
             $ref: '#/definitions/types.HttpRespError'
       summary: Get wallet
+      tags:
+      - V1
+      - Wallet
+  /api/v1/wallets/{walletId}/currencies/{currency}/history:
+    get:
+      parameters:
+      - description: Wallet ID
+        in: path
+        name: walletId
+        required: true
+        type: string
+      - description: Currency
+        enum:
+        - ntd
+        - cny
+        - usd
+        - jpy
+        in: path
+        name: currency
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response
+          schema:
+            $ref: '#/definitions/types.HttpGetWalletBalanceHistoryByCurrencyResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
+      summary: Get wallet balance record
       tags:
       - V1
       - Wallet

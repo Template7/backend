@@ -39,3 +39,17 @@ type HttpGetWalletBalanceHistoryData struct {
 	Timestamp     int64  `json:"timestamp"`
 	Note          string `json:"note"`
 }
+
+type HttpGetWalletBalanceHistoryByCurrencyResp struct {
+	HttpRespBase
+	Data []HttpGetWalletBalanceHistoryByCurrencyData `json:"data"`
+}
+
+type HttpGetWalletBalanceHistoryByCurrencyData struct {
+	Direction     string `json:"direction" example:"deposit"` // one of deposit, withdraw, transferIn, transferOut
+	Amount        string `json:"amount" example:"100"`
+	BalanceBefore string `json:"balanceBefore" example:"10"`
+	BalanceAfter  string `json:"balanceAfter" example:"110"`
+	Timestamp     int64  `json:"timestamp"`
+	Note          string `json:"note"`
+}
