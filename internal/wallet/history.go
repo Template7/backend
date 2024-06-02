@@ -5,7 +5,7 @@ import (
 	walletV1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 )
 
-func (s *Service) GetBalanceHistoryByCurrency(ctx context.Context, walletId string, currency walletV1.Currency) []walletV1.CurrencyBalanceHistory {
+func (s *Service) GetBalanceHistoryByCurrency(ctx context.Context, walletId string, currency walletV1.Currency) []*walletV1.CurrencyBalanceHistory {
 	log := s.log.WithContext(ctx).With("walletId", walletId).With("currency", currency)
 	log.Debug("get wallet balance history by currency")
 
@@ -15,9 +15,9 @@ func (s *Service) GetBalanceHistoryByCurrency(ctx context.Context, walletId stri
 		return nil
 	}
 
-	data := make([]walletV1.CurrencyBalanceHistory, len(history))
+	data := make([]*walletV1.CurrencyBalanceHistory, len(history))
 	for i, h := range history {
-		data[i] = walletV1.CurrencyBalanceHistory{
+		data[i] = &walletV1.CurrencyBalanceHistory{
 			Id:            h.Id,
 			Direction:     walletV1.Direction(walletV1.Direction_value[h.Direction]),
 			Amount:        h.Amount.String(),

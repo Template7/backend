@@ -29,6 +29,7 @@ func NewWalletController(service *wallet.Service, log *logger.Logger) *WalletCon
 // @version 1.0
 // @Success 200 {object} types.HttpGetWalletResp "Response"
 // @failure 400 {object} types.HttpRespError
+// @Security BearerAuth
 // @Param walletId path string true "Wallet ID"
 // @Router /api/v1/wallets/{walletId} [get]
 func (w *WalletController) GetWallet(c *gin.Context) {
@@ -86,6 +87,7 @@ func (w *WalletController) GetWallet(c *gin.Context) {
 // @produce json
 // @Success 200 {object} types.HttpRespBase "Response"
 // @failure 400 {object} types.HttpRespError
+// @Security BearerAuth
 // @Param walletId path string true "Wallet ID"
 // @Router /api/v1/wallets/{walletId}/deposit [post]
 func (w *WalletController) Deposit(c *gin.Context) {
@@ -139,6 +141,7 @@ func (w *WalletController) Deposit(c *gin.Context) {
 // @produce json
 // @Success 200 {object} types.HttpRespBase "Response"
 // @failure 400 {object} types.HttpRespError
+// @Security BearerAuth
 // @Param walletId path string true "Wallet ID"
 // @Router /api/v1/wallets/{walletId}/withdraw [post]
 func (w *WalletController) Withdraw(c *gin.Context) {
@@ -192,6 +195,7 @@ func (w *WalletController) Withdraw(c *gin.Context) {
 // @produce json
 // @Success 200 {object} types.HttpRespBase "Response"
 // @failure 400 {object} types.HttpRespError
+// @Security BearerAuth
 // @Router /api/v1/transfer [post]
 func (w *WalletController) Transfer(c *gin.Context) {
 	log := w.log.WithContext(c)
@@ -243,6 +247,7 @@ func (w *WalletController) Transfer(c *gin.Context) {
 // @produce json
 // @Success 200 {object} types.HttpGetWalletBalanceHistoryResp "Response"
 // @failure 400 {object} types.HttpRespError
+// @Security BearerAuth
 // @Param walletId path string true "Wallet ID"
 // @Router /api/v1/wallets/{walletId}/history [get]
 func (w *WalletController) GetWalletBalanceHistory(c *gin.Context) {
@@ -300,6 +305,7 @@ func (w *WalletController) GetWalletBalanceHistory(c *gin.Context) {
 // @produce json
 // @Success 200 {object} types.HttpGetWalletBalanceHistoryByCurrencyResp "Response"
 // @failure 400 {object} types.HttpRespError
+// @Security BearerAuth
 // @Param walletId path string true "Wallet ID"
 // @Param currency path string true "Currency" Enums(ntd, cny, usd, jpy)
 // @Router /api/v1/wallets/{walletId}/currencies/{currency}/history [get]

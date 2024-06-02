@@ -49,11 +49,11 @@ func (c *client) GetWalletBalanceHistory(ctx context.Context, walletId string) (
     `).Where("wallet_id = ?", walletId)
 
 	transferOutQuery := c.sql.core.Table("transfer_history").Select(`
-        id, from_wallet_id AS wallet_id, 'transfer_out' AS direction, currency, amount, sender_balance_before AS balance_before, sender_balance_after AS balance_after, note, created_at
+        id, from_wallet_id AS wallet_id, 'transferOut' AS direction, currency, amount, sender_balance_before AS balance_before, sender_balance_after AS balance_after, note, created_at
     `).Where("from_wallet_id = ?", walletId)
 
 	transferInQuery := c.sql.core.Table("transfer_history").Select(`
-        id, to_wallet_id AS wallet_id, 'transfer_in' AS direction, currency, amount, receiver_balance_before AS balance_before, receiver_balance_after AS balance_after, note, created_at
+        id, to_wallet_id AS wallet_id, 'transferIn' AS direction, currency, amount, receiver_balance_before AS balance_before, receiver_balance_after AS balance_after, note, created_at
     `).Where("to_wallet_id = ?", walletId)
 
 	unionQuery := c.sql.core.Table("(?) AS u", c.sql.core.Raw(`
@@ -82,11 +82,11 @@ func (c *client) GetWalletBalanceHistoryByCurrency(ctx context.Context, walletId
     `).Where("wallet_id = ? and currency = ?", walletId, currency)
 
 	transferOutQuery := c.sql.core.Table("transfer_history").Select(`
-        id, from_wallet_id AS wallet_id, 'transfer_out' AS direction, currency, amount, sender_balance_before AS balance_before, sender_balance_after AS balance_after, note, created_at
+        id, from_wallet_id AS wallet_id, 'transferOut' AS direction, currency, amount, sender_balance_before AS balance_before, sender_balance_after AS balance_after, note, created_at
     `).Where("from_wallet_id = ? and currency = ?", walletId, currency)
 
 	transferInQuery := c.sql.core.Table("transfer_history").Select(`
-        id, to_wallet_id AS wallet_id, 'transfer_in' AS direction, currency, amount, receiver_balance_before AS balance_before, receiver_balance_after AS balance_after, note, created_at
+        id, to_wallet_id AS wallet_id, 'transferIn' AS direction, currency, amount, receiver_balance_before AS balance_before, receiver_balance_after AS balance_after, note, created_at
     `).Where("to_wallet_id = ? and currency = ?", walletId, currency)
 
 	unionQuery := c.sql.core.Table("(?) AS u", c.sql.core.Raw(`

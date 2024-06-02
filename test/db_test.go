@@ -35,6 +35,4 @@ func TestDbClient_GetWalletBalanceHistory(t *testing.T) {
 	}
 
 	t.Log(data)
-
-	//db.CreateUser()
 }
