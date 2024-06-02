@@ -301,6 +301,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/wallets/{walletId}/currencies/{currency}/history": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V1",
+                    "Wallet"
+                ],
+                "summary": "Get wallet balance record",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet ID",
+                        "name": "walletId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "ntd",
+                            "cny",
+                            "usd",
+                            "jpy"
+                        ],
+                        "type": "string",
+                        "description": "Currency",
+                        "name": "currency",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpGetWalletBalanceHistoryByCurrencyResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpRespError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/wallets/{walletId}/deposit": {
             "post": {
                 "produces": [
@@ -554,6 +602,57 @@ const docTemplate = `{
                 "currency": {
                     "type": "string",
                     "example": "usd"
+                }
+            }
+        },
+        "types.HttpGetWalletBalanceHistoryByCurrencyData": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "string",
+                    "example": "100"
+                },
+                "balanceAfter": {
+                    "type": "string",
+                    "example": "110"
+                },
+                "balanceBefore": {
+                    "type": "string",
+                    "example": "10"
+                },
+                "direction": {
+                    "description": "one of deposit, withdraw, transferIn, transferOut",
+                    "type": "string",
+                    "example": "deposit"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.HttpGetWalletBalanceHistoryByCurrencyResp": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 3000
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.HttpGetWalletBalanceHistoryByCurrencyData"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "requestId": {
+                    "type": "string",
+                    "example": "b8974256-1f17-477f-8638-c7ebbac656d7"
                 }
             }
         },

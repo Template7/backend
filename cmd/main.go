@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	_ "github.com/Template7/backend/docs"
-	"github.com/Template7/backend/internal/config"
 	"net/http"
 	"os"
 	"os/signal"
@@ -24,7 +23,7 @@ import (
 func main() {
 	app := InitializeApp()
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", config.New().Service.Port),
+		Addr:    fmt.Sprintf(":%d", app.config.Service.Port),
 		Handler: app.SetupRoutes(),
 	}
 

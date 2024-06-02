@@ -46,6 +46,7 @@ func (a *App) SetupRoutes() *gin.Engine {
 	wallet.POST("/deposit", a.middlewareController.CheckAccountStatusActivated, a.walletController.Deposit)
 	wallet.POST("/withdraw", a.middlewareController.CheckAccountStatusActivated, a.walletController.Withdraw)
 	wallet.GET("/history", a.middlewareController.CheckAccountStatusActivated, a.walletController.GetWalletBalanceHistory)
+	wallet.GET("/currencies/:currency/history", a.middlewareController.CheckAccountStatusActivated, a.walletController.GetWalletBalanceHistoryByCurrency)
 
 	// transfer
 	transfer := apiV1.Group("/transfer", a.middlewareController.CheckAccountStatusActivated)
