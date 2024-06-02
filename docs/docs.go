@@ -40,6 +40,11 @@ const docTemplate = `{
         },
         "/admin/v1/user": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -77,6 +82,11 @@ const docTemplate = `{
         },
         "/admin/v1/users/{userId}": {
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -149,6 +159,11 @@ const docTemplate = `{
         },
         "/api/v1/transfer": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -186,6 +201,11 @@ const docTemplate = `{
         },
         "/api/v1/user/info": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "tags": [
                     "V1",
                     "User"
@@ -207,6 +227,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -244,6 +269,11 @@ const docTemplate = `{
         },
         "/api/v1/user/wallets": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -271,6 +301,11 @@ const docTemplate = `{
         },
         "/api/v1/wallets/{walletId}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "tags": [
                     "V1",
                     "Wallet"
@@ -303,6 +338,11 @@ const docTemplate = `{
         },
         "/api/v1/wallets/{walletId}/currencies/{currency}/history": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -351,6 +391,11 @@ const docTemplate = `{
         },
         "/api/v1/wallets/{walletId}/deposit": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -395,6 +440,11 @@ const docTemplate = `{
         },
         "/api/v1/wallets/{walletId}/history": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -430,6 +480,11 @@ const docTemplate = `{
         },
         "/api/v1/wallets/{walletId}/withdraw": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -952,6 +1007,13 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

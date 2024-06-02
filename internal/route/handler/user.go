@@ -36,6 +36,7 @@ func NewUserController(service *user.Service, authService auth.Auth, log *logger
 // @version 1.0
 // @Success 200 {object} types.HttpUserInfoResp "Response"
 // @failure 400 {object} types.HttpRespError
+// @Security BearerAuth
 // @Router /api/v1/user/info [get]
 func (u *UserController) GetUserInfo(c *gin.Context) {
 	log := u.log.WithContext(c)
@@ -108,6 +109,7 @@ func (u *UserController) GetUserInfo(c *gin.Context) {
 // @produce json
 // @Success 200 {object} types.HttpCreateUserResp "Response"
 // @failure 400 {object} types.HttpRespError
+// @Security BearerAuth
 // @Router /admin/v1/user [post]
 func (u *UserController) CreateUser(c *gin.Context) {
 	log := u.log.WithContext(c)
@@ -255,6 +257,7 @@ func (u *UserController) ActivateUser(c *gin.Context) {
 // @produce json
 // @Success 200 {object} types.HttpRespBase "Response"
 // @failure 400 {object} types.HttpRespError
+// @Security BearerAuth
 // @Router /api/v1/user/info [put]
 func (u *UserController) UpdateUser(c *gin.Context) {
 	log := u.log.WithContext(c)
@@ -330,6 +333,7 @@ func (u *UserController) UpdateUser(c *gin.Context) {
 // @produce json
 // @Success 200 {object} types.HttpGetUserWalletsResp "Response"
 // @failure 400 {object} types.HttpRespError
+// @Security BearerAuth
 // @Router /api/v1/user/wallets [get]
 func (u *UserController) GetUserWallets(c *gin.Context) {
 	log := u.log.WithContext(c)
@@ -391,6 +395,7 @@ func (u *UserController) GetUserWallets(c *gin.Context) {
 // @produce json
 // @Success 200 {object} types.HttpRespBase "Response"
 // @failure 400 {object} types.HttpRespError
+// @Security BearerAuth
 // @Param userId path string true "User ID"
 // @Router /admin/v1/users/{userId} [delete]
 func (u *UserController) DeleteUser(c *gin.Context) {

@@ -380,6 +380,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/types.HttpRespError'
+      security:
+      - BearerAuth: []
       summary: Create user
       tags:
       - V1
@@ -403,6 +405,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/types.HttpRespError'
+      security:
+      - BearerAuth: []
       summary: Delete user
       tags:
       - V1
@@ -451,6 +455,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/types.HttpRespError'
+      security:
+      - BearerAuth: []
       summary: Wallet transfer
       tags:
       - V1
@@ -466,6 +472,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/types.HttpRespError'
+      security:
+      - BearerAuth: []
       summary: Get user Info
       tags:
       - V1
@@ -489,6 +497,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/types.HttpRespError'
+      security:
+      - BearerAuth: []
       summary: Update user info
       tags:
       - V1
@@ -506,6 +516,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/types.HttpRespError'
+      security:
+      - BearerAuth: []
       summary: Get user wallets
       tags:
       - V1
@@ -528,6 +540,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/types.HttpRespError'
+      security:
+      - BearerAuth: []
       summary: Get wallet
       tags:
       - V1
@@ -561,6 +575,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/types.HttpRespError'
+      security:
+      - BearerAuth: []
       summary: Get wallet balance record
       tags:
       - V1
@@ -590,6 +606,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/types.HttpRespError'
+      security:
+      - BearerAuth: []
       summary: Wallet deposit
       tags:
       - V1
@@ -613,6 +631,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/types.HttpRespError'
+      security:
+      - BearerAuth: []
       summary: Get wallet balance record
       tags:
       - V1
@@ -642,8 +662,15 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/types.HttpRespError'
+      security:
+      - BearerAuth: []
       summary: Wallet withdraw
       tags:
       - V1
       - Wallet
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
