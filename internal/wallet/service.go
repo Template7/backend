@@ -16,10 +16,12 @@ type Service struct {
 }
 
 func New(db db.Client, log *logger.Logger) *Service {
-	return &Service{
+	s := &Service{
 		db:  db,
 		log: log.WithService("wallet"),
 	}
+	s.log.Info("wallet service initialized")
+	return s
 }
 
 func (s *Service) GetWallet(ctx context.Context, walletId string) (*v1.Wallet, error) {

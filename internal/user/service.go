@@ -13,9 +13,11 @@ type Service struct {
 }
 
 func New(authSvc auth.Auth, db db.Client, log *logger.Logger) *Service {
-	return &Service{
+	s := &Service{
 		db:      db,
 		authSvc: authSvc,
 		log:     log.WithService("user"),
 	}
+	s.log.Info("user service initialized")
+	return s
 }

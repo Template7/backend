@@ -247,7 +247,7 @@ func (w *WalletController) Transfer(c *gin.Context) {
 // @Router /api/v1/wallets/{walletId}/history [get]
 func (w *WalletController) GetWalletBalanceHistory(c *gin.Context) {
 	log := w.log.WithContext(c)
-	log.Debug("handle get wallet balance record")
+	log.Debug("handle get wallet balance history")
 
 	wId := c.Param("walletId")
 	if wId == "" {
@@ -284,6 +284,74 @@ func (w *WalletController) GetWalletBalanceHistory(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, types.HttpGetWalletBalanceHistoryResp{
+		HttpRespBase: types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      types.HttpRespCodeOk,
+			Message:   types.HttpRespMsgOk,
+		},
+		Data: data,
+	})
+}
+
+// GetWalletBalanceHistoryByCurrency
+// @Summary Get wallet balance record
+// @Tags V1,Wallet
+// @version 1.0
+// @produce json
+// @Success 200 {object} types.HttpGetWalletBalanceHistoryByCurrencyResp "Response"
+// @failure 400 {object} types.HttpRespError
+// @Param walletId path string true "Wallet ID"
+// @Param currency path string true "Currency" Enums(ntd, cny, usd, jpy)
+// @Router /api/v1/wallets/{walletId}/currencies/{currency}/history [get]
+func (w *WalletController) GetWalletBalanceHistoryByCurrency(c *gin.Context) {
+	log := w.log.WithContext(c)
+	log.Debug("handle get wallet balance history by currency")
+
+	wId := c.Param("walletId")
+	if wId == "" {
+		c.JSON(http.StatusBadRequest, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidBody.Code),
+			Message:   t7Error.InvalidBody.Message,
+		})
+		return
+	}
+
+	currency, ok := walletV1.Currency_value[c.Param("currency")]
+	if !ok {
+		log.With("currency", c.Param("currency")).Info("unsupported currency")
+		c.JSON(http.StatusBadRequest, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidBody.Code),
+			Message:   t7Error.InvalidBody.Message,
+		})
+		return
+	}
+
+	history := w.service.GetBalanceHistoryByCurrency(c, wId, walletV1.Currency(currency))
+
+	if history == nil {
+		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.DbOperationFail.Code),
+			Message:   t7Error.DbOperationFail.Message,
+		})
+		return
+	}
+
+	data := make([]types.HttpGetWalletBalanceHistoryByCurrencyData, len(history))
+	for i, h := range history {
+		data[i] = types.HttpGetWalletBalanceHistoryByCurrencyData{
+			Direction:     h.Direction.String(),
+			Amount:        h.Amount,
+			BalanceBefore: h.BalanceBefore,
+			BalanceAfter:  h.BalanceAfter,
+			Timestamp:     h.Timestamp,
+			Note:          h.Note,
+		}
+	}
+
+	c.JSON(http.StatusOK, types.HttpGetWalletBalanceHistoryByCurrencyResp{
 		HttpRespBase: types.HttpRespBase{
 			RequestId: c.GetHeader(middleware.HeaderRequestId),
 			Code:      types.HttpRespCodeOk,
