@@ -2,8 +2,8 @@ package user
 
 import (
 	"context"
-	"github.com/Template7/backend/internal/db/entity"
 	"github.com/Template7/backend/internal/t7Error"
+	"github.com/Template7/common/models"
 	userV1 "github.com/Template7/protobuf/gen/proto/template7/user"
 )
 
@@ -28,7 +28,7 @@ func (s *Service) GetInfo(ctx context.Context, userId string) (*userV1.UserInfoR
 	return &resp, nil
 }
 
-func (s *Service) UpdateInfo(ctx context.Context, userId string, info entity.UserInfo) error {
+func (s *Service) UpdateInfo(ctx context.Context, userId string, info models.UserInfo) error {
 	log := s.log.WithContext(ctx).With("userId", userId)
 	log.Debug("update user info")
 

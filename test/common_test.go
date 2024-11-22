@@ -6,8 +6,7 @@ import (
 	"fmt"
 	"github.com/Template7/backend/internal/cache"
 	"github.com/Template7/backend/internal/config"
-	"github.com/Template7/backend/internal/db"
-	"github.com/Template7/backend/internal/db/entity"
+	"github.com/Template7/common/models"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/glebarez/sqlite"
 	"github.com/shopspring/decimal"
@@ -25,23 +24,23 @@ type testDbClient struct {
 }
 
 // user methods
-func (c *testDbClient) CreateUser(ctx context.Context, data entity.User) error {
+func (c *testDbClient) CreateUser(ctx context.Context, data models.User) error {
 	return c.core.Create(&data).Error
 }
 
-func (c *testDbClient) GetUser(ctx context.Context, username string) (entity.User, error) {
-	return entity.User{}, errors.New("not implemented")
+func (c *testDbClient) GetUser(ctx context.Context, username string) (models.User, error) {
+	return models.User{}, errors.New("not implemented")
 }
 
-func (c *testDbClient) GetUserById(ctx context.Context, userId string) (entity.User, error) {
-	return entity.User{}, errors.New("not implemented")
+func (c *testDbClient) GetUserById(ctx context.Context, userId string) (models.User, error) {
+	return models.User{}, errors.New("not implemented")
 }
 
-func (c *testDbClient) UpdateUserInfo(ctx context.Context, userId string, info entity.UserInfo) error {
+func (c *testDbClient) UpdateUserInfo(ctx context.Context, userId string, info models.UserInfo) error {
 	return errors.New("not implemented")
 }
 
-func (c *testDbClient) GetUserWallets(ctx context.Context, userId string) []entity.UserWalletBalance {
+func (c *testDbClient) GetUserWallets(ctx context.Context, userId string) []models.UserWalletBalance {
 	return nil
 }
 
@@ -54,19 +53,19 @@ func (c *testDbClient) SetUserStatus(ctx context.Context, userId string, status 
 }
 
 // wallet methods
-func (c *testDbClient) GetWalletBalances(ctx context.Context, walletId string) ([]entity.WalletBalance, error) {
+func (c *testDbClient) GetWalletBalances(ctx context.Context, walletId string) ([]models.WalletBalance, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (c *testDbClient) Deposit(ctx context.Context, walletId string, money entity.Money, note string) error {
+func (c *testDbClient) Deposit(ctx context.Context, walletId string, money models.Money, note string) error {
 	return errors.New("not implemented")
 }
 
-func (c *testDbClient) Withdraw(ctx context.Context, walletId string, money entity.Money, note string) error {
+func (c *testDbClient) Withdraw(ctx context.Context, walletId string, money models.Money, note string) error {
 	return errors.New("not implemented")
 }
 
-func (c *testDbClient) Transfer(ctx context.Context, fromWalletId string, toWalletId string, money entity.Money, note string) error {
+func (c *testDbClient) Transfer(ctx context.Context, fromWalletId string, toWalletId string, money models.Money, note string) error {
 	return errors.New("not implemented")
 }
 
@@ -74,15 +73,15 @@ func (c *testDbClient) GetBalance(ctx context.Context, walletId string, currency
 	return decimal.Decimal{}, errors.New("not implemented")
 }
 
-func (c *testDbClient) getWalletsBalance(ctx context.Context, tx *gorm.DB, walletId []string, currency string) ([]entity.Balance, error) {
+func (c *testDbClient) getWalletsBalance(ctx context.Context, tx *gorm.DB, walletId []string, currency string) ([]models.Balance, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (c *testDbClient) GetWalletBalanceHistoryByCurrency(ctx context.Context, walletId string, currency string) ([]entity.WalletBalanceHistory, error) {
+func (c *testDbClient) GetWalletBalanceHistoryByCurrency(ctx context.Context, walletId string, currency string) ([]models.WalletBalanceHistory, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (c *testDbClient) GetWalletBalanceHistory(ctx context.Context, walletId string) ([]entity.WalletBalanceHistory, error) {
+func (c *testDbClient) GetWalletBalanceHistory(ctx context.Context, walletId string) ([]models.WalletBalanceHistory, error) {
 	return nil, errors.New("not implemented")
 }
 
@@ -127,7 +126,12 @@ func newTestDbCore() *gorm.DB {
 			panic("failed to connect database")
 		}
 		if err := tdc.AutoMigrate(
-			&entity.User{},
+			&models.User{},
+			&models.Wallet{},
+			&models.Balance{},
+			&models.DepositHistory{},
+			&models.WithdrawHistory{},
+			&models.TransferHistory{},
 		); err != nil {
 			panic(err)
 		}
@@ -138,6 +142,6 @@ func newTestDbCore() *gorm.DB {
 
 func newTestConfig() *config.Config {
 	cfg := config.Config{}
-	cfg.Auth.RbacModelPath = "../../config/rbac_model.conf"
+	cfg.Auth.RbacModelPath = "../config/rbac_model.conf"
 	return &cfg
 }

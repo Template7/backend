@@ -3,14 +3,14 @@ package db
 import (
 	"context"
 	"fmt"
-	"github.com/Template7/backend/internal/db/entity"
+	"github.com/Template7/common/models"
 	"github.com/Template7/common/t7Id"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
-func (c *client) GetWalletBalances(ctx context.Context, walletId string) (data []entity.WalletBalance, err error) {
+func (c *client) GetWalletBalances(ctx context.Context, walletId string) (data []models.WalletBalance, err error) {
 	log := c.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("get wallet balances")
 
@@ -22,7 +22,7 @@ func (c *client) GetWalletBalances(ctx context.Context, walletId string) (data [
 
 // Deposit
 // deposit money and create deposit history
-func (c *client) Deposit(ctx context.Context, walletId string, money entity.Money, note string) error {
+func (c *client) Deposit(ctx context.Context, walletId string, money models.Money, note string) error {
 	log := c.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("deposit")
 
@@ -46,7 +46,7 @@ func (c *client) Deposit(ctx context.Context, walletId string, money entity.Mone
 		return err
 	}
 
-	dh := entity.DepositHistory{
+	dh := models.DepositHistory{
 		Id:            t7Id.New().Generate().Int64(),
 		WalletId:      walletId,
 		Currency:      money.Currency,
@@ -69,7 +69,7 @@ func (c *client) Deposit(ctx context.Context, walletId string, money entity.Mone
 	return nil
 }
 
-func (c *client) Withdraw(ctx context.Context, walletId string, money entity.Money, note string) (err error) {
+func (c *client) Withdraw(ctx context.Context, walletId string, money models.Money, note string) (err error) {
 	log := c.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("withdraw")
 
@@ -93,7 +93,7 @@ func (c *client) Withdraw(ctx context.Context, walletId string, money entity.Mon
 		return err
 	}
 
-	wh := entity.WithdrawHistory{
+	wh := models.WithdrawHistory{
 		Id:            t7Id.New().Generate().Int64(),
 		WalletId:      walletId,
 		Currency:      money.Currency,
@@ -116,7 +116,7 @@ func (c *client) Withdraw(ctx context.Context, walletId string, money entity.Mon
 	return nil
 }
 
-func (c *client) Transfer(ctx context.Context, fromWalletId string, toWalletId string, money entity.Money, note string) (err error) {
+func (c *client) Transfer(ctx context.Context, fromWalletId string, toWalletId string, money models.Money, note string) (err error) {
 	log := c.log.WithContext(ctx).With("fromWalletId", fromWalletId).With("toWalletId", toWalletId).With("money", money)
 	log.Debug("transfer money")
 
@@ -162,7 +162,7 @@ func (c *client) Transfer(ctx context.Context, fromWalletId string, toWalletId s
 		rba = wsa[0].Amount
 	}
 
-	th := entity.TransferHistory{
+	th := models.TransferHistory{
 		Id:                    t7Id.New().Generate().Int64(),
 		FromWalletId:          fromWalletId,
 		ToWalletId:            toWalletId,
@@ -187,15 +187,15 @@ func (c *client) Transfer(ctx context.Context, fromWalletId string, toWalletId s
 	return
 }
 
-func (c *client) deposit(ctx context.Context, tx *gorm.DB, walletId string, money entity.Money) (err error) {
+func (c *client) deposit(ctx context.Context, tx *gorm.DB, walletId string, money models.Money) (err error) {
 	log := c.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("do deposit")
 
-	err = tx.Model(&entity.Balance{}).Clauses(
+	err = tx.Model(&models.Balance{}).Clauses(
 		clause.OnConflict{
 			Columns:   []clause.Column{{Name: "wallet_id"}, {Name: "currency"}},
 			DoUpdates: clause.Assignments(map[string]interface{}{"amount": gorm.Expr("amount + ?", money.Amount)}),
-		}).Create(&entity.Balance{WalletId: walletId, Money: money}).Error
+		}).Create(&models.Balance{WalletId: walletId, Money: money}).Error
 
 	if err != nil {
 		log.WithError(err).Error("fail to deposit")
@@ -203,12 +203,12 @@ func (c *client) deposit(ctx context.Context, tx *gorm.DB, walletId string, mone
 	return
 }
 
-func (c *client) withdraw(ctx context.Context, tx *gorm.DB, walletId string, money entity.Money) (err error) {
+func (c *client) withdraw(ctx context.Context, tx *gorm.DB, walletId string, money models.Money) (err error) {
 	log := c.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("do withdraw")
 
-	err = tx.Model(&entity.Balance{}).
-		Take(&entity.Balance{}, "wallet_id = ? AND currency = ? AND amount >= ?", walletId, money.Currency, money.Amount).
+	err = tx.Model(&models.Balance{}).
+		Take(&models.Balance{}, "wallet_id = ? AND currency = ? AND amount >= ?", walletId, money.Currency, money.Amount).
 		Update("amount", gorm.Expr("amount - ?", money.Amount)).Error
 
 	if err != nil {
@@ -228,8 +228,8 @@ func (c *client) getBalance(ctx context.Context, tx *gorm.DB, walletId string, c
 	log := c.log.WithContext(ctx).With("walletId", walletId).With("currency", currency)
 	log.Debug("get balance")
 
-	var data entity.Balance
-	if err := tx.Where(&entity.Balance{}).Select("amount").Where("wallet_id = ? and currency = ?", walletId, currency).Take(&data).Error; err != nil {
+	var data models.Balance
+	if err := tx.Where(&models.Balance{}).Select("amount").Where("wallet_id = ? and currency = ?", walletId, currency).Take(&data).Error; err != nil {
 		log.WithError(err).Error("fail to get balance")
 		return decimal.NewFromInt(-1), err
 	}
@@ -237,11 +237,11 @@ func (c *client) getBalance(ctx context.Context, tx *gorm.DB, walletId string, c
 	return data.Amount, nil
 }
 
-func (c *client) getWalletsBalance(ctx context.Context, tx *gorm.DB, walletsId []string, currency string) (data []entity.Balance, err error) {
+func (c *client) getWalletsBalance(ctx context.Context, tx *gorm.DB, walletsId []string, currency string) (data []models.Balance, err error) {
 	log := c.log.WithContext(ctx).With("walletsId", walletsId).With("currency", currency)
 	log.Debug("get balances")
 
-	if err = tx.Where(&entity.Balance{}).Select("wallet_id", "amount").Where("wallet_id in ? and currency = ?", walletsId, currency).Find(&data).Error; err != nil {
+	if err = tx.Where(&models.Balance{}).Select("wallet_id", "amount").Where("wallet_id in ? and currency = ?", walletsId, currency).Find(&data).Error; err != nil {
 		log.WithError(err).Error("fail to get balance")
 	}
 

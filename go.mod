@@ -3,7 +3,7 @@ module github.com/Template7/backend
 go 1.21.1
 
 require (
-	github.com/Template7/common v1.0.1
+	github.com/Template7/common v1.0.2
 	github.com/Template7/protobuf v0.1.18
 	github.com/casbin/casbin/v2 v2.89.0
 	github.com/casbin/gorm-adapter/v3 v3.24.0
@@ -13,7 +13,7 @@ require (
 	github.com/google/uuid v1.4.0
 	github.com/google/wire v0.6.0
 	github.com/redis/go-redis/v9 v9.1.0
-	github.com/shopspring/decimal v1.3.1
+	github.com/shopspring/decimal v1.4.0
 	github.com/spf13/viper v1.16.0
 	github.com/swaggo/gin-swagger v1.4.0
 	github.com/swaggo/swag v1.16.2

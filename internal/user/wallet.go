@@ -2,7 +2,7 @@ package user
 
 import (
 	"context"
-	"github.com/Template7/backend/internal/db/entity"
+	"github.com/Template7/common/models"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 )
 
@@ -11,11 +11,11 @@ func (s *Service) GetUserWallets(ctx context.Context, userId string) (data []*v1
 	log.Debug("get user wallets")
 
 	uws := s.db.GetUserWallets(ctx, userId)
-	gbw := func() map[string][]entity.UserWalletBalance {
-		r := map[string][]entity.UserWalletBalance{}
+	gbw := func() map[string][]models.UserWalletBalance {
+		r := map[string][]models.UserWalletBalance{}
 		for _, uw := range uws {
 			if _, ok := r[uw.WalletId]; !ok {
-				r[uw.WalletId] = []entity.UserWalletBalance{uw}
+				r[uw.WalletId] = []models.UserWalletBalance{uw}
 			} else {
 				r[uw.WalletId] = append(r[uw.WalletId], uw)
 			}

@@ -22,7 +22,7 @@ package test
 //	uw := user.New().GetUserWallets(ctx, userId)
 //	t.Log(uw)
 //
-//	err = user.New().UpdateInfo(ctx, userId, entity.UserInfo{
+//	err = user.New().UpdateInfo(ctx, userId, models.UserInfo{
 //		Nickname: "nickname",
 //	})
 //	if err != nil {
