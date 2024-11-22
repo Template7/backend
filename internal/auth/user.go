@@ -2,8 +2,8 @@ package auth
 
 import (
 	"context"
-	"github.com/Template7/backend/internal/db/entity"
 	"github.com/Template7/backend/internal/t7Error"
+	"github.com/Template7/common/models"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	userV1 "github.com/Template7/protobuf/gen/proto/template7/user"
 	"github.com/google/uuid"
@@ -30,11 +30,11 @@ func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest)
 		return "", t7Error.UserAlreadyExist
 	}
 
-	data := entity.User{
+	data := models.User{
 		Id:       userId,
 		Username: req.Username,
 		Password: hp,
-		Info: entity.UserInfo{
+		Info: models.UserInfo{
 			Nickname: req.Nickname,
 		},
 		Email:  req.Email,

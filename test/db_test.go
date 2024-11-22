@@ -2,7 +2,7 @@ package test
 
 import (
 	"context"
-	"github.com/Template7/backend/internal/db/entity"
+	"github.com/Template7/common/models"
 	"github.com/Template7/common/t7Id"
 	walletV1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 	"github.com/google/uuid"
@@ -14,7 +14,7 @@ func TestDbClient_GetWalletBalanceHistory(t *testing.T) {
 
 	dbCore := newTestDbCore()
 	wId := uuid.NewString()
-	dh := entity.DepositHistory{
+	dh := models.DepositHistory{
 		Id:            t7Id.New().Generate().Int64(),
 		WalletId:      wId,
 		Currency:      walletV1.Currency_ntd.String(),

@@ -2,11 +2,11 @@ package db
 
 import (
 	"context"
-	"github.com/Template7/backend/internal/db/entity"
+	"github.com/Template7/common/models"
 	"gorm.io/gorm"
 )
 
-func (c *client) createDepositHistory(ctx context.Context, tx *gorm.DB, data entity.DepositHistory) (err error) {
+func (c *client) createDepositHistory(ctx context.Context, tx *gorm.DB, data models.DepositHistory) (err error) {
 	log := c.log.WithContext(ctx)
 	log.Debug("create deposit history")
 
@@ -16,7 +16,7 @@ func (c *client) createDepositHistory(ctx context.Context, tx *gorm.DB, data ent
 	return
 }
 
-func (c *client) createWithdrawHistory(ctx context.Context, tx *gorm.DB, data entity.WithdrawHistory) (err error) {
+func (c *client) createWithdrawHistory(ctx context.Context, tx *gorm.DB, data models.WithdrawHistory) (err error) {
 	log := c.log.WithContext(ctx)
 	log.Debug("create withdraw history")
 
@@ -26,7 +26,7 @@ func (c *client) createWithdrawHistory(ctx context.Context, tx *gorm.DB, data en
 	return
 }
 
-func (c *client) createTransferHistory(ctx context.Context, tx *gorm.DB, data entity.TransferHistory) (err error) {
+func (c *client) createTransferHistory(ctx context.Context, tx *gorm.DB, data models.TransferHistory) (err error) {
 	log := c.log.WithContext(ctx)
 	log.Debug("create transfer history")
 
@@ -36,7 +36,7 @@ func (c *client) createTransferHistory(ctx context.Context, tx *gorm.DB, data en
 	return
 }
 
-func (c *client) GetWalletBalanceHistory(ctx context.Context, walletId string) ([]entity.WalletBalanceHistory, error) {
+func (c *client) GetWalletBalanceHistory(ctx context.Context, walletId string) ([]models.WalletBalanceHistory, error) {
 	log := c.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("get wallet balance history")
 
@@ -60,7 +60,7 @@ func (c *client) GetWalletBalanceHistory(ctx context.Context, walletId string) (
         ? UNION ALL ? UNION ALL ? UNION ALL ?
     `, depositQuery, withdrawQuery, transferOutQuery, transferInQuery)).Order("created_at")
 
-	var wbh []entity.WalletBalanceHistory
+	var wbh []models.WalletBalanceHistory
 	if err := unionQuery.Scan(&wbh).Error; err != nil {
 		log.WithError(err).Error("fail to scan data")
 		return nil, err
@@ -69,7 +69,7 @@ func (c *client) GetWalletBalanceHistory(ctx context.Context, walletId string) (
 	return wbh, nil
 }
 
-func (c *client) GetWalletBalanceHistoryByCurrency(ctx context.Context, walletId string, currency string) ([]entity.WalletBalanceHistory, error) {
+func (c *client) GetWalletBalanceHistoryByCurrency(ctx context.Context, walletId string, currency string) ([]models.WalletBalanceHistory, error) {
 	log := c.log.WithContext(ctx).With("walletId", walletId).With("currency", currency)
 	log.Debug("get wallet balance history by currency")
 
@@ -93,7 +93,7 @@ func (c *client) GetWalletBalanceHistoryByCurrency(ctx context.Context, walletId
         ? UNION ALL ? UNION ALL ? UNION ALL ?
     `, depositQuery, withdrawQuery, transferOutQuery, transferInQuery)).Order("created_at")
 
-	var wbh []entity.WalletBalanceHistory
+	var wbh []models.WalletBalanceHistory
 	if err := unionQuery.Scan(&wbh).Error; err != nil {
 		log.WithError(err).Error("fail to scan data")
 		return nil, err
