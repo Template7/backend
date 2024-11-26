@@ -24,7 +24,7 @@ db:
     password:
 
 cache:
-  host: "localhost:6379"
+  host: "localhost:36379"
   password:
 
 auth:

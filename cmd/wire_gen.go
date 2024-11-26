@@ -7,6 +7,7 @@
 package main
 
 import (
+	"github.com/Template7/backend/internal"
 	"github.com/Template7/backend/internal/auth"
 	"github.com/Template7/backend/internal/cache"
 	"github.com/Template7/backend/internal/config"
@@ -15,8 +16,6 @@ import (
 	"github.com/Template7/backend/internal/route/middleWare"
 	"github.com/Template7/backend/internal/user"
 	"github.com/Template7/backend/internal/wallet"
-	db2 "github.com/Template7/common/db"
-	"github.com/Template7/common/logger"
 )
 
 import (
@@ -26,18 +25,20 @@ import (
 // Injectors from wire.go:
 
 func InitializeApp() *App {
-	loggerLogger := logger.New()
-	client := db.New(loggerLogger)
-	gormDB := db2.NewSql()
-	cacheInterface := cache.New(loggerLogger)
 	configConfig := config.New()
-	authAuth := auth.New(client, gormDB, cacheInterface, loggerLogger, configConfig)
-	authController := handler.NewAuthController(authAuth, loggerLogger)
-	service := user.New(authAuth, client, loggerLogger)
-	userController := handler.NewUserController(service, authAuth, loggerLogger)
-	walletService := wallet.New(client, loggerLogger)
-	walletController := handler.NewWalletController(walletService, loggerLogger)
-	controller := middleware.New(service, authAuth, loggerLogger)
-	app := NewApp(authController, userController, walletController, controller, configConfig, loggerLogger)
+	gormDB := internal.ProvideSqlCore(configConfig)
+	client := internal.ProvideNoSqlCore(configConfig)
+	logger := internal.ProvideLogger(configConfig)
+	dbClient := db.New(gormDB, client, logger)
+	redisClient := internal.ProvideCacheCore(configConfig)
+	cacheInterface := cache.New(redisClient, logger)
+	authAuth := auth.New(dbClient, gormDB, cacheInterface, logger, configConfig)
+	authController := handler.NewAuthController(authAuth, logger)
+	service := user.New(authAuth, dbClient, logger)
+	userController := handler.NewUserController(service, authAuth, logger)
+	walletService := wallet.New(dbClient, logger)
+	walletController := handler.NewWalletController(walletService, logger)
+	controller := middleware.New(service, authAuth, logger)
+	app := NewApp(authController, userController, walletController, controller, configConfig, logger)
 	return app
 }
