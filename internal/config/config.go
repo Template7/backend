@@ -15,10 +15,38 @@ type Config struct {
 		Port int
 	}
 	Log struct {
-		Level string
+		Format  string // json(default) | console
+		Level   string // debug(default) | info | warn | error
+		Version string // commit id
 	}
 	Auth struct {
 		RbacModelPath string
+	}
+	Db struct {
+		Sql struct {
+			Db         string
+			Host       string
+			Port       int
+			Username   string
+			Password   string
+			Connection struct {
+				Min int
+				Max int
+			}
+		}
+		NoSql struct {
+			Db       string
+			Host     string
+			Port     int
+			Username string
+			Password string
+		}
+	}
+	Cache struct {
+		Host         string
+		Password     string
+		ReadTimeout  int
+		WriteTimeout int
 	}
 }
 

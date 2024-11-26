@@ -3,9 +3,9 @@ package wallet
 import (
 	"context"
 	"github.com/Template7/backend/internal/db"
-	"github.com/Template7/backend/internal/db/entity"
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/common/logger"
+	"github.com/Template7/common/models"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 	"github.com/shopspring/decimal"
 )
@@ -55,7 +55,7 @@ func (s *Service) Deposit(ctx context.Context, walletId string, currency v1.Curr
 	log := s.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("deposit")
 
-	m := entity.Money{
+	m := models.Money{
 		Currency: v1.Currency_name[int32(currency)],
 		Amount:   decimal.NewFromInt32(int32(amount)),
 	}
@@ -72,7 +72,7 @@ func (s *Service) Withdraw(ctx context.Context, walletId string, currency v1.Cur
 	log := s.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("withdraw")
 
-	m := entity.Money{
+	m := models.Money{
 		Currency: v1.Currency_name[int32(currency)],
 		Amount:   decimal.NewFromInt32(int32(amount)),
 	}
@@ -89,7 +89,7 @@ func (s *Service) Transfer(ctx context.Context, fromWalletId string, toWalletId 
 	log := s.log.WithContext(ctx).With("fromWalletId", fromWalletId).With("toWalletId", toWalletId)
 	log.Debug("transfer")
 
-	m := entity.Money{
+	m := models.Money{
 		Currency: v1.Currency_name[int32(currency)],
 		Amount:   decimal.NewFromInt32(int32(amount)),
 	}

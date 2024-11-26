@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"github.com/Template7/common/cache"
 	"github.com/Template7/common/logger"
 	"github.com/redis/go-redis/v9"
 )
@@ -11,9 +10,9 @@ type client struct {
 	log  *logger.Logger
 }
 
-func New(log *logger.Logger) Interface {
+func New(core *redis.Client, log *logger.Logger) Interface {
 	return &client{
-		core: cache.New(),
+		core: core,
 		log:  log.WithService("redis"),
 	}
 }

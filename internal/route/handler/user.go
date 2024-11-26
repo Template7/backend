@@ -3,11 +3,11 @@ package handler
 import (
 	"github.com/Template7/backend/api/types"
 	"github.com/Template7/backend/internal/auth"
-	"github.com/Template7/backend/internal/db/entity"
 	middleware "github.com/Template7/backend/internal/route/middleWare"
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/backend/internal/user"
 	"github.com/Template7/common/logger"
+	"github.com/Template7/common/models"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 	"github.com/gin-gonic/gin"
@@ -295,7 +295,7 @@ func (u *UserController) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	data := entity.UserInfo{
+	data := models.UserInfo{
 		Nickname: req.Nickname,
 	}
 	if err := u.userService.UpdateInfo(c, userId, data); err != nil {

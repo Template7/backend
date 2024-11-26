@@ -2,13 +2,13 @@ package db
 
 import (
 	"context"
-	"github.com/Template7/backend/internal/db/entity"
+	"github.com/Template7/common/models"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 	"github.com/google/uuid"
 )
 
-func (c *client) CreateUser(ctx context.Context, data entity.User) (err error) {
+func (c *client) CreateUser(ctx context.Context, data models.User) (err error) {
 	log := c.log.WithContext(ctx).With("username", data.Username)
 	log.Debug("create user")
 
@@ -19,7 +19,7 @@ func (c *client) CreateUser(ctx context.Context, data entity.User) (err error) {
 		return
 	}
 
-	w := entity.Wallet{
+	w := models.Wallet{
 		Id:     uuid.NewString(),
 		UserId: data.Id,
 	}
@@ -28,28 +28,28 @@ func (c *client) CreateUser(ctx context.Context, data entity.User) (err error) {
 		return
 	}
 
-	bls := []entity.Balance{
+	bls := []models.Balance{
 		{
 			WalletId: w.Id,
-			Money: entity.Money{
+			Money: models.Money{
 				Currency: v1.Currency_usd.String(),
 			},
 		},
 		{
 			WalletId: w.Id,
-			Money: entity.Money{
+			Money: models.Money{
 				Currency: v1.Currency_ntd.String(),
 			},
 		},
 		{
 			WalletId: w.Id,
-			Money: entity.Money{
+			Money: models.Money{
 				Currency: v1.Currency_cny.String(),
 			},
 		},
 		{
 			WalletId: w.Id,
-			Money: entity.Money{
+			Money: models.Money{
 				Currency: v1.Currency_jpy.String(),
 			},
 		},
@@ -66,7 +66,7 @@ func (c *client) CreateUser(ctx context.Context, data entity.User) (err error) {
 	return
 }
 
-func (c *client) GetUser(ctx context.Context, username string) (data entity.User, err error) {
+func (c *client) GetUser(ctx context.Context, username string) (data models.User, err error) {
 	log := c.log.WithContext(ctx).With("username", username)
 	log.Debug("get user")
 
@@ -76,7 +76,7 @@ func (c *client) GetUser(ctx context.Context, username string) (data entity.User
 	return
 }
 
-func (c *client) GetUserById(ctx context.Context, userId string) (data entity.User, err error) {
+func (c *client) GetUserById(ctx context.Context, userId string) (data models.User, err error) {
 	log := c.log.WithContext(ctx).With("userId", userId)
 	log.Debug("get user")
 
@@ -86,17 +86,17 @@ func (c *client) GetUserById(ctx context.Context, userId string) (data entity.Us
 	return
 }
 
-func (c *client) UpdateUserInfo(ctx context.Context, userId string, info entity.UserInfo) (err error) {
+func (c *client) UpdateUserInfo(ctx context.Context, userId string, info models.UserInfo) (err error) {
 	log := c.log.WithContext(ctx).With("userId", userId)
 	log.Debug("update user info")
 
-	if err = c.sql.core.WithContext(ctx).Model(&entity.User{}).Where("id = ?", userId).Update("nickname", info.Nickname).Error; err != nil {
+	if err = c.sql.core.WithContext(ctx).Model(&models.User{}).Where("id = ?", userId).Update("nickname", info.Nickname).Error; err != nil {
 		log.WithError(err).Error("fail to update user info")
 	}
 	return
 }
 
-func (c *client) GetUserWallets(ctx context.Context, userId string) (data []entity.UserWalletBalance) {
+func (c *client) GetUserWallets(ctx context.Context, userId string) (data []models.UserWalletBalance) {
 	log := c.log.WithContext(ctx).With("userId", userId)
 	log.Debug("get user wallets balances")
 
@@ -121,7 +121,7 @@ func (c *client) SetUserStatus(ctx context.Context, userId string, status authV1
 	log := c.log.WithContext(ctx).With("userId", userId).With("status", status)
 	log.Debug("set account status")
 
-	if err = c.sql.core.WithContext(ctx).Model(&entity.User{}).Where("id = ?", userId).Update("status", status).Error; err != nil {
+	if err = c.sql.core.WithContext(ctx).Model(&models.User{}).Where("id = ?", userId).Update("status", status).Error; err != nil {
 		log.WithError(err).Error("fail to update account status")
 	}
 
