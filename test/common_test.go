@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/Template7/backend/internal/cache"
 	"github.com/Template7/backend/internal/config"
+	"github.com/Template7/backend/internal/db"
+	"github.com/Template7/common/logger"
 	"github.com/Template7/common/models"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/glebarez/sqlite"
@@ -17,6 +19,8 @@ import (
 
 func init() {
 	viper.AddConfigPath("../config")
+
+	logger.New("debug", "console", "test")
 }
 
 type testDbClient struct {

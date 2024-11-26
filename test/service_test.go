@@ -25,7 +25,7 @@ func Test_service_CreateUser(t *testing.T) {
 		Role:     authV1.Role_admin,
 	}
 
-	authAvc := auth.New(newTestDbClient(), newTestDbCore(), newTestCache(), logger.New(), newTestConfig())
+	authAvc := auth.New(newTestDbClient(), newTestDbCore(), newTestCache(), logger.GetLogger(), newTestConfig())
 
 	userId, err := authAvc.CreateUser(ctx, &req)
 	if err != nil {
@@ -43,7 +43,7 @@ func Test_service_CreateUser(t *testing.T) {
 
 func Test_service_GenActivationCode(t *testing.T) {
 	ctx := context.WithValue(context.Background(), "traceId", "Test_service_GenActivationCode")
-	authAvc := auth.New(newTestDbClient(), newTestDbCore(), newTestCache(), logger.New(), newTestConfig())
+	authAvc := auth.New(newTestDbClient(), newTestDbCore(), newTestCache(), logger.GetLogger(), newTestConfig())
 
 	code, err := authAvc.GenActivationCode(ctx, "testUserId")
 	if err != nil {
