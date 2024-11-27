@@ -9,6 +9,13 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      - name: Get short commit hash
+        id: short_commit_hash
+        run: |
+          COMMIT_HASH=$(git rev-parse --short "$GITHUB_SHA")
+          echo "Commit Hash: $COMMIT_HASH"
+          echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_ENV
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -20,13 +27,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Get short commit hash
-        id: short_commit_hash
-        run: |
-          COMMIT_HASH=$(git rev-parse --short "$GITHUB_SHA")
-          echo "Commit Hash: $COMMIT_HASH"
-          echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_ENV
 
       - name: Show commit hash
         id: show_commit_hash
