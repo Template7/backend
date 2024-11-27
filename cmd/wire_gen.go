@@ -26,11 +26,11 @@ import (
 
 func InitializeApp() *App {
 	configConfig := config.New()
-	gormDB := internal.ProvideSqlCore(configConfig)
-	client := internal.ProvideNoSqlCore(configConfig)
 	logger := internal.ProvideLogger(configConfig)
+	gormDB := internal.ProvideSqlCore(configConfig, logger)
+	client := internal.ProvideNoSqlCore(configConfig, logger)
 	dbClient := db.New(gormDB, client, logger)
-	redisClient := internal.ProvideCacheCore(configConfig)
+	redisClient := internal.ProvideCacheCore(configConfig, logger)
 	cacheInterface := cache.New(redisClient, logger)
 	authAuth := auth.New(dbClient, gormDB, cacheInterface, logger, configConfig)
 	authController := handler.NewAuthController(authAuth, logger)

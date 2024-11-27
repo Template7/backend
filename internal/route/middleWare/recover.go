@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"errors"
-	"github.com/Template7/common/logger"
 	"github.com/gin-gonic/gin"
 	"net"
 	"net/http"
@@ -39,7 +38,7 @@ func (m *Controller) RecoverMiddleware(c *gin.Context) {
 				_ = c.Error(err.(error))
 				c.Abort()
 			} else {
-				logger.New().WithService("gin").
+				m.log.WithService("gin").
 					With("result", err).
 					With("header", headers).
 					Panic("panic recovered")
