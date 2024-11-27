@@ -12,7 +12,7 @@ RUN swag init -g ./cmd/main.go
 RUN wire gen ./cmd
 
 RUN apk add --no-cache git
-RUN go build -ldflags="-X 'github.com/Template7/backend/internal.CommitHash=$(git rev-parse --short  HEAD)'" -o $PROJECT ./cmd
+RUN go build -ldflags="-X 'github.com/Template7/backend/internal.CommitHash=$$(git rev-parse --short  HEAD)'" -o $PROJECT ./cmd
 
 FROM alpine
 ENV PROJECT=backend
