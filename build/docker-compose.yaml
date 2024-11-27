@@ -1,10 +1,18 @@
-version: '3'
 services:
   backend:
     build:
       context: ../
       dockerfile: ./build/Dockerfile
-#    image: allensyk/template7-backend:latest
+      args:
+        COMMIT_HASH: $(git rev-parse --short  HEAD)
+    #    image: allensyk/template7-backend:latest
     image: allensyk/template7-backend:arm64
     container_name: backend
+#    volumes:
+#      - type: bind
+#        source: ./config
+#        target: /backend/config
+
+    command: [ "sleep", "infinity" ]
+
 

@@ -1,5 +1,8 @@
 FROM golang:alpine as builder
 ARG PROJECT=backend
+ARG COMMIT_HASH
+
+RUN echo "commit hash: $COMMIT_HASH"
 
 WORKDIR /$PROJECT
 COPY . .
@@ -11,11 +14,9 @@ RUN go install github.com/google/wire/cmd/wire@latest
 RUN swag init -g ./cmd/main.go
 RUN wire gen ./cmd
 
-RUN apk add --no-cache git
-RUN go build -ldflags="-X 'github.com/Template7/backend/internal.CommitHash=$(git rev-parse --short  HEAD)'" -o $PROJECT ./cmd
+RUN go build -ldflags="-X 'github.com/Template7/backend/internal.CommitHash=$COMMIT_HASH'" -o $PROJECT ./cmd
 
 FROM alpine
-ENV PROJECT=backend
 
 WORKDIR /$PROJECT
 COPY --from=builder /$PROJECT/$PROJECT ./
