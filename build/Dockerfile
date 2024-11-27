@@ -18,6 +18,8 @@ RUN go build -ldflags="-X 'github.com/Template7/backend/internal.CommitHash=$COM
 
 FROM alpine
 
+ARG PROJECT=backend
+
 WORKDIR /$PROJECT
 COPY --from=builder /$PROJECT/$PROJECT ./
 
