@@ -11,7 +11,8 @@ RUN go install github.com/google/wire/cmd/wire@latest
 RUN swag init -g ./cmd/main.go
 RUN wire gen ./cmd
 
-RUN go build -o $PROJECT ./cmd
+RUN apk add --no-cache git
+RUN go build -ldflags="-X 'github.com/Template7/backend/internal.CommitHash=$(git rev-parse --short  HEAD)'" -o $PROJECT ./cmd
 
 FROM alpine
 ENV PROJECT=backend
