@@ -32,7 +32,7 @@ func NewAuthController(service auth.Auth, log *logger.Logger) *AuthController {
 // @failure 400 {object} types.HttpRespError
 // @Router /api/v1/login/native [post]
 func (a *AuthController) NativeLogin(c *gin.Context) {
-	log := logger.New().WithContext(c)
+	log := a.log.WithContext(c)
 	log.Debug("handle native login")
 
 	var req types.HttpLoginReq

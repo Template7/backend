@@ -3,14 +3,13 @@ package middleware
 import (
 	"github.com/Template7/backend/api/types"
 	"github.com/Template7/backend/internal/t7Error"
-	"github.com/Template7/common/logger"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func (m *Controller) Permission(c *gin.Context) {
-	log := logger.New().WithContext(c)
+	log := m.log.WithContext(c)
 	log.Debug("check user permission")
 
 	role, ok := c.Get(Role)
@@ -49,7 +48,7 @@ func (m *Controller) Permission(c *gin.Context) {
 }
 
 func (m *Controller) AuthToken(c *gin.Context) {
-	log := logger.New().WithContext(c)
+	log := m.log.WithContext(c)
 	log.Debug("auth user token")
 
 	token := c.GetHeader("Authorization")
@@ -104,7 +103,7 @@ func (m *Controller) AuthToken(c *gin.Context) {
 // AuthUserWallet
 // verify the user have permission to the wallet
 func (m *Controller) AuthUserWallet(c *gin.Context) {
-	log := logger.New().WithContext(c)
+	log := m.log.WithContext(c)
 	log.Debug("check user wallet")
 
 	walletId := c.Param("walletId")
@@ -163,7 +162,7 @@ func (m *Controller) AuthUserWallet(c *gin.Context) {
 }
 
 func (m *Controller) CheckAccountStatusActivated(c *gin.Context) {
-	log := logger.New().WithContext(c)
+	log := m.log.WithContext(c)
 	log.Debug("check account status activated")
 
 	status, ok := c.Get(Status)
@@ -203,7 +202,7 @@ func (m *Controller) CheckAccountStatusActivated(c *gin.Context) {
 }
 
 func (m *Controller) CheckAccountStatusInitialized(c *gin.Context) {
-	log := logger.New().WithContext(c)
+	log := m.log.WithContext(c)
 	log.Debug("check account status initialized")
 
 	status, ok := c.Get(Status)

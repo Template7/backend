@@ -10,7 +10,9 @@ import (
 	"gorm.io/gorm"
 )
 
-func ProvideSqlCore(cfg *config.Config) *gorm.DB {
+var CommitHash string
+
+func ProvideSqlCore(cfg *config.Config, log *logger.Logger) *gorm.DB {
 	return db.NewSql(
 		cfg.Db.Sql.Host,
 		cfg.Db.Sql.Port,
@@ -18,17 +20,18 @@ func ProvideSqlCore(cfg *config.Config) *gorm.DB {
 		cfg.Db.Sql.Password,
 		cfg.Db.Sql.Db,
 		cfg.Db.Sql.Connection.Min,
-		cfg.Db.Sql.Connection.Max)
+		cfg.Db.Sql.Connection.Max,
+		log)
 }
 
-func ProvideNoSqlCore(cfg *config.Config) *mongo.Client {
-	return db.NewNoSql(cfg.Db.NoSql.Host, cfg.Db.NoSql.Port, cfg.Db.NoSql.Username, cfg.Db.NoSql.Password)
+func ProvideNoSqlCore(cfg *config.Config, log *logger.Logger) *mongo.Client {
+	return db.NewNoSql(cfg.Db.NoSql.Host, cfg.Db.NoSql.Port, cfg.Db.NoSql.Username, cfg.Db.NoSql.Password, log)
 }
 
-func ProvideCacheCore(cfg *config.Config) *redis.Client {
-	return cache.New(cfg.Cache.Host, cfg.Cache.Password, cfg.Cache.ReadTimeout, cfg.Cache.WriteTimeout)
+func ProvideCacheCore(cfg *config.Config, log *logger.Logger) *redis.Client {
+	return cache.New(cfg.Cache.Host, cfg.Cache.Password, cfg.Cache.ReadTimeout, cfg.Cache.WriteTimeout, log)
 }
 
 func ProvideLogger(cfg *config.Config) *logger.Logger {
-	return logger.New(cfg.Log.Level, cfg.Log.Format, cfg.Log.Version)
+	return logger.New(cfg.Log.Level, cfg.Log.Format, CommitHash)
 }

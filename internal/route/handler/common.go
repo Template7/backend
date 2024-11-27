@@ -20,7 +20,7 @@ type hello struct {
 // @Success 200 {object} hello
 // @Router / [get]
 func HelloPage(c *gin.Context) {
-	log := logger.New().WithContext(c)
+	log := logger.GetLogger().WithContext(c)
 	log.Debug("handle hello page")
 
 	c.JSON(http.StatusOK, hello{
@@ -31,7 +31,7 @@ func HelloPage(c *gin.Context) {
 }
 
 func TestGracefulShutdown(c *gin.Context) {
-	log := logger.New().WithContext(c)
+	log := logger.GetLogger().WithContext(c)
 	log.Debug("handle test graceful shutdown")
 
 	time.Sleep(10 * time.Second)
