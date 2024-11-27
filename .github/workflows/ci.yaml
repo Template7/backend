@@ -58,6 +58,8 @@ jobs:
           push: true
           platforms: linux/arm64
           tags: allensyk/template7-backend:arm64
+          build-args: |
+            COMMIT_HASH=${{ env.COMMIT_HASH }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
