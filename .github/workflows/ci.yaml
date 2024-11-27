@@ -9,6 +9,9 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      - name: Get short commit hash
+        id: short_commit_hash
+        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Build
@@ -25,6 +28,8 @@ jobs:
           file: build/Dockerfile
           push: true
           tags: allensyk/template7-backend:latest
+          build-args: |
+            COMMIT_HASH=${{ env.COMMIT_HASH }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
 
