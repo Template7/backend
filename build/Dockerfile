@@ -1,4 +1,4 @@
-FROM golang:alpine as builder
+FROM golang:alpine AS builder
 ARG PROJECT=backend
 ARG COMMIT_HASH
 
@@ -18,7 +18,7 @@ RUN go build -ldflags="-X 'github.com/Template7/backend/internal.CommitHash=$COM
 
 FROM alpine
 
-ARG PROJECT=backend
+ENV PROJECT=backend
 
 WORKDIR /$PROJECT
 COPY --from=builder /$PROJECT/$PROJECT ./
