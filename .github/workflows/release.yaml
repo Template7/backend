@@ -38,7 +38,7 @@ jobs:
         with:
           file: build/Dockerfile
           push: true
-          tags: allensyk/template7-backend:$${{ env.COMMIT_HASH }}
+          tags: allensyk/template7-backend:${{ env.COMMIT_HASH }}
           build-args: |
             COMMIT_HASH=${{ env.COMMIT_HASH }}
 
