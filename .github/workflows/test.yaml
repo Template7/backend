@@ -1,0 +1,68 @@
+name: test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+env:
+  # keep in sync with build/Dockerfile
+  GO_VERSION: "1.27.4"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Build
+        run: go build ./...
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test -race -count=1 ./...
+
+      - name: Generated code is up to date (wire, swagger)
+        run: |
+          go run github.com/google/wire/cmd/wire@v0.6.0 gen ./cmd
+          go run github.com/swaggo/swag/cmd/swag@v1.16.4 init -g ./cmd/main.go -q
+          git diff --exit-code -- cmd/wire_gen.go docs/ || {
+            echo "::error::generated code is stale, run 'make generate' and commit the result"
+            exit 1
+          }
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.15.0
+
+  vulncheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...

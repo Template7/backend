@@ -6,8 +6,8 @@ import (
 	"github.com/Template7/backend/internal/route/middleware"
 	"github.com/Template7/common/logger"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 type App struct {

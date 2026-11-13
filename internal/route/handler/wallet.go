@@ -39,7 +39,7 @@ func (w *WalletController) GetWallet(c *gin.Context) {
 	if !ok {
 		return
 	}
-	data, err := w.service.GetWallet(c, userId, c.Param("walletId"))
+	data, err := w.service.GetWallet(c.Request.Context(), userId, c.Param("walletId"))
 	if err != nil {
 		response.Error(c, err)
 		return
@@ -76,7 +76,7 @@ func (w *WalletController) Deposit(c *gin.Context) {
 		return
 	}
 
-	if err := w.service.Deposit(c, userId, c.Param("walletId"), toCurrency(req.Currency), req.Amount, req.Note); err != nil {
+	if err := w.service.Deposit(c.Request.Context(), userId, c.Param("walletId"), toCurrency(req.Currency), req.Amount, req.Note); err != nil {
 		response.Error(c, err)
 		return
 	}
@@ -105,7 +105,7 @@ func (w *WalletController) Withdraw(c *gin.Context) {
 		return
 	}
 
-	if err := w.service.Withdraw(c, userId, c.Param("walletId"), toCurrency(req.Currency), req.Amount, req.Note); err != nil {
+	if err := w.service.Withdraw(c.Request.Context(), userId, c.Param("walletId"), toCurrency(req.Currency), req.Amount, req.Note); err != nil {
 		response.Error(c, err)
 		return
 	}
@@ -134,7 +134,7 @@ func (w *WalletController) Transfer(c *gin.Context) {
 		return
 	}
 
-	if err := w.service.Transfer(c, userId, req.FromWalletId, req.ToWalletId, toCurrency(req.Currency), req.Amount, req.Note); err != nil {
+	if err := w.service.Transfer(c.Request.Context(), userId, req.FromWalletId, req.ToWalletId, toCurrency(req.Currency), req.Amount, req.Note); err != nil {
 		response.Error(c, err)
 		return
 	}
@@ -156,7 +156,7 @@ func (w *WalletController) GetWalletBalanceHistory(c *gin.Context) {
 	if !ok {
 		return
 	}
-	history, err := w.service.GetBalanceHistory(c, userId, c.Param("walletId"))
+	history, err := w.service.GetBalanceHistory(c.Request.Context(), userId, c.Param("walletId"))
 	if err != nil {
 		response.Error(c, err)
 		return
@@ -203,7 +203,7 @@ func (w *WalletController) GetWalletBalanceHistoryByCurrency(c *gin.Context) {
 		return
 	}
 
-	history, err := w.service.GetBalanceHistoryByCurrency(c, userId, c.Param("walletId"), walletV1.Currency(currency))
+	history, err := w.service.GetBalanceHistoryByCurrency(c.Request.Context(), userId, c.Param("walletId"), walletV1.Currency(currency))
 	if err != nil {
 		response.Error(c, err)
 		return
@@ -242,7 +242,7 @@ func (w *WalletController) GetUserWallets(c *gin.Context) {
 		return
 	}
 
-	uws, err := w.service.GetUserWallets(c, userId)
+	uws, err := w.service.GetUserWallets(c.Request.Context(), userId)
 	if err != nil {
 		response.Error(c, err)
 		return

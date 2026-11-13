@@ -1,4 +1,5 @@
-FROM golang:alpine AS builder
+# keep the Go version in sync with .github/workflows/test.yaml
+FROM golang:1.27.4-alpine AS builder
 ARG PROJECT=backend
 ARG COMMIT_HASH
 
@@ -8,11 +9,9 @@ WORKDIR /$PROJECT
 COPY . .
 RUN go mod download
 
-# install swag cli then build swagger document
-RUN go install github.com/swaggo/swag/cmd/swag@latest
-RUN go install github.com/google/wire/cmd/wire@latest
-RUN swag init -g ./cmd/main.go
-RUN wire gen ./cmd
+# regenerate swagger document and dependency injection (pinned tool versions)
+RUN go run github.com/swaggo/swag/cmd/swag@v1.16.4 init -g ./cmd/main.go -q
+RUN go run github.com/google/wire/cmd/wire@v0.6.0 gen ./cmd
 
 RUN go build -ldflags="-X 'github.com/Template7/backend/internal.CommitHash=$COMMIT_HASH'" -o $PROJECT ./cmd
 

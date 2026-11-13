@@ -1,0 +1,13 @@
+version: "2"
+
+linters:
+  # default set: errcheck, govet, ineffassign, staticcheck, unused
+  default: standard
+  exclusions:
+    generated: lax
+    paths:
+      - docs/
+
+formatters:
+  enable:
+    - gofmt

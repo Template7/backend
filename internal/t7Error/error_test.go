@@ -21,13 +21,12 @@ func TestError_Error(t *testing.T) {
 		{
 			name: "normal",
 			fields: fields{
-				Code: codeUnAuthorized,
+				Code:    codeUnAuthorized,
 				Message: "message",
-				Detail: "",
+				Detail:  "",
 			},
 			want: "error code: 1024, message: message",
 		},
-
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -57,9 +56,9 @@ func TestError_GetStatus(t *testing.T) {
 		want   int
 	}{
 		{
-			name: "default",
+			name:   "default",
 			fields: fields{},
-			want: http.StatusBadRequest,
+			want:   http.StatusBadRequest,
 		},
 		{
 			name: "500",
@@ -101,7 +100,7 @@ func TestError_WithDetail(t *testing.T) {
 		want   *Error
 	}{
 		{
-			name: "have detail",
+			name:   "have detail",
 			fields: fields{},
 			args: args{
 				d: "detail",
@@ -111,10 +110,10 @@ func TestError_WithDetail(t *testing.T) {
 			},
 		},
 		{
-			name: "have no detail",
+			name:   "have no detail",
 			fields: fields{},
-			args: args{},
-			want: &Error{},
+			args:   args{},
+			want:   &Error{},
 		},
 	}
 	for _, tt := range tests {
@@ -156,22 +155,22 @@ func TestError_WithDetailAndStatus(t *testing.T) {
 		{
 			name: "normal error with default status",
 			fields: fields{
-				Code: codeUnAuthorized,
+				Code:    codeUnAuthorized,
 				Message: "message",
 			},
 			args: args{
 				d: "detail",
 			},
 			want: &Error{
-				Code: codeUnAuthorized,
+				Code:    codeUnAuthorized,
 				Message: "message",
-				Detail: "detail",
+				Detail:  "detail",
 			},
 		},
 		{
 			name: "normal error with custom status",
 			fields: fields{
-				Code: codeUnAuthorized,
+				Code:    codeUnAuthorized,
 				Message: "message",
 			},
 			args: args{
@@ -224,18 +223,18 @@ func TestError_WithStatus(t *testing.T) {
 		{
 			name: "normal error with default status",
 			fields: fields{
-				Code: codeUnAuthorized,
+				Code:    codeUnAuthorized,
 				Message: "message",
 			},
 			want: &Error{
-				Code: codeUnAuthorized,
+				Code:    codeUnAuthorized,
 				Message: "message",
 			},
 		},
 		{
 			name: "normal error with custom status",
 			fields: fields{
-				Code: codeUnAuthorized,
+				Code:    codeUnAuthorized,
 				Message: "message",
 			},
 			args: args{
