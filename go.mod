@@ -7,9 +7,9 @@ require (
 	github.com/Template7/protobuf v0.1.18
 	github.com/casbin/casbin/v2 v2.89.0
 	github.com/casbin/gorm-adapter/v3 v3.24.0
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.8.2
 	github.com/glebarez/sqlite v1.7.0
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.4.0
 	github.com/google/wire v0.6.0
 	github.com/redis/go-redis/v9 v9.1.0

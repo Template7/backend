@@ -89,6 +89,7 @@ func (m *Controller) AuthToken(c *gin.Context) {
 			Code:      int(t7Error.BlockedAccount.Code),
 			Message:   t7Error.BlockedAccount.Message,
 		})
+		c.Abort()
 		return
 	}
 

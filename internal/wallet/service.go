@@ -8,6 +8,7 @@ import (
 	"github.com/Template7/common/models"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 	"github.com/shopspring/decimal"
+	"net/http"
 )
 
 type Service struct {
@@ -55,9 +56,10 @@ func (s *Service) Deposit(ctx context.Context, walletId string, currency v1.Curr
 	log := s.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("deposit")
 
-	m := models.Money{
-		Currency: v1.Currency_name[int32(currency)],
-		Amount:   decimal.NewFromInt32(int32(amount)),
+	m, err := newMoney(currency, amount)
+	if err != nil {
+		log.WithError(err).Warn("invalid money")
+		return err
 	}
 	if err := s.db.Deposit(ctx, walletId, m, note); err != nil {
 		log.WithError(err).Error("fail to deposit")
@@ -72,9 +74,10 @@ func (s *Service) Withdraw(ctx context.Context, walletId string, currency v1.Cur
 	log := s.log.WithContext(ctx).With("walletId", walletId)
 	log.Debug("withdraw")
 
-	m := models.Money{
-		Currency: v1.Currency_name[int32(currency)],
-		Amount:   decimal.NewFromInt32(int32(amount)),
+	m, err := newMoney(currency, amount)
+	if err != nil {
+		log.WithError(err).Warn("invalid money")
+		return err
 	}
 	if err := s.db.Withdraw(ctx, walletId, m, note); err != nil {
 		log.WithError(err).Error("fail to withdraw")
@@ -85,13 +88,25 @@ func (s *Service) Withdraw(ctx context.Context, walletId string, currency v1.Cur
 	return nil
 }
 
-func (s *Service) Transfer(ctx context.Context, fromWalletId string, toWalletId string, currency v1.Currency, amount uint32, note string) error {
-	log := s.log.WithContext(ctx).With("fromWalletId", fromWalletId).With("toWalletId", toWalletId)
+// Transfer moves money from one of userId's wallets to another wallet.
+// The caller must own fromWalletId.
+func (s *Service) Transfer(ctx context.Context, userId string, fromWalletId string, toWalletId string, currency v1.Currency, amount uint32, note string) error {
+	log := s.log.WithContext(ctx).With("userId", userId).With("fromWalletId", fromWalletId).With("toWalletId", toWalletId)
 	log.Debug("transfer")
 
-	m := models.Money{
-		Currency: v1.Currency_name[int32(currency)],
-		Amount:   decimal.NewFromInt32(int32(amount)),
+	if fromWalletId == toWalletId {
+		log.Warn("transfer to the same wallet")
+		return t7Error.InvalidBody.WithDetail("fromWalletId and toWalletId must differ")
+	}
+	if !s.isUserWallet(ctx, userId, fromWalletId) {
+		log.Warn("user does not own the source wallet")
+		return t7Error.WalletNotFound.WithStatus(http.StatusForbidden)
+	}
+
+	m, err := newMoney(currency, amount)
+	if err != nil {
+		log.WithError(err).Warn("invalid money")
+		return err
 	}
 	if err := s.db.Transfer(ctx, fromWalletId, toWalletId, m, note); err != nil {
 		log.WithError(err).Error("fail to transfer")
@@ -100,4 +115,32 @@ func (s *Service) Transfer(ctx context.Context, fromWalletId string, toWalletId 
 
 	log.Debug("transfer success")
 	return nil
+}
+
+// newMoney validates the amount and converts it without overflow
+// (uint32 -> int32 would turn amounts above math.MaxInt32 negative).
+func newMoney(currency v1.Currency, amount uint32) (models.Money, error) {
+	if amount == 0 {
+		return models.Money{}, t7Error.InvalidBody.WithDetail("amount must be greater than 0")
+	}
+	name, ok := v1.Currency_name[int32(currency)]
+	if !ok {
+		return models.Money{}, t7Error.InvalidBody.WithDetail("unsupported currency")
+	}
+	return models.Money{
+		Currency: name,
+		Amount:   decimal.NewFromInt(int64(amount)),
+	}, nil
+}
+
+func (s *Service) isUserWallet(ctx context.Context, userId string, walletId string) bool {
+	if userId == "" || walletId == "" {
+		return false
+	}
+	for _, uw := range s.db.GetUserWallets(ctx, userId) {
+		if uw.WalletId == walletId {
+			return true
+		}
+	}
+	return false
 }

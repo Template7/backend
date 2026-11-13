@@ -20,7 +20,7 @@ func (c *client) createWithdrawHistory(ctx context.Context, tx *gorm.DB, data mo
 	log := c.log.WithContext(ctx)
 	log.Debug("create withdraw history")
 
-	if err = c.sql.core.WithContext(ctx).Create(&data).Error; err != nil {
+	if err = tx.Create(&data).Error; err != nil {
 		log.WithError(err).Error("fail to create withdraw history")
 	}
 	return
@@ -30,7 +30,7 @@ func (c *client) createTransferHistory(ctx context.Context, tx *gorm.DB, data mo
 	log := c.log.WithContext(ctx)
 	log.Debug("create transfer history")
 
-	if err = c.sql.core.WithContext(ctx).Create(&data).Error; err != nil {
+	if err = tx.Create(&data).Error; err != nil {
 		log.WithError(err).Error("fail to create transfer history")
 	}
 	return

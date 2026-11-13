@@ -27,9 +27,25 @@ Three layer architecture design: handler -> service -> repo
 | DB Client         | 3     | Repo layer.                                                                |
 | Redis Client      | 3     | Redis client.                                                              |
 
+## Configuration
+
+Settings are read from `config/config.yaml`. Any key can be overridden with an env var:
+prefix `T7_`, upper-case, `.` replaced by `_`. Secrets are **not** stored in the config file
+and must be provided this way:
+
+| Env var               | Config key           | Note                         |
+|:----------------------|:---------------------|:-----------------------------|
+| `T7_AUTH_JWTSECRET`   | `auth.jwtSecret`     | required, at least 32 chars  |
+| `T7_DB_SQL_PASSWORD`  | `db.sql.password`    |                              |
+| `T7_DB_NOSQL_PASSWORD`| `db.nosql.password`  |                              |
+| `T7_CACHE_PASSWORD`   | `cache.password`     |                              |
+
+Generate a JWT secret with `openssl rand -hex 32`.
+
 ## Run
 
 ```
+$ export T7_AUTH_JWTSECRET=$(openssl rand -hex 32)
 $ make run
 ```
 

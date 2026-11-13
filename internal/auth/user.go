@@ -15,7 +15,7 @@ func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest)
 
 	hp, err := hashedPassword(req.Password)
 	if err != nil {
-		log.WithError(err).With("password", req.Password).Error("fail to hash password")
+		log.WithError(err).Error("fail to hash password")
 		return "", t7Error.DecodeFail.WithDetail(err.Error())
 	}
 
