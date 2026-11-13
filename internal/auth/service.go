@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"github.com/Template7/backend/internal/cache"
 	"github.com/Template7/backend/internal/config"
 	"github.com/Template7/backend/internal/db"
 	"github.com/Template7/common/logger"
@@ -21,7 +20,7 @@ const (
 
 // dummyPasswordHash is compared against when the user doesn't exist,
 // so a login for an unknown user takes as long as a wrong password.
-var dummyPasswordHash, _ = hashedPassword("dummy-password-for-timing")
+var dummyPasswordHash, _ = HashPassword("dummy-password-for-timing")
 
 type UserTokenClaims struct {
 	jwt.RegisteredClaims
@@ -33,13 +32,11 @@ type UserTokenClaims struct {
 type service struct {
 	core      *casbin.Enforcer
 	jwtSecret []byte
-	db        db.Client
-	dbCore    *gorm.DB
-	cache     cache.Interface
+	db        db.UserRepo
 	log       *logger.Logger
 }
 
-func New(db db.Client, dbCore *gorm.DB, cache cache.Interface, log *logger.Logger, cfg *config.Config) Auth {
+func New(db db.Client, dbCore *gorm.DB, log *logger.Logger, cfg *config.Config) Auth {
 	if len(cfg.Auth.JwtSecret) < minJwtSecretLen {
 		log.With("minLength", minJwtSecretLen).Panic("jwt secret missing or too short, set auth.jwtSecret / T7_AUTH_JWTSECRET")
 	}
@@ -59,9 +56,7 @@ func New(db db.Client, dbCore *gorm.DB, cache cache.Interface, log *logger.Logge
 		log.WithError(err).Panic("fail to load policy")
 	}
 	e.AddFunction("checkAdmin", func(args ...interface{}) (interface{}, error) {
-		log.With("args", args).Debug("check admin")
-
-		role := args[0].(string)
+		role, _ := args[0].(string)
 		return role == authV1.Role_admin.String(), nil
 	})
 
@@ -69,7 +64,6 @@ func New(db db.Client, dbCore *gorm.DB, cache cache.Interface, log *logger.Logge
 		core:      e,
 		jwtSecret: []byte(cfg.Auth.JwtSecret),
 		db:        db,
-		cache:     cache,
 		log:       log.WithService("auth"),
 	}
 	s.loadDefaultPolicies()
@@ -106,7 +100,8 @@ func (s *service) loadDefaultPolicies() {
 	}
 }
 
-func hashedPassword(password string) (string, error) {
+// HashPassword returns the bcrypt hash to store for a new password.
+func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcryptCost)
 	return string(bytes), err
 }

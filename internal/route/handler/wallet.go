@@ -3,7 +3,6 @@ package handler
 import (
 	"github.com/Template7/backend/api/types"
 	"github.com/Template7/backend/internal/route/response"
-	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/backend/internal/wallet"
 	"github.com/Template7/common/logger"
 	walletV1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
@@ -11,11 +10,11 @@ import (
 )
 
 type WalletController struct {
-	service *wallet.Service
+	service wallet.Service
 	log     *logger.Logger
 }
 
-func NewWalletController(service *wallet.Service, log *logger.Logger) *WalletController {
+func NewWalletController(service wallet.Service, log *logger.Logger) *WalletController {
 	return &WalletController{
 		service: service,
 		log:     log.WithService("walletController"),
@@ -36,7 +35,11 @@ func toCurrency(name string) walletV1.Currency {
 // @Param walletId path string true "Wallet ID"
 // @Router /api/v1/wallets/{walletId} [get]
 func (w *WalletController) GetWallet(c *gin.Context) {
-	data, err := w.service.GetWallet(c, c.Param("walletId"))
+	userId, ok := currentUserId(c)
+	if !ok {
+		return
+	}
+	data, err := w.service.GetWallet(c, userId, c.Param("walletId"))
 	if err != nil {
 		response.Error(c, err)
 		return
@@ -68,8 +71,12 @@ func (w *WalletController) Deposit(c *gin.Context) {
 		response.BadRequest(c, err.Error())
 		return
 	}
+	userId, ok := currentUserId(c)
+	if !ok {
+		return
+	}
 
-	if err := w.service.Deposit(c, c.Param("walletId"), toCurrency(req.Currency), req.Amount, req.Note); err != nil {
+	if err := w.service.Deposit(c, userId, c.Param("walletId"), toCurrency(req.Currency), req.Amount, req.Note); err != nil {
 		response.Error(c, err)
 		return
 	}
@@ -93,8 +100,12 @@ func (w *WalletController) Withdraw(c *gin.Context) {
 		response.BadRequest(c, err.Error())
 		return
 	}
+	userId, ok := currentUserId(c)
+	if !ok {
+		return
+	}
 
-	if err := w.service.Withdraw(c, c.Param("walletId"), toCurrency(req.Currency), req.Amount, req.Note); err != nil {
+	if err := w.service.Withdraw(c, userId, c.Param("walletId"), toCurrency(req.Currency), req.Amount, req.Note); err != nil {
 		response.Error(c, err)
 		return
 	}
@@ -141,15 +152,13 @@ func (w *WalletController) Transfer(c *gin.Context) {
 // @Param walletId path string true "Wallet ID"
 // @Router /api/v1/wallets/{walletId}/history [get]
 func (w *WalletController) GetWalletBalanceHistory(c *gin.Context) {
-	wId := c.Param("walletId")
-	if wId == "" {
-		response.BadRequest(c, "empty wallet id")
+	userId, ok := currentUserId(c)
+	if !ok {
 		return
 	}
-
-	history := w.service.GetBalanceHistory(c, wId)
-	if history == nil {
-		response.Error(c, t7Error.DbOperationFail)
+	history, err := w.service.GetBalanceHistory(c, userId, c.Param("walletId"))
+	if err != nil {
+		response.Error(c, err)
 		return
 	}
 
@@ -184,20 +193,19 @@ func (w *WalletController) GetWalletBalanceHistory(c *gin.Context) {
 // @Param currency path string true "Currency" Enums(ntd, cny, usd, jpy)
 // @Router /api/v1/wallets/{walletId}/currencies/{currency}/history [get]
 func (w *WalletController) GetWalletBalanceHistoryByCurrency(c *gin.Context) {
-	wId := c.Param("walletId")
-	if wId == "" {
-		response.BadRequest(c, "empty wallet id")
-		return
-	}
 	currency, ok := walletV1.Currency_value[c.Param("currency")]
 	if !ok {
 		response.BadRequest(c, "unsupported currency: "+c.Param("currency"))
 		return
 	}
+	userId, ok := currentUserId(c)
+	if !ok {
+		return
+	}
 
-	history := w.service.GetBalanceHistoryByCurrency(c, wId, walletV1.Currency(currency))
-	if history == nil {
-		response.Error(c, t7Error.DbOperationFail)
+	history, err := w.service.GetBalanceHistoryByCurrency(c, userId, c.Param("walletId"), walletV1.Currency(currency))
+	if err != nil {
+		response.Error(c, err)
 		return
 	}
 
@@ -216,5 +224,39 @@ func (w *WalletController) GetWalletBalanceHistoryByCurrency(c *gin.Context) {
 	response.JSON(c, types.HttpGetWalletBalanceHistoryByCurrencyResp{
 		HttpRespBase: response.Ok(c),
 		Data:         data,
+	})
+}
+
+// GetUserWallets
+// @Summary Get user wallets
+// @Tags V1,User,Wallet
+// @version 1.0
+// @produce json
+// @Success 200 {object} types.HttpGetUserWalletsResp "Response"
+// @failure 400 {object} types.HttpRespError
+// @Security BearerAuth
+// @Router /api/v1/user/wallets [get]
+func (w *WalletController) GetUserWallets(c *gin.Context) {
+	userId, ok := currentUserId(c)
+	if !ok {
+		return
+	}
+
+	uws, err := w.service.GetUserWallets(c, userId)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+	rd := make([]types.HttpGetUserWalletsRespData, len(uws))
+	for i, uw := range uws {
+		rd[i] = types.HttpGetUserWalletsRespData{
+			Id:       uw.Id,
+			Balances: toBalances(uw.Balances),
+		}
+	}
+
+	response.JSON(c, types.HttpGetUserWalletsResp{
+		HttpRespBase: response.Ok(c),
+		Data:         rd,
 	})
 }

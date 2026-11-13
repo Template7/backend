@@ -6,7 +6,6 @@ import (
 	"github.com/Template7/common/db"
 	"github.com/Template7/common/logger"
 	"github.com/redis/go-redis/v9"
-	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 )
 
@@ -22,10 +21,6 @@ func ProvideSqlCore(cfg *config.Config, log *logger.Logger) *gorm.DB {
 		cfg.Db.Sql.Connection.Min,
 		cfg.Db.Sql.Connection.Max,
 		log)
-}
-
-func ProvideNoSqlCore(cfg *config.Config, log *logger.Logger) *mongo.Client {
-	return db.NewNoSql(cfg.Db.NoSql.Host, cfg.Db.NoSql.Port, cfg.Db.NoSql.Username, cfg.Db.NoSql.Password, log)
 }
 
 func ProvideCacheCore(cfg *config.Config, log *logger.Logger) *redis.Client {

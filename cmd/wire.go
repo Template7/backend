@@ -23,7 +23,6 @@ func InitializeApp() *App {
 		internal.ProvideLogger,
 		internal.ProvideCacheCore,
 		internal.ProvideSqlCore,
-		internal.ProvideNoSqlCore,
 		db.New,
 		cache.New,
 		handler.NewAuthController,

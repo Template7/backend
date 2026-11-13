@@ -19,12 +19,12 @@ const (
 )
 
 type Controller struct {
-	userSvc *user.Service
+	userSvc user.Service
 	authSvc auth.Auth
 	log     *logger.Logger
 }
 
-func New(userSvc *user.Service, authSvc auth.Auth, log *logger.Logger) *Controller {
+func New(userSvc user.Service, authSvc auth.Auth, log *logger.Logger) *Controller {
 	return &Controller{
 		userSvc: userSvc,
 		authSvc: authSvc,

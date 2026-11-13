@@ -3,101 +3,72 @@ package db
 import (
 	"context"
 	"github.com/Template7/common/models"
-	"gorm.io/gorm"
 )
 
-func (c *client) createDepositHistory(ctx context.Context, tx *gorm.DB, data models.DepositHistory) (err error) {
-	log := c.log.WithContext(ctx)
-	log.Debug("create deposit history")
-
-	if err = tx.Create(&data).Error; err != nil {
-		log.WithError(err).Error("fail to create deposit history")
-	}
-	return
+func (c *client) CreateDepositHistory(ctx context.Context, data models.DepositHistory) error {
+	return c.db(ctx).Create(&data).Error
 }
 
-func (c *client) createWithdrawHistory(ctx context.Context, tx *gorm.DB, data models.WithdrawHistory) (err error) {
-	log := c.log.WithContext(ctx)
-	log.Debug("create withdraw history")
-
-	if err = tx.Create(&data).Error; err != nil {
-		log.WithError(err).Error("fail to create withdraw history")
-	}
-	return
+func (c *client) CreateWithdrawHistory(ctx context.Context, data models.WithdrawHistory) error {
+	return c.db(ctx).Create(&data).Error
 }
 
-func (c *client) createTransferHistory(ctx context.Context, tx *gorm.DB, data models.TransferHistory) (err error) {
-	log := c.log.WithContext(ctx)
-	log.Debug("create transfer history")
-
-	if err = tx.Create(&data).Error; err != nil {
-		log.WithError(err).Error("fail to create transfer history")
-	}
-	return
+func (c *client) CreateTransferHistory(ctx context.Context, data models.TransferHistory) error {
+	return c.db(ctx).Create(&data).Error
 }
 
 func (c *client) GetWalletBalanceHistory(ctx context.Context, walletId string) ([]models.WalletBalanceHistory, error) {
-	log := c.log.WithContext(ctx).With("walletId", walletId)
-	log.Debug("get wallet balance history")
-
-	depositQuery := c.sql.core.Table("deposit_history").Select(`
+	depositQuery := c.core.Table("deposit_history").Select(`
         id, wallet_id, 'deposit' AS direction, currency, amount, balance_before, balance_after, note, created_at
     `).Where("wallet_id = ?", walletId)
 
-	withdrawQuery := c.sql.core.Table("withdraw_history").Select(`
+	withdrawQuery := c.core.Table("withdraw_history").Select(`
         id, wallet_id, 'withdraw' AS direction, currency, amount, balance_before, balance_after, note, created_at
     `).Where("wallet_id = ?", walletId)
 
-	transferOutQuery := c.sql.core.Table("transfer_history").Select(`
+	transferOutQuery := c.core.Table("transfer_history").Select(`
         id, from_wallet_id AS wallet_id, 'transferOut' AS direction, currency, amount, sender_balance_before AS balance_before, sender_balance_after AS balance_after, note, created_at
     `).Where("from_wallet_id = ?", walletId)
 
-	transferInQuery := c.sql.core.Table("transfer_history").Select(`
+	transferInQuery := c.core.Table("transfer_history").Select(`
         id, to_wallet_id AS wallet_id, 'transferIn' AS direction, currency, amount, receiver_balance_before AS balance_before, receiver_balance_after AS balance_after, note, created_at
     `).Where("to_wallet_id = ?", walletId)
 
-	unionQuery := c.sql.core.Table("(?) AS u", c.sql.core.Raw(`
+	unionQuery := c.core.Table("(?) AS u", c.core.Raw(`
         ? UNION ALL ? UNION ALL ? UNION ALL ?
     `, depositQuery, withdrawQuery, transferOutQuery, transferInQuery)).Order("created_at")
 
 	var wbh []models.WalletBalanceHistory
-	if err := unionQuery.Scan(&wbh).Error; err != nil {
-		log.WithError(err).Error("fail to scan data")
+	if err := unionQuery.WithContext(ctx).Scan(&wbh).Error; err != nil {
 		return nil, err
 	}
-
 	return wbh, nil
 }
 
 func (c *client) GetWalletBalanceHistoryByCurrency(ctx context.Context, walletId string, currency string) ([]models.WalletBalanceHistory, error) {
-	log := c.log.WithContext(ctx).With("walletId", walletId).With("currency", currency)
-	log.Debug("get wallet balance history by currency")
-
-	depositQuery := c.sql.core.Table("deposit_history").Select(`
+	depositQuery := c.core.Table("deposit_history").Select(`
         id, wallet_id, 'deposit' AS direction, currency, amount, balance_before, balance_after, note, created_at
     `).Where("wallet_id = ? and currency = ?", walletId, currency)
 
-	withdrawQuery := c.sql.core.Table("withdraw_history").Select(`
+	withdrawQuery := c.core.Table("withdraw_history").Select(`
         id, wallet_id, 'withdraw' AS direction, currency, amount, balance_before, balance_after, note, created_at
     `).Where("wallet_id = ? and currency = ?", walletId, currency)
 
-	transferOutQuery := c.sql.core.Table("transfer_history").Select(`
+	transferOutQuery := c.core.Table("transfer_history").Select(`
         id, from_wallet_id AS wallet_id, 'transferOut' AS direction, currency, amount, sender_balance_before AS balance_before, sender_balance_after AS balance_after, note, created_at
     `).Where("from_wallet_id = ? and currency = ?", walletId, currency)
 
-	transferInQuery := c.sql.core.Table("transfer_history").Select(`
+	transferInQuery := c.core.Table("transfer_history").Select(`
         id, to_wallet_id AS wallet_id, 'transferIn' AS direction, currency, amount, receiver_balance_before AS balance_before, receiver_balance_after AS balance_after, note, created_at
     `).Where("to_wallet_id = ? and currency = ?", walletId, currency)
 
-	unionQuery := c.sql.core.Table("(?) AS u", c.sql.core.Raw(`
+	unionQuery := c.core.Table("(?) AS u", c.core.Raw(`
         ? UNION ALL ? UNION ALL ? UNION ALL ?
     `, depositQuery, withdrawQuery, transferOutQuery, transferInQuery)).Order("created_at")
 
 	var wbh []models.WalletBalanceHistory
-	if err := unionQuery.Scan(&wbh).Error; err != nil {
-		log.WithError(err).Error("fail to scan data")
+	if err := unionQuery.WithContext(ctx).Scan(&wbh).Error; err != nil {
 		return nil, err
 	}
-
 	return wbh, nil
 }

@@ -2,262 +2,70 @@ package db
 
 import (
 	"context"
-	"errors"
-	"fmt"
+
 	"github.com/Template7/common/models"
-	"github.com/Template7/common/t7Id"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
-// ErrInsufficientBalance is returned by Withdraw and Transfer when the
-// source balance is lower than the amount.
-var ErrInsufficientBalance = errors.New("insufficient balance")
+func (c *client) CreateWallet(ctx context.Context, wallet models.Wallet, currencies []string) error {
+	return c.db(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&wallet).Error; err != nil {
+			return err
+		}
+		if len(currencies) == 0 {
+			return nil
+		}
+		bls := make([]models.Balance, len(currencies))
+		for i, cur := range currencies {
+			bls[i] = models.Balance{WalletId: wallet.Id, Money: models.Money{Currency: cur}}
+		}
+		return tx.Create(&bls).Error
+	})
+}
+
+func (c *client) GetWallet(ctx context.Context, walletId string) (data models.Wallet, err error) {
+	err = c.db(ctx).Where("id = ?", walletId).Take(&data).Error
+	return
+}
+
+func (c *client) GetUserWallets(ctx context.Context, userId string) (data []models.UserWalletBalance, err error) {
+	err = c.db(ctx).Raw(
+		"select w.user_id, w.id as wallet_id, b.currency, b.amount from wallet w join balance b on w.id = b.wallet_id where w.user_id = ? order by w.id, b.currency",
+		userId).Scan(&data).Error
+	return
+}
 
 func (c *client) GetWalletBalances(ctx context.Context, walletId string) (data []models.WalletBalance, err error) {
-	log := c.log.WithContext(ctx).With("walletId", walletId)
-	log.Debug("get wallet balances")
-
-	if err = c.sql.core.WithContext(ctx).Raw("select w.id as wallet_id, b.currency, b.amount from wallet w join balance b on w.id = b.wallet_id where w.id = ?", walletId).Scan(&data).Error; err != nil {
-		log.WithError(err).Error("fail to get wallet balances")
-	}
+	err = c.db(ctx).Raw(
+		"select w.id as wallet_id, b.currency, b.amount from wallet w join balance b on w.id = b.wallet_id where w.id = ? order by b.currency",
+		walletId).Scan(&data).Error
 	return
 }
 
-// Deposit
-// deposit money and create deposit history
-func (c *client) Deposit(ctx context.Context, walletId string, money models.Money, note string) error {
-	log := c.log.WithContext(ctx).With("walletId", walletId)
-	log.Debug("deposit")
-
-	tx := c.sql.core.WithContext(ctx).Begin()
-	defer tx.Rollback()
-
-	bb, err := c.getBalance(ctx, tx, walletId, money.Currency)
-	if err != nil {
-		log.WithError(err).Error("fail to get balance before")
-		return err
+func (c *client) LockBalances(ctx context.Context, walletIds []string, currency string) (map[string]decimal.Decimal, error) {
+	q := c.db(ctx).
+		Select("wallet_id", "amount").
+		Where("wallet_id IN ? AND currency = ?", walletIds, currency).
+		Order("wallet_id") // same lock order everywhere avoids deadlocks between opposite transfers
+	if c.core.Dialector.Name() != "sqlite" { // SQLite has no row locks (and no FOR UPDATE); it locks the whole DB on write
+		q = q.Clauses(clause.Locking{Strength: "UPDATE"})
 	}
 
-	if err := c.deposit(ctx, tx, walletId, money); err != nil {
-		log.WithError(err).Error("fail to deposit money")
-		return err
+	var rows []models.Balance
+	if err := q.Find(&rows).Error; err != nil {
+		return nil, err
 	}
-
-	ba, err := c.getBalance(ctx, tx, walletId, money.Currency)
-	if err != nil {
-		log.WithError(err).Error("fail to get balance after")
-		return err
+	r := make(map[string]decimal.Decimal, len(rows))
+	for _, b := range rows {
+		r[b.WalletId] = b.Amount
 	}
-
-	dh := models.DepositHistory{
-		Id:            t7Id.New().Generate().Int64(),
-		WalletId:      walletId,
-		Currency:      money.Currency,
-		Amount:        money.Amount,
-		BalanceBefore: bb,
-		BalanceAfter:  ba,
-		Note:          note,
-	}
-	if err := c.createDepositHistory(ctx, tx, dh); err != nil {
-		log.WithError(err).Error("fail to create deposit history")
-		return err
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		log.WithError(err).Error("fail to commit transaction")
-		return err
-	}
-
-	log.Debug("deposit done")
-	return nil
+	return r, nil
 }
 
-func (c *client) Withdraw(ctx context.Context, walletId string, money models.Money, note string) (err error) {
-	log := c.log.WithContext(ctx).With("walletId", walletId)
-	log.Debug("withdraw")
-
-	tx := c.sql.core.WithContext(ctx).Begin()
-	defer tx.Rollback()
-
-	bb, err := c.getBalance(ctx, tx, walletId, money.Currency)
-	if err != nil {
-		log.WithError(err).Error("fail to get balance before")
-		return err
-	}
-
-	if err := c.withdraw(ctx, tx, walletId, money); err != nil {
-		log.WithError(err).Error("fail to withdraw money")
-		return err
-	}
-
-	ba, err := c.getBalance(ctx, tx, walletId, money.Currency)
-	if err != nil {
-		log.WithError(err).Error("fail to get balance after")
-		return err
-	}
-
-	wh := models.WithdrawHistory{
-		Id:            t7Id.New().Generate().Int64(),
-		WalletId:      walletId,
-		Currency:      money.Currency,
-		Amount:        money.Amount,
-		BalanceBefore: bb,
-		BalanceAfter:  ba,
-		Note:          note,
-	}
-	if err := c.createWithdrawHistory(ctx, tx, wh); err != nil {
-		log.WithError(err).Error("fail to create withdraw history")
-		return err
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		log.WithError(err).Error("fail to commit transaction")
-		return err
-	}
-
-	log.Debug("withdraw done")
-	return nil
-}
-
-func (c *client) Transfer(ctx context.Context, fromWalletId string, toWalletId string, money models.Money, note string) (err error) {
-	log := c.log.WithContext(ctx).With("fromWalletId", fromWalletId).With("toWalletId", toWalletId).With("money", money)
-	log.Debug("transfer money")
-
-	tx := c.sql.core.WithContext(ctx).Begin()
-	defer tx.Rollback()
-
-	wsb, err := c.getWalletsBalance(ctx, tx, []string{fromWalletId, toWalletId}, money.Currency)
-	if err != nil {
-		log.WithError(err).Error("fail to get wallets balance")
-		return err
-	}
-	var sbb, rbb decimal.Decimal
-	if wsb[0].WalletId == fromWalletId {
-		sbb = wsb[0].Amount
-		rbb = wsb[1].Amount
-	} else {
-		sbb = wsb[1].Amount
-		rbb = wsb[0].Amount
-	}
-
-	err = c.withdraw(ctx, tx, fromWalletId, money)
-	if err != nil {
-		log.WithError(err).Error("fail to withdraw money")
-		return
-	}
-	err = c.deposit(ctx, tx, toWalletId, money)
-	if err != nil {
-		log.WithError(err).Error("fail to deposit money")
-		return
-	}
-
-	wsa, err := c.getWalletsBalance(ctx, tx, []string{fromWalletId, toWalletId}, money.Currency)
-	if err != nil {
-		log.WithError(err).Error("fail to get wallets balance")
-		return err
-	}
-	var sba, rba decimal.Decimal
-	if wsb[0].WalletId == fromWalletId {
-		sba = wsa[0].Amount
-		rba = wsa[1].Amount
-	} else {
-		sba = wsa[1].Amount
-		rba = wsa[0].Amount
-	}
-
-	th := models.TransferHistory{
-		Id:                    t7Id.New().Generate().Int64(),
-		FromWalletId:          fromWalletId,
-		ToWalletId:            toWalletId,
-		Currency:              money.Currency,
-		Amount:                money.Amount,
-		SenderBalanceBefore:   sbb,
-		SenderBalanceAfter:    sba,
-		ReceiverBalanceBefore: rbb,
-		ReceiverBalanceAfter:  rba,
-		Note:                  note,
-	}
-	if err := c.createTransferHistory(ctx, tx, th); err != nil {
-		log.WithError(err).Error("fail to create transfer history")
-		return err
-	}
-
-	if err = tx.Commit().Error; err != nil {
-		log.WithError(err).Error("fail to commit tx")
-		return
-	}
-	log.Debug("finish transfer money")
-	return
-}
-
-func (c *client) deposit(ctx context.Context, tx *gorm.DB, walletId string, money models.Money) (err error) {
-	log := c.log.WithContext(ctx).With("walletId", walletId)
-	log.Debug("do deposit")
-
-	err = tx.Model(&models.Balance{}).Clauses(
-		clause.OnConflict{
-			Columns:   []clause.Column{{Name: "wallet_id"}, {Name: "currency"}},
-			DoUpdates: clause.Assignments(map[string]interface{}{"amount": gorm.Expr("amount + ?", money.Amount)}),
-		}).Create(&models.Balance{WalletId: walletId, Money: money}).Error
-
-	if err != nil {
-		log.WithError(err).Error("fail to deposit")
-	}
-	return
-}
-
-func (c *client) withdraw(ctx context.Context, tx *gorm.DB, walletId string, money models.Money) (err error) {
-	log := c.log.WithContext(ctx).With("walletId", walletId)
-	log.Debug("do withdraw")
-
-	err = tx.Model(&models.Balance{}).
-		Take(&models.Balance{}, "wallet_id = ? AND currency = ? AND amount >= ?", walletId, money.Currency, money.Amount).
-		Update("amount", gorm.Expr("amount - ?", money.Amount)).Error
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Info("insufficient balance")
-		return ErrInsufficientBalance
-	}
-	if err != nil {
-		log.WithError(err).Error("fail to withdraw")
-	}
-	return
-}
-
-func (c *client) GetBalance(ctx context.Context, walletId string, currency string) (decimal.Decimal, error) {
-	log := c.log.WithContext(ctx).With("walletId", walletId).With("currency", currency)
-	log.Debug("get balance")
-
-	return c.getBalance(ctx, c.sql.core.WithContext(ctx), walletId, currency)
-}
-
-func (c *client) getBalance(ctx context.Context, tx *gorm.DB, walletId string, currency string) (decimal.Decimal, error) {
-	log := c.log.WithContext(ctx).With("walletId", walletId).With("currency", currency)
-	log.Debug("get balance")
-
-	var data models.Balance
-	if err := tx.Where(&models.Balance{}).Select("amount").Where("wallet_id = ? and currency = ?", walletId, currency).Take(&data).Error; err != nil {
-		log.WithError(err).Error("fail to get balance")
-		return decimal.NewFromInt(-1), err
-	}
-
-	return data.Amount, nil
-}
-
-func (c *client) getWalletsBalance(ctx context.Context, tx *gorm.DB, walletsId []string, currency string) (data []models.Balance, err error) {
-	log := c.log.WithContext(ctx).With("walletsId", walletsId).With("currency", currency)
-	log.Debug("get balances")
-
-	if err = tx.Where(&models.Balance{}).Select("wallet_id", "amount").Where("wallet_id in ? and currency = ?", walletsId, currency).Find(&data).Error; err != nil {
-		log.WithError(err).Error("fail to get balance")
-	}
-
-	if len(data) != len(walletsId) {
-		log.With("walletIdLength", len(walletsId)).With("dataLength", len(data)).Warn("length not match")
-		err = fmt.Errorf("length not match")
-	}
-
-	return
+func (c *client) AddBalance(ctx context.Context, walletId string, currency string, delta decimal.Decimal) error {
+	return checkFound(c.db(ctx).Model(&models.Balance{}).
+		Where("wallet_id = ? AND currency = ?", walletId, currency).
+		Update("amount", gorm.Expr("amount + ?", delta)))
 }

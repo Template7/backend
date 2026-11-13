@@ -37,7 +37,6 @@ and must be provided this way:
 |:----------------------|:---------------------|:-----------------------------|
 | `T7_AUTH_JWTSECRET`   | `auth.jwtSecret`     | required, at least 32 chars  |
 | `T7_DB_SQL_PASSWORD`  | `db.sql.password`    |                              |
-| `T7_DB_NOSQL_PASSWORD`| `db.nosql.password`  |                              |
 | `T7_CACHE_PASSWORD`   | `cache.password`     |                              |
 
 Generate a JWT secret with `openssl rand -hex 32`.

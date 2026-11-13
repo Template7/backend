@@ -2,56 +2,37 @@ package auth
 
 import (
 	"context"
-	"errors"
+
+	"github.com/Template7/backend/internal/db"
 	"github.com/Template7/backend/internal/t7Error"
-	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
-	"gorm.io/gorm"
 )
 
 func (s *service) Login(ctx context.Context, username string, password string) (string, error) {
-	log := s.log.WithContext(ctx)
-	log.With("user", username).Debug("user login")
-
 	user, err := s.db.GetUser(ctx, username)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// same answer and similar timing as a wrong password, so usernames can't be probed
-			checkPasswordHash(password, dummyPasswordHash)
-			log.Info("user not found")
-			return "", t7Error.SignInFail
-		}
-		log.WithError(err).Error("fail to get user")
-		return "", t7Error.DbOperationFail.WithDetail(err.Error())
-	}
-
-	if !checkPasswordHash(password, user.Password) {
-		log.Info("password incorrect")
+	if db.IsNotFound(err) {
+		// same answer and similar timing as a wrong password, so usernames can't be probed
+		checkPasswordHash(password, dummyPasswordHash)
 		return "", t7Error.SignInFail
 	}
-	role := s.GetUserRole(ctx, user.Id)
-	if _, ok := authV1.Role_name[int32(role)]; !ok {
-		log.With("role", role).Warn("invalid user role")
-		return "", t7Error.UserHasNoRole
+	if err != nil {
+		return "", t7Error.DbOperationFail.WithDetail(err.Error())
+	}
+	if !checkPasswordHash(password, user.Password) {
+		return "", t7Error.SignInFail
 	}
 
-	token, err := s.genUserToken(ctx, user.Id, role)
+	role, err := s.GetUserRole(ctx, user.Id)
 	if err != nil {
-		log.WithError(err).Error("fail to generate user token")
 		return "", err
 	}
-	return token, nil
+	return s.genUserToken(user.Id, role, user.Status)
 }
 
 func (s *service) CheckPermission(ctx context.Context, sub, obj, act string) bool {
-	log := s.log.WithContext(ctx).With("sub", sub).With("obj", obj).With("act", act)
-	log.Debug("check permission")
-
-	ok, _ := s.core.Enforce(sub, obj, act)
-	if !ok {
-		log.Info("no permission")
+	ok, err := s.core.Enforce(sub, obj, act)
+	if err != nil {
+		s.log.WithContext(ctx).WithError(err).With("sub", sub).With("obj", obj).With("act", act).Error("fail to check permission")
 		return false
 	}
-
-	log.Debug("permission check ok")
-	return true
+	return ok
 }

@@ -5,25 +5,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Template7/backend/internal/db"
 	"github.com/Template7/common/logger"
-	"github.com/Template7/common/models"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 const testSecret = "test-secret-0123456789abcdef0123456789"
 
-type fakeDb struct{ db.Client }
-
-func (fakeDb) GetUserById(_ context.Context, userId string) (models.User, error) {
-	return models.User{Id: userId, Status: authV1.AccountStatus_activated}, nil
-}
-
 func newTestService(secret string) *service {
 	return &service{
 		jwtSecret: []byte(secret),
-		db:        fakeDb{},
 		log:       logger.New("error", "console", "test"),
 	}
 }
@@ -31,7 +22,7 @@ func newTestService(secret string) *service {
 func TestToken_RoundTrip(t *testing.T) {
 	s := newTestService(testSecret)
 
-	tk, err := s.genUserToken(context.Background(), "user-1", authV1.Role_user)
+	tk, err := s.genUserToken("user-1", authV1.Role_user, authV1.AccountStatus_activated)
 	if err != nil {
 		t.Fatalf("gen: %v", err)
 	}
@@ -45,7 +36,7 @@ func TestToken_RoundTrip(t *testing.T) {
 }
 
 func TestToken_RejectsOtherSecret(t *testing.T) {
-	tk, err := newTestService("another-secret-0123456789abcdef012345").genUserToken(context.Background(), "user-1", authV1.Role_admin)
+	tk, err := newTestService("another-secret-0123456789abcdef012345").genUserToken("user-1", authV1.Role_admin, authV1.AccountStatus_activated)
 	if err != nil {
 		t.Fatalf("gen: %v", err)
 	}

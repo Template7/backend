@@ -6,123 +6,157 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/Template7/backend/internal/db"
+	"github.com/Template7/backend/internal/db/dbtest"
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/common/logger"
 	"github.com/Template7/common/models"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 	"github.com/shopspring/decimal"
+	"gorm.io/gorm"
 )
 
-// fakeDb implements only the db.Client methods the wallet service uses;
-// calling any other method panics via the nil embedded interface.
-type fakeDb struct {
-	db.Client
-	userWallets map[string][]string // userId -> walletIds
+var ctx = context.Background()
 
-	transferCalls int
-	lastMoney     models.Money
+// alice owns wallet-alice (100 usd), bob owns wallet-bob (5 usd)
+func setup(t *testing.T) (Service, *gorm.DB) {
+	t.Helper()
+	client, core := dbtest.New(t)
+	dbtest.SeedUser(t, core, "alice", "wallet-alice", 100)
+	dbtest.SeedUser(t, core, "bob", "wallet-bob", 5)
+	return New(client, logger.New("error", "console", "test")), core
 }
 
-func (f *fakeDb) GetUserWallets(_ context.Context, userId string) []models.UserWalletBalance {
-	var r []models.UserWalletBalance
-	for _, wId := range f.userWallets[userId] {
-		r = append(r, models.UserWalletBalance{UserId: userId, WalletId: wId, Currency: "usd"})
-	}
-	return r
-}
-
-func (f *fakeDb) Transfer(_ context.Context, _ string, _ string, money models.Money, _ string) error {
-	f.transferCalls++
-	f.lastMoney = money
-	return nil
-}
-
-func (f *fakeDb) Deposit(_ context.Context, _ string, money models.Money, _ string) error {
-	f.lastMoney = money
-	return nil
-}
-
-func (f *fakeDb) Withdraw(_ context.Context, _ string, money models.Money, _ string) error {
-	f.lastMoney = money
-	return nil
-}
-
-func newTestService() (*Service, *fakeDb) {
-	f := &fakeDb{userWallets: map[string][]string{
-		"alice": {"wallet-alice"},
-		"bob":   {"wallet-bob"},
-	}}
-	return New(f, logger.New("error", "console", "test")), f
-}
-
-func TestTransfer_RejectsWalletNotOwnedByCaller(t *testing.T) {
-	s, f := newTestService()
-
-	err := s.Transfer(context.Background(), "alice", "wallet-bob", "wallet-alice", v1.Currency_usd, 100, "")
-
-	t7Err, ok := t7Error.ToT7Error(err)
-	if !ok || t7Err.Code != t7Error.WalletNotFound.Code || t7Err.GetStatus() != http.StatusNotFound {
-		t.Fatalf("want WalletNotFound/404, got %v", err)
-	}
-	if f.transferCalls != 0 {
-		t.Fatalf("db.Transfer must not be called, got %d calls", f.transferCalls)
+func wantCode(t *testing.T, err error, want *t7Error.Error) {
+	t.Helper()
+	got, ok := t7Error.ToT7Error(err)
+	if !ok || got.Code != want.Code {
+		t.Fatalf("want %s, got %v", want.Message, err)
 	}
 }
 
-func TestTransfer_RejectsSameWallet(t *testing.T) {
-	s, f := newTestService()
+func usd(t *testing.T, core *gorm.DB, walletId string) decimal.Decimal {
+	return dbtest.Balance(t, core, walletId, "usd")
+}
 
-	err := s.Transfer(context.Background(), "alice", "wallet-alice", "wallet-alice", v1.Currency_usd, 100, "")
+func TestDepositWithdraw(t *testing.T) {
+	s, core := setup(t)
 
-	if t7Err, ok := t7Error.ToT7Error(err); !ok || t7Err.Code != t7Error.InvalidBody.Code {
-		t.Fatalf("want InvalidBody, got %v", err)
+	if err := s.Deposit(ctx, "alice", "wallet-alice", v1.Currency_usd, 50, "in"); err != nil {
+		t.Fatal(err)
 	}
-	if f.transferCalls != 0 {
-		t.Fatalf("db.Transfer must not be called")
+	if err := s.Withdraw(ctx, "alice", "wallet-alice", v1.Currency_usd, 30, "out"); err != nil {
+		t.Fatal(err)
+	}
+	if b := usd(t, core, "wallet-alice"); !b.Equal(decimal.NewFromInt(120)) {
+		t.Fatalf("balance = %s, want 120", b)
+	}
+
+	history, err := s.GetBalanceHistory(ctx, "alice", "wallet-alice")
+	if err != nil || len(history) != 2 {
+		t.Fatalf("history = %v, %v", history, err)
+	}
+	var withdraw *v1.BalanceHistory
+	for _, h := range history {
+		if h.Direction == v1.Direction_withdraw {
+			withdraw = h
+		}
+	}
+	if withdraw == nil || withdraw.BalanceBefore != "150" || withdraw.BalanceAfter != "120" {
+		t.Fatalf("withdraw history = %v, want before/after 150/120", withdraw)
 	}
 }
 
-func TestTransfer_OwnerSucceeds(t *testing.T) {
-	s, f := newTestService()
+func TestWithdraw_InsufficientBalanceChangesNothing(t *testing.T) {
+	s, core := setup(t)
 
-	if err := s.Transfer(context.Background(), "alice", "wallet-alice", "wallet-bob", v1.Currency_usd, 100, ""); err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	wantCode(t, s.Withdraw(ctx, "alice", "wallet-alice", v1.Currency_usd, 101, ""), t7Error.InsufficientBalance)
+	if b := usd(t, core, "wallet-alice"); !b.Equal(decimal.NewFromInt(100)) {
+		t.Fatalf("balance changed to %s", b)
 	}
-	if f.transferCalls != 1 || !f.lastMoney.Amount.Equal(decimal.NewFromInt(100)) {
-		t.Fatalf("want one transfer of 100, got calls=%d money=%v", f.transferCalls, f.lastMoney)
+	if n := dbtest.Count(t, core, &models.WithdrawHistory{}); n != 0 {
+		t.Fatalf("history rows = %d, want 0", n)
 	}
+}
+
+func TestTransfer(t *testing.T) {
+	s, core := setup(t)
+
+	if err := s.Transfer(ctx, "alice", "wallet-alice", "wallet-bob", v1.Currency_usd, 40, ""); err != nil {
+		t.Fatal(err)
+	}
+	if a, b := usd(t, core, "wallet-alice"), usd(t, core, "wallet-bob"); !a.Equal(decimal.NewFromInt(60)) || !b.Equal(decimal.NewFromInt(45)) {
+		t.Fatalf("balances = %s / %s, want 60 / 45", a, b)
+	}
+
+	// the receiver sees it as transferIn
+	history, err := s.GetBalanceHistory(ctx, "bob", "wallet-bob")
+	if err != nil || len(history) != 1 || history[0].Direction != v1.Direction_transferIn {
+		t.Fatalf("receiver history = %v, %v", history, err)
+	}
+}
+
+func TestTransfer_Rejections(t *testing.T) {
+	s, core := setup(t)
+
+	cases := []struct {
+		name           string
+		user, from, to string
+		amount         uint32
+		want           *t7Error.Error
+	}{
+		{"not the owner", "alice", "wallet-bob", "wallet-alice", 1, t7Error.WalletNotFound},
+		{"same wallet", "alice", "wallet-alice", "wallet-alice", 1, t7Error.InvalidBody},
+		{"unknown receiver", "alice", "wallet-alice", "nope", 1, t7Error.WalletNotFound},
+		{"insufficient", "alice", "wallet-alice", "wallet-bob", 101, t7Error.InsufficientBalance},
+		{"zero amount", "alice", "wallet-alice", "wallet-bob", 0, t7Error.InvalidBody},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			wantCode(t, s.Transfer(ctx, tc.user, tc.from, tc.to, v1.Currency_usd, tc.amount, ""), tc.want)
+		})
+	}
+	if a, b := usd(t, core, "wallet-alice"), usd(t, core, "wallet-bob"); !a.Equal(decimal.NewFromInt(100)) || !b.Equal(decimal.NewFromInt(5)) {
+		t.Fatalf("balances changed: %s / %s", a, b)
+	}
+}
+
+func TestOtherUsersWalletLooksMissing(t *testing.T) {
+	s, _ := setup(t)
+
+	_, err := s.GetWallet(ctx, "alice", "wallet-bob")
+	wantCode(t, err, t7Error.WalletNotFound)
+	if got, _ := t7Error.ToT7Error(err); got.GetStatus() != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404", got.GetStatus())
+	}
+
+	wantCode(t, s.Deposit(ctx, "alice", "wallet-bob", v1.Currency_usd, 1, ""), t7Error.WalletNotFound)
+	wantCode(t, s.Withdraw(ctx, "alice", "wallet-bob", v1.Currency_usd, 1, ""), t7Error.WalletNotFound)
+	_, err = s.GetBalanceHistory(ctx, "alice", "wallet-bob")
+	wantCode(t, err, t7Error.WalletNotFound)
+	_, err = s.GetBalanceHistoryByCurrency(ctx, "alice", "wallet-bob", v1.Currency_usd)
+	wantCode(t, err, t7Error.WalletNotFound)
 }
 
 func TestAmountAboveMaxInt32StaysPositive(t *testing.T) {
-	s, f := newTestService()
-	const amount = uint32(math.MaxUint32) // was int32(-1) before the fix
+	s, core := setup(t)
 
-	if err := s.Deposit(context.Background(), "wallet-alice", v1.Currency_usd, amount, ""); err != nil {
-		t.Fatalf("deposit: %v", err)
+	if err := s.Deposit(ctx, "alice", "wallet-alice", v1.Currency_usd, math.MaxUint32, ""); err != nil {
+		t.Fatal(err)
 	}
-	if !f.lastMoney.Amount.Equal(decimal.NewFromInt(math.MaxUint32)) {
-		t.Fatalf("deposit amount = %s, want %d", f.lastMoney.Amount, uint32(math.MaxUint32))
-	}
-
-	if err := s.Withdraw(context.Background(), "wallet-alice", v1.Currency_usd, math.MaxInt32+1, ""); err != nil {
-		t.Fatalf("withdraw: %v", err)
-	}
-	if !f.lastMoney.Amount.IsPositive() {
-		t.Fatalf("withdraw amount must be positive, got %s", f.lastMoney.Amount)
+	want := decimal.NewFromInt(100 + math.MaxUint32)
+	if b := usd(t, core, "wallet-alice"); !b.Equal(want) {
+		t.Fatalf("balance = %s, want %s", b, want)
 	}
 }
 
-func TestZeroAmountRejected(t *testing.T) {
-	s, _ := newTestService()
+func TestGetUserWallets(t *testing.T) {
+	s, _ := setup(t)
 
-	for name, err := range map[string]error{
-		"deposit":  s.Deposit(context.Background(), "wallet-alice", v1.Currency_usd, 0, ""),
-		"withdraw": s.Withdraw(context.Background(), "wallet-alice", v1.Currency_usd, 0, ""),
-		"transfer": s.Transfer(context.Background(), "alice", "wallet-alice", "wallet-bob", v1.Currency_usd, 0, ""),
-	} {
-		if t7Err, ok := t7Error.ToT7Error(err); !ok || t7Err.Code != t7Error.InvalidBody.Code {
-			t.Errorf("%s: want InvalidBody, got %v", name, err)
-		}
+	ws, err := s.GetUserWallets(ctx, "alice")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ws) != 1 || ws[0].Id != "wallet-alice" || len(ws[0].Balances) != len(dbtest.Currencies) {
+		t.Fatalf("wallets = %v", ws)
 	}
 }
