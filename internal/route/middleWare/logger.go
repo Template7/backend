@@ -7,6 +7,6 @@ import (
 
 func (m *Controller) Request(c *gin.Context) {
 	uId := uuid.New().String()
-	c.Request.Header.Add(HeaderRequestId, uId)
+	c.Request.Header.Set(HeaderRequestId, uId)
 	c.Set("traceId", uId)
 }

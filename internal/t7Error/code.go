@@ -26,6 +26,7 @@ const (
 	codeUserHasNoRole
 	codeBlockedAccount
 	codeUnknown
+	codeInsufficientBalance
 )
 
 const (
@@ -166,5 +167,11 @@ var (
 		Code:    codeWalletNotFound,
 		Message: "wallet not found",
 		Type:    typeDb,
+	}
+
+	InsufficientBalance = &Error{
+		Code:    codeInsufficientBalance,
+		Message: "insufficient balance",
+		Type:    typeInvalidData,
 	}
 )
