@@ -49,7 +49,7 @@ func (c *client) LockBalances(ctx context.Context, walletIds []string, currency 
 		Select("wallet_id", "amount").
 		Where("wallet_id IN ? AND currency = ?", walletIds, currency).
 		Order("wallet_id") // same lock order everywhere avoids deadlocks between opposite transfers
-	if c.core.Dialector.Name() != "sqlite" { // SQLite has no row locks (and no FOR UPDATE); it locks the whole DB on write
+	if c.core.Name() != "sqlite" { // SQLite has no row locks (and no FOR UPDATE); it locks the whole DB on write
 		q = q.Clauses(clause.Locking{Strength: "UPDATE"})
 	}
 

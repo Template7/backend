@@ -5,7 +5,7 @@ import (
 	"github.com/Template7/backend/internal/db"
 	"github.com/Template7/common/logger"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
-	"github.com/casbin/casbin/v2"
+	"github.com/casbin/casbin/v3"
 	"github.com/casbin/gorm-adapter/v3"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"

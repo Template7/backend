@@ -14,7 +14,7 @@ func (m *Controller) Permission(c *gin.Context) {
 		response.Error(c, t7Error.InvalidToken.WithDetail("no role in context"))
 		return
 	}
-	if !m.authSvc.CheckPermission(c, role, c.Request.URL.Path, c.Request.Method) {
+	if !m.authSvc.CheckPermission(c.Request.Context(), role, c.Request.URL.Path, c.Request.Method) {
 		response.Error(c, t7Error.Forbidden)
 		return
 	}
@@ -29,7 +29,7 @@ func (m *Controller) AuthToken(c *gin.Context) {
 		response.Error(c, t7Error.InvalidToken.WithDetail("empty token"))
 		return
 	}
-	claims, err := m.authSvc.ParseToken(c, token)
+	claims, err := m.authSvc.ParseToken(c.Request.Context(), token)
 	if err != nil {
 		response.Error(c, err)
 		return
@@ -37,7 +37,7 @@ func (m *Controller) AuthToken(c *gin.Context) {
 
 	// account status can change after the token was issued (activated, blocked, deleted),
 	// so read the current value instead of trusting the claim
-	status, err := m.userSvc.GetStatus(c, claims.UserId)
+	status, err := m.userSvc.GetStatus(c.Request.Context(), claims.UserId)
 	if err != nil {
 		if t7Err, ok := t7Error.ToT7Error(err); ok && t7Err.Code == t7Error.UserNotfound.Code {
 			err = t7Error.InvalidToken.WithDetail("user not found")

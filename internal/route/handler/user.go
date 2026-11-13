@@ -48,7 +48,7 @@ func (u *UserController) GetUserInfo(c *gin.Context) {
 		return
 	}
 
-	info, err := u.userService.GetInfo(c, userId)
+	info, err := u.userService.GetInfo(c.Request.Context(), userId)
 	if err != nil {
 		response.Error(c, err)
 		return
@@ -84,7 +84,7 @@ func (u *UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	userId, actCode, err := u.userService.CreateUser(c, req.ToProto())
+	userId, actCode, err := u.userService.CreateUser(c.Request.Context(), req.ToProto())
 	if err != nil {
 		response.Error(c, err)
 		return
@@ -117,7 +117,7 @@ func (u *UserController) ActivateUser(c *gin.Context) {
 		return
 	}
 
-	if err := u.userService.ActivateUser(c, c.Param("userId"), req.ActivationCode); err != nil {
+	if err := u.userService.ActivateUser(c.Request.Context(), c.Param("userId"), req.ActivationCode); err != nil {
 		response.Error(c, err)
 		return
 	}
@@ -149,7 +149,7 @@ func (u *UserController) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	if err := u.userService.UpdateInfo(c, userId, models.UserInfo{Nickname: req.Nickname}); err != nil {
+	if err := u.userService.UpdateInfo(c.Request.Context(), userId, models.UserInfo{Nickname: req.Nickname}); err != nil {
 		response.Error(c, err)
 		return
 	}
@@ -173,7 +173,7 @@ func (u *UserController) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	if err := u.userService.DeleteUser(c, userId); err != nil {
+	if err := u.userService.DeleteUser(c.Request.Context(), userId); err != nil {
 		response.Error(c, err)
 		return
 	}

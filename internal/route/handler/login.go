@@ -37,7 +37,7 @@ func (a *AuthController) NativeLogin(c *gin.Context) {
 		return
 	}
 
-	token, err := a.service.Login(c, req.Username, req.Password)
+	token, err := a.service.Login(c.Request.Context(), req.Username, req.Password)
 	if err != nil {
 		response.Error(c, err)
 		return
