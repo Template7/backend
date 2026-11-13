@@ -1,6 +1,6 @@
 env: dev
 
-logger:
+log:
   level: debug
 
 service:
@@ -16,12 +16,6 @@ db:
     connection:
       min: 4
       max: 8
-  nosql:
-    db: template7
-    host: 127.0.0.1
-    port: 37017
-    username:
-    password: ""
 
 cache:
   host: "localhost:36379"

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"github.com/Template7/backend/api/types"
-	"github.com/Template7/backend/internal/auth"
 	"github.com/Template7/backend/internal/route/middleware"
 	"github.com/Template7/backend/internal/route/response"
 	"github.com/Template7/backend/internal/t7Error"
@@ -15,15 +14,13 @@ import (
 )
 
 type UserController struct {
-	userService *user.Service
-	authService auth.Auth
+	userService user.Service
 	log         *logger.Logger
 }
 
-func NewUserController(service *user.Service, authService auth.Auth, log *logger.Logger) *UserController {
+func NewUserController(service user.Service, log *logger.Logger) *UserController {
 	return &UserController{
 		userService: service,
-		authService: authService,
 		log:         log.WithService("userController"),
 	}
 }
@@ -87,13 +84,7 @@ func (u *UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	userId, err := u.authService.CreateUser(c, req.ToProto())
-	if err != nil {
-		response.Error(c, err)
-		return
-	}
-
-	actCode, err := u.authService.GenActivationCode(c, userId)
+	userId, actCode, err := u.userService.CreateUser(c, req.ToProto())
 	if err != nil {
 		response.Error(c, err)
 		return
@@ -126,9 +117,8 @@ func (u *UserController) ActivateUser(c *gin.Context) {
 		return
 	}
 
-	userId := c.Param("userId")
-	if !u.authService.ActivateUser(c, userId, req.ActivationCode) {
-		response.Error(c, t7Error.IncorrectVerifyCode)
+	if err := u.userService.ActivateUser(c, c.Param("userId"), req.ActivationCode); err != nil {
+		response.Error(c, err)
 		return
 	}
 
@@ -166,36 +156,6 @@ func (u *UserController) UpdateUser(c *gin.Context) {
 	response.JSON(c, response.Ok(c))
 }
 
-// GetUserWallets
-// @Summary Get user wallets
-// @Tags V1,User,Wallet
-// @version 1.0
-// @produce json
-// @Success 200 {object} types.HttpGetUserWalletsResp "Response"
-// @failure 400 {object} types.HttpRespError
-// @Security BearerAuth
-// @Router /api/v1/user/wallets [get]
-func (u *UserController) GetUserWallets(c *gin.Context) {
-	userId, ok := currentUserId(c)
-	if !ok {
-		return
-	}
-
-	uws := u.userService.GetUserWallets(c, userId)
-	rd := make([]types.HttpGetUserWalletsRespData, len(uws))
-	for i, uw := range uws {
-		rd[i] = types.HttpGetUserWalletsRespData{
-			Id:       uw.Id,
-			Balances: toBalances(uw.Balances),
-		}
-	}
-
-	response.JSON(c, types.HttpGetUserWalletsResp{
-		HttpRespBase: response.Ok(c),
-		Data:         rd,
-	})
-}
-
 // DeleteUser
 // @Summary Delete user
 // @Tags V1,User
@@ -213,7 +173,7 @@ func (u *UserController) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	if err := u.authService.DeleteUser(c, userId); err != nil {
+	if err := u.userService.DeleteUser(c, userId); err != nil {
 		response.Error(c, err)
 		return
 	}

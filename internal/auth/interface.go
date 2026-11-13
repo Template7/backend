@@ -1,10 +1,12 @@
+// Package auth handles credentials, tokens, roles and permissions.
+// User accounts themselves are managed by the user package.
 package auth
 
 import (
 	"context"
-	v1 "github.com/Template7/protobuf/gen/proto/template7/auth"
-	userV1 "github.com/Template7/protobuf/gen/proto/template7/user"
 	"time"
+
+	v1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 )
 
 const (
@@ -12,14 +14,13 @@ const (
 )
 
 type Auth interface {
-	ParseToken(ctx context.Context, token string) (data *UserTokenClaims, err error)
-	CheckPermission(ctx context.Context, sub, obj, act string) bool
+	// Login checks the credentials and returns a signed token.
 	Login(ctx context.Context, username string, password string) (token string, err error)
-	GetUserRole(ctx context.Context, username string) v1.Role
-	// GetUserStatus returns the current account status, or -1 if the user can't be loaded.
-	GetUserStatus(ctx context.Context, userId string) v1.AccountStatus
-	CreateUser(ctx context.Context, req *userV1.CreateUserRequest) (string, error)
-	GenActivationCode(ctx context.Context, userId string) (string, error)
-	DeleteUser(ctx context.Context, userId string) error
-	ActivateUser(ctx context.Context, userId string, actCode string) bool
+	ParseToken(ctx context.Context, token string) (*UserTokenClaims, error)
+	// CheckPermission reports whether role sub may do act on obj (path, method).
+	CheckPermission(ctx context.Context, sub, obj, act string) bool
+
+	GetUserRole(ctx context.Context, userId string) (v1.Role, error)
+	AddUserRole(ctx context.Context, userId string, role v1.Role) error
+	DeleteUserRoles(ctx context.Context, userId string) error
 }

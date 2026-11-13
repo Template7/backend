@@ -37,9 +37,12 @@ func (m *Controller) AuthToken(c *gin.Context) {
 
 	// account status can change after the token was issued (activated, blocked, deleted),
 	// so read the current value instead of trusting the claim
-	status := m.authSvc.GetUserStatus(c, claims.UserId)
-	if status < 0 {
-		response.Error(c, t7Error.InvalidToken.WithDetail("user not found"))
+	status, err := m.userSvc.GetStatus(c, claims.UserId)
+	if err != nil {
+		if t7Err, ok := t7Error.ToT7Error(err); ok && t7Err.Code == t7Error.UserNotfound.Code {
+			err = t7Error.InvalidToken.WithDetail("user not found")
+		}
+		response.Error(c, err)
 		return
 	}
 	if status == authV1.AccountStatus_blocked {
@@ -51,29 +54,6 @@ func (m *Controller) AuthToken(c *gin.Context) {
 	c.Set(Role, claims.Role)
 	c.Set(Status, int(status))
 	c.Next()
-}
-
-// AuthUserWallet allows the request only if the :walletId belongs to the caller.
-// A wallet the caller doesn't own is reported as not found, so ids can't be probed.
-func (m *Controller) AuthUserWallet(c *gin.Context) {
-	walletId := c.Param("walletId")
-	if walletId == "" {
-		response.BadRequest(c, "empty wallet id")
-		return
-	}
-	userId, ok := CurrentUserId(c)
-	if !ok {
-		response.Error(c, t7Error.InvalidToken.WithDetail("no user id in context"))
-		return
-	}
-
-	for _, uw := range m.userSvc.GetUserWallets(c, userId) {
-		if uw.Id == walletId {
-			c.Next()
-			return
-		}
-	}
-	response.Error(c, t7Error.WalletNotFound)
 }
 
 // CheckAccountStatusActivated allows only activated accounts.

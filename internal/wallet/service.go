@@ -1,126 +1,227 @@
+// Package wallet holds the money rules: ownership, amounts, balances and history.
+// Every call takes the caller's user id and only works on wallets that user owns
+// (transfers may send to any wallet).
 package wallet
 
 import (
 	"context"
-	"errors"
+
 	"github.com/Template7/backend/internal/db"
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/common/logger"
 	"github.com/Template7/common/models"
+	"github.com/Template7/common/t7Id"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 	"github.com/shopspring/decimal"
 )
 
-type Service struct {
+type Service interface {
+	GetUserWallets(ctx context.Context, userId string) ([]*v1.Wallet, error)
+	GetWallet(ctx context.Context, userId string, walletId string) (*v1.Wallet, error)
+
+	Deposit(ctx context.Context, userId string, walletId string, currency v1.Currency, amount uint32, note string) error
+	Withdraw(ctx context.Context, userId string, walletId string, currency v1.Currency, amount uint32, note string) error
+	// Transfer moves money from one of the caller's wallets to any other wallet.
+	Transfer(ctx context.Context, userId string, fromWalletId string, toWalletId string, currency v1.Currency, amount uint32, note string) error
+
+	GetBalanceHistory(ctx context.Context, userId string, walletId string) ([]*v1.BalanceHistory, error)
+	GetBalanceHistoryByCurrency(ctx context.Context, userId string, walletId string, currency v1.Currency) ([]*v1.CurrencyBalanceHistory, error)
+}
+
+type service struct {
 	db  db.Client
 	log *logger.Logger
 }
 
-func New(db db.Client, log *logger.Logger) *Service {
-	s := &Service{
+func New(db db.Client, log *logger.Logger) Service {
+	return &service{
 		db:  db,
 		log: log.WithService("wallet"),
 	}
-	s.log.Info("wallet service initialized")
-	return s
 }
 
-func (s *Service) GetWallet(ctx context.Context, walletId string) (*v1.Wallet, error) {
-	log := s.log.WithContext(ctx).With("walletId", walletId)
-	log.Debug("get wallet")
-
-	wbs, err := s.db.GetWalletBalances(ctx, walletId)
+func (s *service) GetUserWallets(ctx context.Context, userId string) ([]*v1.Wallet, error) {
+	rows, err := s.db.GetUserWallets(ctx, userId)
 	if err != nil {
-		log.WithError(err).Error("fail to get wallet balances")
-		return nil, t7Error.DbOperationFail.WithDetail(err.Error())
-	}
-	if len(wbs) == 0 {
-		log.Info("no balances")
-		return nil, t7Error.WalletNotFound
+		return nil, dbError(err)
 	}
 
-	w := v1.Wallet{
-		Id: wbs[0].WalletId,
+	// rows are ordered by wallet id, so balances of one wallet are adjacent
+	var data []*v1.Wallet
+	for _, r := range rows {
+		if len(data) == 0 || data[len(data)-1].Id != r.WalletId {
+			data = append(data, &v1.Wallet{Id: r.WalletId})
+		}
+		w := data[len(data)-1]
+		w.Balances = append(w.Balances, toBalance(r.Currency, r.Amount))
 	}
-	for _, wb := range wbs {
-		w.Balances = append(w.Balances, &v1.Balance{
-			Currency: v1.Currency(v1.Currency_value[wb.Currency]),
-			Amount:   wb.Amount.String(),
+	return data, nil
+}
+
+func (s *service) GetWallet(ctx context.Context, userId string, walletId string) (*v1.Wallet, error) {
+	if err := s.checkOwner(ctx, userId, walletId); err != nil {
+		return nil, err
+	}
+	rows, err := s.db.GetWalletBalances(ctx, walletId)
+	if err != nil {
+		return nil, dbError(err)
+	}
+
+	w := &v1.Wallet{Id: walletId}
+	for _, r := range rows {
+		w.Balances = append(w.Balances, toBalance(r.Currency, r.Amount))
+	}
+	return w, nil
+}
+
+func (s *service) Deposit(ctx context.Context, userId string, walletId string, currency v1.Currency, amount uint32, note string) error {
+	m, err := newMoney(currency, amount)
+	if err != nil {
+		return err
+	}
+	if err := s.checkOwner(ctx, userId, walletId); err != nil {
+		return err
+	}
+
+	return s.inTx(ctx, func(tx db.Client) error {
+		before, err := lockOne(ctx, tx, walletId, m.Currency)
+		if err != nil {
+			return err
+		}
+		if err := tx.AddBalance(ctx, walletId, m.Currency, m.Amount); err != nil {
+			return err
+		}
+		return tx.CreateDepositHistory(ctx, models.DepositHistory{
+			Id:            newId(),
+			WalletId:      walletId,
+			Currency:      m.Currency,
+			Amount:        m.Amount,
+			BalanceBefore: before,
+			BalanceAfter:  before.Add(m.Amount),
+			Note:          note,
 		})
-	}
-
-	return &w, nil
+	})
 }
 
-func (s *Service) Deposit(ctx context.Context, walletId string, currency v1.Currency, amount uint32, note string) error {
-	log := s.log.WithContext(ctx).With("walletId", walletId)
-	log.Debug("deposit")
-
+func (s *service) Withdraw(ctx context.Context, userId string, walletId string, currency v1.Currency, amount uint32, note string) error {
 	m, err := newMoney(currency, amount)
 	if err != nil {
-		log.WithError(err).Warn("invalid money")
 		return err
 	}
-	if err := s.db.Deposit(ctx, walletId, m, note); err != nil {
-		log.WithError(err).Error("fail to deposit")
-		return t7Error.DbOperationFail.WithDetail(err.Error())
-	}
-
-	log.Debug("deposit success")
-	return nil
-}
-
-func (s *Service) Withdraw(ctx context.Context, walletId string, currency v1.Currency, amount uint32, note string) error {
-	log := s.log.WithContext(ctx).With("walletId", walletId)
-	log.Debug("withdraw")
-
-	m, err := newMoney(currency, amount)
-	if err != nil {
-		log.WithError(err).Warn("invalid money")
+	if err := s.checkOwner(ctx, userId, walletId); err != nil {
 		return err
 	}
-	if err := s.db.Withdraw(ctx, walletId, m, note); err != nil {
-		if errors.Is(err, db.ErrInsufficientBalance) {
+
+	return s.inTx(ctx, func(tx db.Client) error {
+		before, err := lockOne(ctx, tx, walletId, m.Currency)
+		if err != nil {
+			return err
+		}
+		if before.LessThan(m.Amount) {
 			return t7Error.InsufficientBalance
 		}
-		log.WithError(err).Error("fail to withdraw")
-		return t7Error.DbOperationFail.WithDetail(err.Error())
-	}
-
-	log.Debug("withdraw success")
-	return nil
+		if err := tx.AddBalance(ctx, walletId, m.Currency, m.Amount.Neg()); err != nil {
+			return err
+		}
+		return tx.CreateWithdrawHistory(ctx, models.WithdrawHistory{
+			Id:            newId(),
+			WalletId:      walletId,
+			Currency:      m.Currency,
+			Amount:        m.Amount,
+			BalanceBefore: before,
+			BalanceAfter:  before.Sub(m.Amount),
+			Note:          note,
+		})
+	})
 }
 
-// Transfer moves money from one of userId's wallets to another wallet.
-// The caller must own fromWalletId.
-func (s *Service) Transfer(ctx context.Context, userId string, fromWalletId string, toWalletId string, currency v1.Currency, amount uint32, note string) error {
-	log := s.log.WithContext(ctx).With("userId", userId).With("fromWalletId", fromWalletId).With("toWalletId", toWalletId)
-	log.Debug("transfer")
-
+func (s *service) Transfer(ctx context.Context, userId string, fromWalletId string, toWalletId string, currency v1.Currency, amount uint32, note string) error {
 	if fromWalletId == toWalletId {
-		log.Warn("transfer to the same wallet")
 		return t7Error.InvalidBody.WithDetail("fromWalletId and toWalletId must differ")
 	}
-	if !s.isUserWallet(ctx, userId, fromWalletId) {
-		log.Warn("user does not own the source wallet")
-		return t7Error.WalletNotFound
-	}
-
 	m, err := newMoney(currency, amount)
 	if err != nil {
-		log.WithError(err).Warn("invalid money")
 		return err
 	}
-	if err := s.db.Transfer(ctx, fromWalletId, toWalletId, m, note); err != nil {
-		if errors.Is(err, db.ErrInsufficientBalance) {
-			return t7Error.InsufficientBalance
-		}
-		log.WithError(err).Error("fail to transfer")
-		return t7Error.DbOperationFail.WithDetail(err.Error())
+	if err := s.checkOwner(ctx, userId, fromWalletId); err != nil {
+		return err
 	}
 
-	log.Debug("transfer success")
+	return s.inTx(ctx, func(tx db.Client) error {
+		bls, err := tx.LockBalances(ctx, []string{fromWalletId, toWalletId}, m.Currency)
+		if err != nil {
+			return err
+		}
+		senderBefore, ok := bls[fromWalletId]
+		if !ok {
+			return t7Error.WalletNotFound
+		}
+		receiverBefore, ok := bls[toWalletId]
+		if !ok {
+			return t7Error.WalletNotFound.WithDetail("receiver wallet")
+		}
+		if senderBefore.LessThan(m.Amount) {
+			return t7Error.InsufficientBalance
+		}
+
+		if err := tx.AddBalance(ctx, fromWalletId, m.Currency, m.Amount.Neg()); err != nil {
+			return err
+		}
+		if err := tx.AddBalance(ctx, toWalletId, m.Currency, m.Amount); err != nil {
+			return err
+		}
+		return tx.CreateTransferHistory(ctx, models.TransferHistory{
+			Id:                    newId(),
+			FromWalletId:          fromWalletId,
+			ToWalletId:            toWalletId,
+			Currency:              m.Currency,
+			Amount:                m.Amount,
+			SenderBalanceBefore:   senderBefore,
+			SenderBalanceAfter:    senderBefore.Sub(m.Amount),
+			ReceiverBalanceBefore: receiverBefore,
+			ReceiverBalanceAfter:  receiverBefore.Add(m.Amount),
+			Note:                  note,
+		})
+	})
+}
+
+// checkOwner returns WalletNotFound unless walletId exists and belongs to userId,
+// so a wallet someone else owns looks the same as one that doesn't exist.
+func (s *service) checkOwner(ctx context.Context, userId string, walletId string) error {
+	if userId == "" || walletId == "" {
+		return t7Error.WalletNotFound
+	}
+	w, err := s.db.GetWallet(ctx, walletId)
+	if db.IsNotFound(err) {
+		return t7Error.WalletNotFound
+	}
+	if err != nil {
+		return dbError(err)
+	}
+	if w.UserId != userId {
+		return t7Error.WalletNotFound
+	}
 	return nil
+}
+
+// inTx runs fn in a transaction and turns storage errors into t7Errors.
+func (s *service) inTx(ctx context.Context, fn func(tx db.Client) error) error {
+	if err := s.db.Transaction(ctx, fn); err != nil {
+		return dbError(err)
+	}
+	return nil
+}
+
+func lockOne(ctx context.Context, tx db.Client, walletId string, currency string) (decimal.Decimal, error) {
+	bls, err := tx.LockBalances(ctx, []string{walletId}, currency)
+	if err != nil {
+		return decimal.Zero, err
+	}
+	b, ok := bls[walletId]
+	if !ok {
+		return decimal.Zero, t7Error.WalletNotFound.WithDetail("no " + currency + " balance")
+	}
+	return b, nil
 }
 
 // newMoney validates the amount and converts it without overflow
@@ -139,14 +240,25 @@ func newMoney(currency v1.Currency, amount uint32) (models.Money, error) {
 	}, nil
 }
 
-func (s *Service) isUserWallet(ctx context.Context, userId string, walletId string) bool {
-	if userId == "" || walletId == "" {
-		return false
+// dbError keeps t7Errors (business errors returned inside a transaction) and
+// wraps anything else as a DB failure.
+func dbError(err error) error {
+	if _, ok := t7Error.ToT7Error(err); ok {
+		return err
 	}
-	for _, uw := range s.db.GetUserWallets(ctx, userId) {
-		if uw.WalletId == walletId {
-			return true
-		}
+	if db.IsNotFound(err) {
+		return t7Error.WalletNotFound
 	}
-	return false
+	return t7Error.DbOperationFail.WithDetail(err.Error())
+}
+
+func newId() int64 {
+	return t7Id.New().Generate().Int64()
+}
+
+func toBalance(currency string, amount decimal.Decimal) *v1.Balance {
+	return &v1.Balance{
+		Currency: v1.Currency(v1.Currency_value[currency]),
+		Amount:   amount.String(),
+	}
 }

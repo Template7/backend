@@ -17,7 +17,6 @@ require (
 	github.com/spf13/viper v1.16.0
 	github.com/swaggo/gin-swagger v1.4.0
 	github.com/swaggo/swag v1.16.2
-	go.mongodb.org/mongo-driver v1.8.2
 	golang.org/x/crypto v0.23.0
 	gorm.io/gorm v1.25.12
 )
@@ -78,6 +77,7 @@ require (
 	github.com/xdg-go/scram v1.1.0 // indirect
 	github.com/xdg-go/stringprep v1.0.2 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
+	go.mongodb.org/mongo-driver v1.8.2 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect

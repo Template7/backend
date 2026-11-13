@@ -7,33 +7,42 @@ import (
 	"testing"
 
 	"github.com/Template7/backend/internal/auth"
+	"github.com/Template7/backend/internal/t7Error"
+	"github.com/Template7/backend/internal/user"
 	"github.com/Template7/common/logger"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/gin-gonic/gin"
 )
 
-// fakeAuth issues tokens that always claim "activated"; dbStatus is the
-// status currently stored for the user.
+// fakeAuth issues tokens that always claim "activated".
 type fakeAuth struct {
 	auth.Auth
-	dbStatus authV1.AccountStatus
-	allow    bool
-}
-
-func (f fakeAuth) CheckPermission(_ context.Context, _, _, _ string) bool {
-	return f.allow
+	allow bool
 }
 
 func (f fakeAuth) ParseToken(_ context.Context, _ string) (*auth.UserTokenClaims, error) {
 	return &auth.UserTokenClaims{UserId: "user-1", Role: authV1.Role_user.String(), Status: int(authV1.AccountStatus_activated)}, nil
 }
 
-func (f fakeAuth) GetUserStatus(_ context.Context, _ string) authV1.AccountStatus {
-	return f.dbStatus
+func (f fakeAuth) CheckPermission(_ context.Context, _, _, _ string) bool {
+	return f.allow
+}
+
+// fakeUsers returns dbStatus as the user's current status; -1 means the user is gone.
+type fakeUsers struct {
+	user.Service
+	dbStatus authV1.AccountStatus
+}
+
+func (f fakeUsers) GetStatus(_ context.Context, _ string) (authV1.AccountStatus, error) {
+	if f.dbStatus < 0 {
+		return 0, t7Error.UserNotfound
+	}
+	return f.dbStatus, nil
 }
 
 func newTestController(dbStatus authV1.AccountStatus) *Controller {
-	return New(nil, fakeAuth{dbStatus: dbStatus}, logger.New("error", "console", "test"))
+	return New(fakeUsers{dbStatus: dbStatus}, fakeAuth{}, logger.New("error", "console", "test"))
 }
 
 func serve(handlers ...gin.HandlerFunc) (code int, reachedHandler bool) {
@@ -121,7 +130,7 @@ func TestRequest_ClientCannotSetRequestId(t *testing.T) {
 }
 
 func TestPermission_DeniedIs403(t *testing.T) {
-	m := New(nil, fakeAuth{dbStatus: authV1.AccountStatus_activated, allow: false}, logger.New("error", "console", "test"))
+	m := New(fakeUsers{dbStatus: authV1.AccountStatus_activated}, fakeAuth{allow: false}, logger.New("error", "console", "test"))
 	code, reached := serve(m.AuthToken, m.Permission)
 	if reached || code != http.StatusForbidden {
 		t.Fatalf("want 403, code=%d reached=%v", code, reached)

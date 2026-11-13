@@ -37,11 +37,11 @@ func (a *App) SetupRoutes() *gin.Engine {
 	// user
 	user := apiV1.Group("/user")
 	user.GET("/info", a.middlewareController.CheckAccountStatusInitialized, a.userController.GetUserInfo)
-	user.GET("/wallets", a.middlewareController.CheckAccountStatusInitialized, a.userController.GetUserWallets)
+	user.GET("/wallets", a.middlewareController.CheckAccountStatusInitialized, a.walletController.GetUserWallets)
 	user.PUT("/info", a.middlewareController.CheckAccountStatusActivated, a.userController.UpdateUser)
 
-	// wallet
-	wallet := apiV1.Group("/wallets/:walletId", a.middlewareController.AuthUserWallet)
+	// wallet (ownership is checked by the wallet service)
+	wallet := apiV1.Group("/wallets/:walletId")
 	wallet.GET("", a.middlewareController.CheckAccountStatusInitialized, a.walletController.GetWallet)
 	wallet.POST("/deposit", a.middlewareController.CheckAccountStatusActivated, a.walletController.Deposit)
 	wallet.POST("/withdraw", a.middlewareController.CheckAccountStatusActivated, a.walletController.Withdraw)
