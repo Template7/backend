@@ -43,6 +43,19 @@ and must be provided this way:
 
 Generate a JWT secret with `openssl rand -hex 32`.
 
+Other settings worth knowing:
+
+| Config key                       | Default | Meaning |
+|:---------------------------------|:--------|:--------|
+| `service.trustedProxies`         | `[]`    | Proxies / load balancers whose `X-Forwarded-For` is trusted. **Set this when running behind a load balancer**, otherwise every request appears to come from the balancer and all clients share one per-IP login limit. |
+| `auth.login.maxFailuresPerUser`  | `5`     | Failed logins per username before it is locked for the window (HTTP 429). |
+| `auth.login.maxFailuresPerIp`    | `20`    | Failed logins per client IP before that IP is locked for the window. |
+| `auth.login.windowMinutes`       | `15`    | Length of the window, starting at the first failure. |
+
+RBAC: the `user` role may call every authenticated `/api/v1` route; `admin` may call everything.
+The `user` policies are generated from the route table at startup (`cmd/app.go`), so a new
+route under `/api/v1` needs no policy change.
+
 ## Requirements
 
 - Go 1.27.4 or newer (see `GO_VERSION` in `.github/workflows/test.yaml`)

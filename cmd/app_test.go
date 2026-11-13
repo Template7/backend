@@ -41,8 +41,9 @@ func newTestApp(t *testing.T) *testApp {
 	cfg.Auth.JwtSecret = "e2e-secret-0123456789abcdef0123456789"
 
 	client, core := dbtest.New(t)
-	authSvc := auth.New(client, core, log, cfg)
-	userSvc := user.New(authSvc, client, cachetest.New(), log)
+	mem := cachetest.New()
+	authSvc := auth.New(client, core, mem, log, cfg)
+	userSvc := user.New(authSvc, client, mem, log)
 	walletSvc := wallet.New(client, log)
 
 	app := NewApp(
@@ -50,7 +51,7 @@ func newTestApp(t *testing.T) *testApp {
 		handler.NewUserController(userSvc, log),
 		handler.NewWalletController(walletSvc, log),
 		middleware.New(userSvc, authSvc, log),
-		cfg, log)
+		authSvc, cfg, log)
 	return &testApp{t: t, router: app.SetupRoutes(), users: userSvc}
 }
 
@@ -227,6 +228,22 @@ func TestEndToEnd(t *testing.T) {
 		carolWallet := a.walletId(carol) // initialized users may read
 		a.expect(a.do(http.MethodPost, "/api/v1/wallets/"+carolWallet+"/deposit", carol, map[string]interface{}{"currency": "usd", "amount": 1}),
 			http.StatusForbidden, code(t7Error.AccountNotActivated))
+	})
+
+	t.Run("repeated failed logins are locked out with 429", func(t *testing.T) {
+		// default limit: 5 failures per username
+		for i := 0; i < 5; i++ {
+			a.expect(a.do(http.MethodPost, "/api/v1/login/native", "", map[string]string{"username": "carol", "password": "wrong"}),
+				http.StatusUnauthorized, code(t7Error.SignInFail))
+		}
+		a.expect(a.do(http.MethodPost, "/api/v1/login/native", "", map[string]string{"username": "carol", "password": "pass-carol"}),
+			http.StatusTooManyRequests, code(t7Error.TooManyAttempts))
+	})
+
+	t.Run("user role may call every user route", func(t *testing.T) {
+		// policies are generated from the route table; spot-check a few
+		a.expect(a.do(http.MethodGet, "/api/v1/wallets/"+aliceWallet+"/currencies/usd/history", alice, nil), http.StatusOK, 3000)
+		a.expect(a.do(http.MethodPut, "/api/v1/user/info", alice, map[string]string{"nickname": "Ali"}), http.StatusOK, 3000)
 	})
 
 	t.Run("deleted user's token stops working", func(t *testing.T) {

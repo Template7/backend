@@ -5,6 +5,10 @@ log:
 
 service:
   port: 8080
+  # proxies / load balancers whose X-Forwarded-For is trusted (IPs or CIDRs);
+  # empty = use the connection address. Set this behind a load balancer, or every
+  # request looks like it comes from the balancer and shares one login limit.
+  trustedProxies: []
 
 db:
   sql:
@@ -24,3 +28,7 @@ cache:
 auth:
   rbacModelPath: "./config/rbac_model.conf"
   jwtSecret: "" # set via T7_AUTH_JWTSECRET (min 32 chars)
+  login:
+    maxFailuresPerUser: 5
+    maxFailuresPerIp: 20
+    windowMinutes: 15

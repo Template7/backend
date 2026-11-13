@@ -29,6 +29,7 @@ const (
 	codeInsufficientBalance
 	codeForbidden
 	codeAccountNotActivated
+	codeTooManyAttempts
 )
 
 const (
@@ -206,5 +207,12 @@ var (
 		Message: "account not activated",
 		Type:    typeAuth,
 		status:  http.StatusForbidden,
+	}
+
+	TooManyAttempts = &Error{
+		Code:    codeTooManyAttempts,
+		Message: "too many failed attempts, try again later",
+		Type:    typeAuth,
+		status:  http.StatusTooManyRequests,
 	}
 )
