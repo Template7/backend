@@ -17,6 +17,11 @@ import (
 type fakeAuth struct {
 	auth.Auth
 	dbStatus authV1.AccountStatus
+	allow    bool
+}
+
+func (f fakeAuth) CheckPermission(_ context.Context, _, _, _ string) bool {
+	return f.allow
 }
 
 func (f fakeAuth) ParseToken(_ context.Context, _ string) (*auth.UserTokenClaims, error) {
@@ -112,5 +117,28 @@ func TestRequest_ClientCannotSetRequestId(t *testing.T) {
 
 	if got == "" || got == "client-chosen" {
 		t.Fatalf("request id must be server-generated, got %q", got)
+	}
+}
+
+func TestPermission_DeniedIs403(t *testing.T) {
+	m := New(nil, fakeAuth{dbStatus: authV1.AccountStatus_activated, allow: false}, logger.New("error", "console", "test"))
+	code, reached := serve(m.AuthToken, m.Permission)
+	if reached || code != http.StatusForbidden {
+		t.Fatalf("want 403, code=%d reached=%v", code, reached)
+	}
+}
+
+func TestCheckAccountStatusActivated_NotActivatedIs403(t *testing.T) {
+	m := newTestController(authV1.AccountStatus_initialized)
+	code, _ := serve(m.AuthToken, m.CheckAccountStatusActivated)
+	if code != http.StatusForbidden {
+		t.Fatalf("want 403, got %d", code)
+	}
+}
+
+func TestBlockedAccountIs403(t *testing.T) {
+	code, _ := serve(newTestController(authV1.AccountStatus_blocked).AuthToken)
+	if code != http.StatusForbidden {
+		t.Fatalf("want 403, got %d", code)
 	}
 }

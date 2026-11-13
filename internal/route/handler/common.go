@@ -27,15 +27,4 @@ func HelloPage(c *gin.Context) {
 		Message:   "hello",
 		Timestamp: time.Now(),
 	})
-	return
-}
-
-func TestGracefulShutdown(c *gin.Context) {
-	log := logger.GetLogger().WithContext(c)
-	log.Debug("handle test graceful shutdown")
-
-	time.Sleep(10 * time.Second)
-
-	c.String(http.StatusOK, "response after 10 second")
-	return
 }

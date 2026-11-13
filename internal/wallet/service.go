@@ -9,7 +9,6 @@ import (
 	"github.com/Template7/common/models"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 	"github.com/shopspring/decimal"
-	"net/http"
 )
 
 type Service struct {
@@ -37,7 +36,7 @@ func (s *Service) GetWallet(ctx context.Context, walletId string) (*v1.Wallet, e
 	}
 	if len(wbs) == 0 {
 		log.Info("no balances")
-		return nil, t7Error.WalletNotFound.WithStatus(http.StatusNotFound)
+		return nil, t7Error.WalletNotFound
 	}
 
 	w := v1.Wallet{
@@ -104,7 +103,7 @@ func (s *Service) Transfer(ctx context.Context, userId string, fromWalletId stri
 	}
 	if !s.isUserWallet(ctx, userId, fromWalletId) {
 		log.Warn("user does not own the source wallet")
-		return t7Error.WalletNotFound.WithStatus(http.StatusForbidden)
+		return t7Error.WalletNotFound
 	}
 
 	m, err := newMoney(currency, amount)

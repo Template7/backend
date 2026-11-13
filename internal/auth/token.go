@@ -5,7 +5,6 @@ import (
 	"github.com/Template7/backend/internal/t7Error"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/golang-jwt/jwt/v5"
-	"net/http"
 	"time"
 )
 
@@ -24,7 +23,7 @@ func (s *service) ParseToken(ctx context.Context, token string) (data *UserToken
 	claims, ok := tk.Claims.(*UserTokenClaims)
 	if !ok {
 		log.Error("token assertion fail")
-		err = t7Error.TokenAssertionFail.WithStatus(http.StatusBadRequest)
+		err = t7Error.TokenAssertionFail
 		return
 	}
 
@@ -49,7 +48,7 @@ func (s *service) genUserToken(ctx context.Context, userId string, role v1.Role)
 	tokenString, signErr := tokenClaims.SignedString(s.jwtSecret)
 	if signErr != nil {
 		log.WithError(signErr).Error("fail to sign jwt")
-		return "", t7Error.TokenSignFail.WithDetailAndStatus(signErr.Error(), http.StatusInternalServerError)
+		return "", t7Error.TokenSignFail.WithDetail(signErr.Error())
 	}
 	return tokenString, nil
 }

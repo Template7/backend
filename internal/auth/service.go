@@ -47,19 +47,16 @@ func New(db db.Client, dbCore *gorm.DB, cache cache.Interface, log *logger.Logge
 	adapter, err := gormadapter.NewAdapterByDB(dbCore)
 	if err != nil {
 		log.WithError(err).Panic("fail to new mysql adapter")
-		panic(err)
 	}
 
 	e, err := casbin.NewEnforcer(cfg.Auth.RbacModelPath, adapter)
 	if err != nil {
-		log.WithError(err).Error("fail to new enforcer")
-		panic(err)
+		log.WithError(err).Panic("fail to new enforcer")
 	}
 
 	err = e.LoadPolicy()
 	if err != nil {
 		log.WithError(err).Panic("fail to load policy")
-		panic(err)
 	}
 	e.AddFunction("checkAdmin", func(args ...interface{}) (interface{}, error) {
 		log.With("args", args).Debug("check admin")
@@ -102,7 +99,6 @@ func (s *service) loadDefaultPolicies() {
 		ok, err := s.core.AddPolicy(p)
 		if err != nil {
 			s.log.WithError(err).Panic("fail to add policy")
-			panic(err)
 		}
 		if !ok {
 			s.log.With("policy", p).Info("policy already exists")

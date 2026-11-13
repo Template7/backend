@@ -2,13 +2,12 @@ package handler
 
 import (
 	"github.com/Template7/backend/api/types"
-	middleware "github.com/Template7/backend/internal/route/middleWare"
+	"github.com/Template7/backend/internal/route/response"
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/backend/internal/wallet"
 	"github.com/Template7/common/logger"
 	walletV1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type WalletController struct {
@@ -19,8 +18,12 @@ type WalletController struct {
 func NewWalletController(service *wallet.Service, log *logger.Logger) *WalletController {
 	return &WalletController{
 		service: service,
-		log:     log.With("userService", "walletController"),
+		log:     log.WithService("walletController"),
 	}
+}
+
+func toCurrency(name string) walletV1.Currency {
+	return walletV1.Currency(walletV1.Currency_value[name])
 }
 
 // GetWallet
@@ -28,53 +31,22 @@ func NewWalletController(service *wallet.Service, log *logger.Logger) *WalletCon
 // @Tags V1,Wallet
 // @version 1.0
 // @Success 200 {object} types.HttpGetWalletResp "Response"
-// @failure 400 {object} types.HttpRespError
+// @failure 404 {object} types.HttpRespError "wallet not found"
 // @Security BearerAuth
 // @Param walletId path string true "Wallet ID"
 // @Router /api/v1/wallets/{walletId} [get]
 func (w *WalletController) GetWallet(c *gin.Context) {
-	log := w.log.WithContext(c)
-	log.Debug("handle get wallet")
-
 	data, err := w.service.GetWallet(c, c.Param("walletId"))
 	if err != nil {
-		defer c.Abort()
-		log.WithError(err).Error("fail to get wallet")
-		t7Err, ok := t7Error.ToT7Error(err)
-		if !ok {
-			log.WithError(err).Error("unknown error")
-			c.JSON(http.StatusInternalServerError, types.HttpRespBase{
-				RequestId: c.GetHeader(middleware.HeaderRequestId),
-				Code:      int(t7Error.Unknown.Code),
-				Message:   t7Error.Unknown.Message,
-			})
-			return
-		}
-		c.JSON(t7Err.GetStatus(), types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Err.Code),
-			Message:   t7Err.Message,
-		})
+		response.Error(c, err)
 		return
 	}
 
-	bls := make([]types.HttpGetUserWalletsRespDataBalance, len(data.Balances))
-	for i, bl := range data.GetBalances() {
-		bls[i] = types.HttpGetUserWalletsRespDataBalance{
-			Currency: bl.GetCurrency().String(),
-			Amount:   bl.GetAmount(),
-		}
-	}
-
-	c.JSON(http.StatusOK, types.HttpGetWalletResp{
-		HttpRespBase: types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      types.HttpRespCodeOk,
-			Message:   types.HttpRespMsgOk,
-		},
+	response.JSON(c, types.HttpGetWalletResp{
+		HttpRespBase: response.Ok(c),
 		Data: types.HttpGetUserWalletsRespData{
-			Id:       data.Id,
-			Balances: bls,
+			Id:       data.GetId(),
+			Balances: toBalances(data.GetBalances()),
 		},
 	})
 }
@@ -91,46 +63,17 @@ func (w *WalletController) GetWallet(c *gin.Context) {
 // @Param walletId path string true "Wallet ID"
 // @Router /api/v1/wallets/{walletId}/deposit [post]
 func (w *WalletController) Deposit(c *gin.Context) {
-	log := w.log.WithContext(c)
-	log.Debug("handle deposit")
-
 	var req types.HttpWalletDepositReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		log.WithError(err).Warn("invalid body")
-		c.JSON(http.StatusBadRequest, types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Error.InvalidBody.Code),
-			Message:   t7Error.InvalidBody.Message,
-		})
+		response.BadRequest(c, err.Error())
 		return
 	}
 
-	if err := w.service.Deposit(c, c.Param("walletId"), walletV1.Currency(walletV1.Currency_value[req.Currency]), req.Amount, req.Note); err != nil {
-		defer c.Abort()
-		log.WithError(err).Error("fail to deposit")
-		t7Err, ok := t7Error.ToT7Error(err)
-		if !ok {
-			log.WithError(err).Error("unknown error")
-			c.JSON(http.StatusInternalServerError, types.HttpRespBase{
-				RequestId: c.GetHeader(middleware.HeaderRequestId),
-				Code:      int(t7Error.Unknown.Code),
-				Message:   t7Error.Unknown.Message,
-			})
-			return
-		}
-		c.JSON(t7Err.GetStatus(), types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Err.Code),
-			Message:   t7Err.Message,
-		})
+	if err := w.service.Deposit(c, c.Param("walletId"), toCurrency(req.Currency), req.Amount, req.Note); err != nil {
+		response.Error(c, err)
 		return
 	}
-
-	c.JSON(http.StatusOK, types.HttpRespBase{
-		RequestId: c.GetHeader(middleware.HeaderRequestId),
-		Code:      types.HttpRespCodeOk,
-		Message:   types.HttpRespMsgOk,
-	})
+	response.JSON(c, response.Ok(c))
 }
 
 // Withdraw
@@ -140,51 +83,22 @@ func (w *WalletController) Deposit(c *gin.Context) {
 // @Param request body types.HttpWalletWithdrawReq true "Request"
 // @produce json
 // @Success 200 {object} types.HttpRespBase "Response"
-// @failure 400 {object} types.HttpRespError
+// @failure 400 {object} types.HttpRespError "invalid body or insufficient balance"
 // @Security BearerAuth
 // @Param walletId path string true "Wallet ID"
 // @Router /api/v1/wallets/{walletId}/withdraw [post]
 func (w *WalletController) Withdraw(c *gin.Context) {
-	log := w.log.WithContext(c)
-	log.Debug("handle withdraw")
-
 	var req types.HttpWalletWithdrawReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		log.WithError(err).Warn("invalid body")
-		c.JSON(http.StatusBadRequest, types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Error.InvalidBody.Code),
-			Message:   t7Error.InvalidBody.Message,
-		})
+		response.BadRequest(c, err.Error())
 		return
 	}
 
-	if err := w.service.Withdraw(c, c.Param("walletId"), walletV1.Currency(walletV1.Currency_value[req.Currency]), req.Amount, req.Note); err != nil {
-		defer c.Abort()
-		log.WithError(err).Error("fail to withdraw")
-		t7Err, ok := t7Error.ToT7Error(err)
-		if !ok {
-			log.WithError(err).Error("unknown error")
-			c.JSON(http.StatusInternalServerError, types.HttpRespBase{
-				RequestId: c.GetHeader(middleware.HeaderRequestId),
-				Code:      int(t7Error.Unknown.Code),
-				Message:   t7Error.Unknown.Message,
-			})
-			return
-		}
-		c.JSON(t7Err.GetStatus(), types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Err.Code),
-			Message:   t7Err.Message,
-		})
+	if err := w.service.Withdraw(c, c.Param("walletId"), toCurrency(req.Currency), req.Amount, req.Note); err != nil {
+		response.Error(c, err)
 		return
 	}
-
-	c.JSON(http.StatusOK, types.HttpRespBase{
-		RequestId: c.GetHeader(middleware.HeaderRequestId),
-		Code:      types.HttpRespCodeOk,
-		Message:   types.HttpRespMsgOk,
-	})
+	response.JSON(c, response.Ok(c))
 }
 
 // Transfer
@@ -194,62 +108,26 @@ func (w *WalletController) Withdraw(c *gin.Context) {
 // @Param request body types.HttpTransferMoneyReq true "Request"
 // @produce json
 // @Success 200 {object} types.HttpRespBase "Response"
-// @failure 400 {object} types.HttpRespError
+// @failure 400 {object} types.HttpRespError "invalid body or insufficient balance"
+// @failure 404 {object} types.HttpRespError "source wallet not found or not owned by the caller"
 // @Security BearerAuth
 // @Router /api/v1/transfer [post]
 func (w *WalletController) Transfer(c *gin.Context) {
-	log := w.log.WithContext(c)
-	log.WithContext(c).Debug("handle make transfer")
-
 	var req types.HttpTransferMoneyReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		log.WithError(err).Warn("invalid body")
-		c.JSON(http.StatusBadRequest, types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Error.InvalidBody.Code),
-			Message:   t7Error.InvalidBody.Message,
-		})
+		response.BadRequest(c, err.Error())
+		return
+	}
+	userId, ok := currentUserId(c)
+	if !ok {
 		return
 	}
 
-	userId := c.GetString(middleware.UserId)
-	if userId == "" {
-		log.Warn("no user id from the previous middleware")
-		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Error.InvalidToken.Code),
-			Message:   t7Error.InvalidToken.Message,
-		})
-		c.Abort()
+	if err := w.service.Transfer(c, userId, req.FromWalletId, req.ToWalletId, toCurrency(req.Currency), req.Amount, req.Note); err != nil {
+		response.Error(c, err)
 		return
 	}
-
-	if err := w.service.Transfer(c, userId, req.FromWalletId, req.ToWalletId, walletV1.Currency(walletV1.Currency_value[req.Currency]), req.Amount, req.Note); err != nil {
-		defer c.Abort()
-		log.WithError(err).Error("fail to transfer")
-		t7Err, ok := t7Error.ToT7Error(err)
-		if !ok {
-			log.WithError(err).Error("unknown error")
-			c.JSON(http.StatusInternalServerError, types.HttpRespBase{
-				RequestId: c.GetHeader(middleware.HeaderRequestId),
-				Code:      int(t7Error.Unknown.Code),
-				Message:   t7Error.Unknown.Message,
-			})
-			return
-		}
-		c.JSON(t7Err.GetStatus(), types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Err.Code),
-			Message:   t7Err.Message,
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, types.HttpRespBase{
-		RequestId: c.GetHeader(middleware.HeaderRequestId),
-		Code:      types.HttpRespCodeOk,
-		Message:   types.HttpRespMsgOk,
-	})
+	response.JSON(c, response.Ok(c))
 }
 
 // GetWalletBalanceHistory
@@ -263,27 +141,15 @@ func (w *WalletController) Transfer(c *gin.Context) {
 // @Param walletId path string true "Wallet ID"
 // @Router /api/v1/wallets/{walletId}/history [get]
 func (w *WalletController) GetWalletBalanceHistory(c *gin.Context) {
-	log := w.log.WithContext(c)
-	log.Debug("handle get wallet balance history")
-
 	wId := c.Param("walletId")
 	if wId == "" {
-		c.JSON(http.StatusBadRequest, types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Error.InvalidBody.Code),
-			Message:   t7Error.InvalidBody.Message,
-		})
+		response.BadRequest(c, "empty wallet id")
 		return
 	}
 
 	history := w.service.GetBalanceHistory(c, wId)
-
 	if history == nil {
-		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Error.DbOperationFail.Code),
-			Message:   t7Error.DbOperationFail.Message,
-		})
+		response.Error(c, t7Error.DbOperationFail)
 		return
 	}
 
@@ -300,13 +166,9 @@ func (w *WalletController) GetWalletBalanceHistory(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, types.HttpGetWalletBalanceHistoryResp{
-		HttpRespBase: types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      types.HttpRespCodeOk,
-			Message:   types.HttpRespMsgOk,
-		},
-		Data: data,
+	response.JSON(c, types.HttpGetWalletBalanceHistoryResp{
+		HttpRespBase: response.Ok(c),
+		Data:         data,
 	})
 }
 
@@ -322,38 +184,20 @@ func (w *WalletController) GetWalletBalanceHistory(c *gin.Context) {
 // @Param currency path string true "Currency" Enums(ntd, cny, usd, jpy)
 // @Router /api/v1/wallets/{walletId}/currencies/{currency}/history [get]
 func (w *WalletController) GetWalletBalanceHistoryByCurrency(c *gin.Context) {
-	log := w.log.WithContext(c)
-	log.Debug("handle get wallet balance history by currency")
-
 	wId := c.Param("walletId")
 	if wId == "" {
-		c.JSON(http.StatusBadRequest, types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Error.InvalidBody.Code),
-			Message:   t7Error.InvalidBody.Message,
-		})
+		response.BadRequest(c, "empty wallet id")
 		return
 	}
-
 	currency, ok := walletV1.Currency_value[c.Param("currency")]
 	if !ok {
-		log.With("currency", c.Param("currency")).Info("unsupported currency")
-		c.JSON(http.StatusBadRequest, types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Error.InvalidBody.Code),
-			Message:   t7Error.InvalidBody.Message,
-		})
+		response.BadRequest(c, "unsupported currency: "+c.Param("currency"))
 		return
 	}
 
 	history := w.service.GetBalanceHistoryByCurrency(c, wId, walletV1.Currency(currency))
-
 	if history == nil {
-		c.JSON(http.StatusInternalServerError, types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Error.DbOperationFail.Code),
-			Message:   t7Error.DbOperationFail.Message,
-		})
+		response.Error(c, t7Error.DbOperationFail)
 		return
 	}
 
@@ -369,12 +213,8 @@ func (w *WalletController) GetWalletBalanceHistoryByCurrency(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, types.HttpGetWalletBalanceHistoryByCurrencyResp{
-		HttpRespBase: types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      types.HttpRespCodeOk,
-			Message:   types.HttpRespMsgOk,
-		},
-		Data: data,
+	response.JSON(c, types.HttpGetWalletBalanceHistoryByCurrencyResp{
+		HttpRespBase: response.Ok(c),
+		Data:         data,
 	})
 }

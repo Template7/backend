@@ -10,7 +10,7 @@ import (
 	"github.com/Template7/backend/internal/config"
 	"github.com/Template7/backend/internal/db"
 	"github.com/Template7/backend/internal/route/handler"
-	middleware "github.com/Template7/backend/internal/route/middleWare"
+	"github.com/Template7/backend/internal/route/middleware"
 	"github.com/Template7/backend/internal/user"
 	"github.com/Template7/backend/internal/wallet"
 	"github.com/google/wire"

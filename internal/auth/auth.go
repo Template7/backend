@@ -6,7 +6,6 @@ import (
 	"github.com/Template7/backend/internal/t7Error"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"gorm.io/gorm"
-	"net/http"
 )
 
 func (s *service) Login(ctx context.Context, username string, password string) (string, error) {
@@ -19,15 +18,15 @@ func (s *service) Login(ctx context.Context, username string, password string) (
 			// same answer and similar timing as a wrong password, so usernames can't be probed
 			checkPasswordHash(password, dummyPasswordHash)
 			log.Info("user not found")
-			return "", t7Error.SignInFail.WithStatus(http.StatusUnauthorized)
+			return "", t7Error.SignInFail
 		}
 		log.WithError(err).Error("fail to get user")
-		return "", t7Error.DbOperationFail.WithDetailAndStatus(err.Error(), http.StatusInternalServerError)
+		return "", t7Error.DbOperationFail.WithDetail(err.Error())
 	}
 
 	if !checkPasswordHash(password, user.Password) {
 		log.Info("password incorrect")
-		return "", t7Error.SignInFail.WithStatus(http.StatusUnauthorized)
+		return "", t7Error.SignInFail
 	}
 	role := s.GetUserRole(ctx, user.Id)
 	if _, ok := authV1.Role_name[int32(role)]; !ok {

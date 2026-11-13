@@ -27,6 +27,8 @@ const (
 	codeBlockedAccount
 	codeUnknown
 	codeInsufficientBalance
+	codeForbidden
+	codeAccountNotActivated
 )
 
 const (
@@ -43,6 +45,7 @@ var (
 		Code:    codeUnknown,
 		Message: "unknown",
 		Type:    typeOther,
+		status:  http.StatusInternalServerError,
 	}
 
 	BlockedAccount = &Error{
@@ -56,18 +59,21 @@ var (
 		Code:    codeUserHasNoRole,
 		Message: "user has no role",
 		Type:    typeAuth,
+		status:  http.StatusForbidden,
 	}
 
 	PasswordIncorrect = &Error{
 		Code:    codePasswordIncorrect,
 		Message: "password incorrect",
 		Type:    typeAuth,
+		status:  http.StatusUnauthorized,
 	}
 
 	UnAuthorized = &Error{
 		Code:    codeUnAuthorized,
 		Message: "token unauthorized",
 		Type:    typeAuth,
+		status:  http.StatusUnauthorized,
 	}
 
 	InvalidBody = &Error{
@@ -80,11 +86,13 @@ var (
 		Code:    codeDbConnectionFail,
 		Message: "db connection fail",
 		Type:    typeDb,
+		status:  http.StatusInternalServerError,
 	}
 	DbOperationFail = &Error{
 		Code:    codeDbOperationFail,
 		Message: "db operation fail",
 		Type:    typeDb,
+		status:  http.StatusInternalServerError,
 	}
 	InvalidDocumentId = &Error{
 		Code:    codeInvalidDocumentId,
@@ -96,32 +104,38 @@ var (
 		Code:    codeHttpOperationFail,
 		Message: "http operation fail",
 		Type:    typeNetwork,
+		status:  http.StatusBadGateway,
 	}
 	HttpUnexpectedResponseCode = &Error{
 		Code:    codeHttpUnexpectedResponseCode,
 		Message: "http unexpected response code",
 		Type:    typeInvalidData,
+		status:  http.StatusBadGateway,
 	}
 	HashFail = &Error{
 		Code:    codeHashFail,
 		Message: "Hash fail",
 		Type:    typeAuth,
+		status:  http.StatusInternalServerError,
 	}
 
 	UserNotfound = &Error{
 		Code:    codeUserNotfound,
 		Message: "user not found",
 		Type:    typeInvalidData,
+		status:  http.StatusNotFound,
 	}
 	UserAlreadyExist = &Error{
 		Code:    codeUserAlreadyExist,
 		Message: "user already exist",
 		Type:    typeInvalidData,
+		status:  http.StatusConflict,
 	}
 	SignInFail = &Error{
 		Code:    codeSignInFail,
 		Message: "Invalid user name or password",
 		Type:    typeInvalidData,
+		status:  http.StatusUnauthorized,
 	}
 
 	VerifyCodeExpired = &Error{
@@ -139,22 +153,26 @@ var (
 		Code:    codeRedisOperationFail,
 		Message: "redis operation fail",
 		Type:    typeRedis,
+		status:  http.StatusInternalServerError,
 	}
 
 	TokenSignFail = &Error{
 		Code:    codeTokenSignFail,
 		Message: "token sign fail",
 		Type:    typeAuth,
+		status:  http.StatusInternalServerError,
 	}
 	TokenAssertionFail = &Error{
 		Code:    codeTokenAssertionFail,
 		Message: "token assertion fail",
 		Type:    typeInvalidData,
+		status:  http.StatusUnauthorized,
 	}
 	InvalidToken = &Error{
 		Code:    codeInvalidToken,
 		Message: "invalid token",
 		Type:    typeAuth,
+		status:  http.StatusUnauthorized,
 	}
 
 	DecodeFail = &Error{
@@ -167,11 +185,26 @@ var (
 		Code:    codeWalletNotFound,
 		Message: "wallet not found",
 		Type:    typeDb,
+		status:  http.StatusNotFound,
 	}
 
 	InsufficientBalance = &Error{
 		Code:    codeInsufficientBalance,
 		Message: "insufficient balance",
 		Type:    typeInvalidData,
+	}
+
+	Forbidden = &Error{
+		Code:    codeForbidden,
+		Message: "permission denied",
+		Type:    typeAuth,
+		status:  http.StatusForbidden,
+	}
+
+	AccountNotActivated = &Error{
+		Code:    codeAccountNotActivated,
+		Message: "account not activated",
+		Type:    typeAuth,
+		status:  http.StatusForbidden,
 	}
 )
