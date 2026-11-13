@@ -16,7 +16,12 @@ import (
 
 const (
 	minJwtSecretLen = 32
+	bcryptCost      = bcrypt.DefaultCost
 )
+
+// dummyPasswordHash is compared against when the user doesn't exist,
+// so a login for an unknown user takes as long as a wrong password.
+var dummyPasswordHash, _ = hashedPassword("dummy-password-for-timing")
 
 type UserTokenClaims struct {
 	jwt.RegisteredClaims
@@ -106,7 +111,7 @@ func (s *service) loadDefaultPolicies() {
 }
 
 func hashedPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 7)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcryptCost)
 	return string(bytes), err
 }
 

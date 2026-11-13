@@ -106,6 +106,11 @@ func (c *testCache) GetUserActivationCode(ctx context.Context, userId string) (s
 	return code, nil
 }
 
+func (c *testCache) DeleteUserActivationCode(ctx context.Context, userId string) error {
+	delete(c.actCode, userId)
+	return nil
+}
+
 func newTestDbClient() db.Client {
 	return &testDbClient{
 		core: newTestDbCore(),

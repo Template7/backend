@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"context"
+	"errors"
 	"github.com/Template7/backend/internal/db"
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/common/logger"
@@ -36,7 +37,7 @@ func (s *Service) GetWallet(ctx context.Context, walletId string) (*v1.Wallet, e
 	}
 	if len(wbs) == 0 {
 		log.Info("no balances")
-		return nil, nil
+		return nil, t7Error.WalletNotFound.WithStatus(http.StatusNotFound)
 	}
 
 	w := v1.Wallet{
@@ -80,6 +81,9 @@ func (s *Service) Withdraw(ctx context.Context, walletId string, currency v1.Cur
 		return err
 	}
 	if err := s.db.Withdraw(ctx, walletId, m, note); err != nil {
+		if errors.Is(err, db.ErrInsufficientBalance) {
+			return t7Error.InsufficientBalance
+		}
 		log.WithError(err).Error("fail to withdraw")
 		return t7Error.DbOperationFail.WithDetail(err.Error())
 	}
@@ -109,6 +113,9 @@ func (s *Service) Transfer(ctx context.Context, userId string, fromWalletId stri
 		return err
 	}
 	if err := s.db.Transfer(ctx, fromWalletId, toWalletId, m, note); err != nil {
+		if errors.Is(err, db.ErrInsufficientBalance) {
+			return t7Error.InsufficientBalance
+		}
 		log.WithError(err).Error("fail to transfer")
 		return t7Error.DbOperationFail.WithDetail(err.Error())
 	}

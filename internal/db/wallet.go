@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/Template7/common/models"
 	"github.com/Template7/common/t7Id"
@@ -9,6 +10,10 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
+
+// ErrInsufficientBalance is returned by Withdraw and Transfer when the
+// source balance is lower than the amount.
+var ErrInsufficientBalance = errors.New("insufficient balance")
 
 func (c *client) GetWalletBalances(ctx context.Context, walletId string) (data []models.WalletBalance, err error) {
 	log := c.log.WithContext(ctx).With("walletId", walletId)
@@ -211,6 +216,10 @@ func (c *client) withdraw(ctx context.Context, tx *gorm.DB, walletId string, mon
 		Take(&models.Balance{}, "wallet_id = ? AND currency = ? AND amount >= ?", walletId, money.Currency, money.Amount).
 		Update("amount", gorm.Expr("amount - ?", money.Amount)).Error
 
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Info("insufficient balance")
+		return ErrInsufficientBalance
+	}
 	if err != nil {
 		log.WithError(err).Error("fail to withdraw")
 	}

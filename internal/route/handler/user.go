@@ -75,6 +75,7 @@ func (u *UserController) GetUserInfo(c *gin.Context) {
 				Code:      int(t7Error.Unknown.Code),
 				Message:   t7Error.Unknown.Message,
 			})
+			return
 		}
 		c.JSON(t7Err.GetStatus(), types.HttpRespBase{
 			RequestId: c.GetHeader(middleware.HeaderRequestId),

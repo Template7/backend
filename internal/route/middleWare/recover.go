@@ -2,50 +2,64 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
+	"github.com/Template7/backend/api/types"
+	"github.com/Template7/backend/internal/t7Error"
 	"github.com/gin-gonic/gin"
 	"net"
 	"net/http"
-	"net/http/httputil"
 	"os"
+	"runtime/debug"
 	"strings"
 )
 
+// RecoverMiddleware turns a panic in any later handler into a 500 response
+// instead of a dropped connection.
 func (m *Controller) RecoverMiddleware(c *gin.Context) {
-	// TODO: refine
 	defer func() {
-		if err := recover(); err != nil {
-			httpRequest, _ := httputil.DumpRequest(c.Request, false)
-			headers := strings.Split(string(httpRequest), "\r\n")
-			for idx, header := range headers {
-				current := strings.Split(header, ":")
-				if current[0] == "Authorization" {
-					headers[idx] = current[0] + ": *"
-				}
-			}
-
-			var brokenPipe bool
-			var ne *net.OpError
-			if errors.As(err.(error), &ne) {
-				var se *os.SyscallError
-				if errors.As(ne, &se) {
-					if strings.Contains(strings.ToLower(se.Error()), "broken pipe") || strings.Contains(strings.ToLower(se.Error()), "connection reset by peer") {
-						brokenPipe = true
-					}
-				}
-			}
-
-			if brokenPipe {
-				_ = c.Error(err.(error))
-				c.Abort()
-			} else {
-				m.log.WithService("gin").
-					With("result", err).
-					With("header", headers).
-					Panic("panic recovered")
-
-				c.AbortWithStatus(http.StatusInternalServerError)
-			}
+		rec := recover()
+		if rec == nil {
+			return
 		}
+
+		// panic values are not always errors, e.g. panic("msg")
+		err, isErr := rec.(error)
+		if isErr && isBrokenPipe(err) {
+			// client went away; nothing to respond to
+			_ = c.Error(err)
+			c.Abort()
+			return
+		}
+
+		m.log.WithContext(c).
+			With("panic", fmt.Sprint(rec)).
+			With("method", c.Request.Method).
+			With("path", c.Request.URL.Path).
+			With("stack", string(debug.Stack())).
+			Error("panic recovered")
+
+		if c.Writer.Written() {
+			c.Abort()
+			return
+		}
+		c.AbortWithStatusJSON(http.StatusInternalServerError, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.Unknown.Code),
+			Message:   t7Error.Unknown.Message,
+		})
 	}()
 	c.Next()
+}
+
+func isBrokenPipe(err error) bool {
+	var ne *net.OpError
+	if !errors.As(err, &ne) {
+		return false
+	}
+	var se *os.SyscallError
+	if !errors.As(ne, &se) {
+		return false
+	}
+	msg := strings.ToLower(se.Error())
+	return strings.Contains(msg, "broken pipe") || strings.Contains(msg, "connection reset by peer")
 }

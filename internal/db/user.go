@@ -6,6 +6,7 @@ import (
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/wallet"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 func (c *client) CreateUser(ctx context.Context, data models.User) (err error) {
@@ -110,10 +111,28 @@ func (c *client) DeleteUser(ctx context.Context, userId string) (err error) {
 	log := c.log.WithContext(ctx).With("userId", userId)
 	log.Debug("delete user")
 
-	if err = c.sql.core.WithContext(ctx).Exec("delete u, b, w from user u join wallet w on u.id = w.user_id join balance b on w.id = b.wallet_id where u.id = ?", userId).Error; err != nil {
+	// separate deletes instead of one join-delete: an inner join skipped users
+	// without wallet/balance rows. History is kept for audit.
+	err = c.sql.core.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		walletIds := tx.Model(&models.Wallet{}).Select("id").Where("user_id = ?", userId)
+		if err := tx.Where("wallet_id IN (?)", walletIds).Delete(&models.Balance{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("user_id = ?", userId).Delete(&models.Wallet{}).Error; err != nil {
+			return err
+		}
+		res := tx.Where("id = ?", userId).Delete(&models.User{})
+		if res.Error != nil {
+			return res.Error
+		}
+		if res.RowsAffected == 0 {
+			return gorm.ErrRecordNotFound
+		}
+		return nil
+	})
+	if err != nil {
 		log.WithError(err).Error("fail to delete user")
 	}
-
 	return
 }
 

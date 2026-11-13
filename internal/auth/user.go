@@ -2,11 +2,15 @@ package auth
 
 import (
 	"context"
+	"crypto/subtle"
+	"errors"
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/Template7/common/models"
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	userV1 "github.com/Template7/protobuf/gen/proto/template7/user"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
+	"net/http"
 )
 
 func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest) (string, error) {
@@ -42,6 +46,10 @@ func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest)
 	}
 	if err := s.db.CreateUser(ctx, data); err != nil {
 		log.WithError(err).Error("fail to create user")
+		// undo the role so no orphan casbin entry is left behind
+		if _, rErr := s.core.DeleteRolesForUser(userId); rErr != nil {
+			log.WithError(rErr).Error("fail to roll back user role")
+		}
 		return "", t7Error.DbOperationFail.WithDetail(err.Error())
 	}
 
@@ -55,7 +63,7 @@ func (s *service) GenActivationCode(ctx context.Context, userId string) (string,
 
 	actCode := uuid.NewString()
 	if err := s.cache.SetUserActivationCode(ctx, userId, actCode); err != nil {
-		log.WithError(err).Error("fail to get user activation code")
+		log.WithError(err).Error("fail to set user activation code")
 		return "", t7Error.RedisOperationFail.WithDetail(err.Error())
 	}
 
@@ -72,7 +80,7 @@ func (s *service) ActivateUser(ctx context.Context, userId string, actCode strin
 		return false
 	}
 
-	if code != actCode {
+	if actCode == "" || subtle.ConstantTimeCompare([]byte(code), []byte(actCode)) != 1 {
 		log.Warn("invalid activation code")
 		return false
 	}
@@ -80,6 +88,11 @@ func (s *service) ActivateUser(ctx context.Context, userId string, actCode strin
 	if err := s.db.SetUserStatus(ctx, userId, authV1.AccountStatus_activated); err != nil {
 		log.WithError(err).Error("fail to update user status")
 		return false
+	}
+
+	// one-time code
+	if err := s.cache.DeleteUserActivationCode(ctx, userId); err != nil {
+		log.WithError(err).Warn("fail to delete used activation code")
 	}
 
 	log.Debug("user activated")
@@ -90,14 +103,22 @@ func (s *service) DeleteUser(ctx context.Context, userId string) error {
 	log := s.log.WithContext(ctx).With("userId", userId)
 	log.Debug("delete user")
 
-	_, err := s.core.DeleteUser(userId)
-	if err != nil {
-		log.WithError(err).Error("fail to delete user from casbin api")
-	}
-
+	// delete the data first: if it fails, the user keeps working as before
 	if err := s.db.DeleteUser(ctx, userId); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Info("user not found")
+			return t7Error.UserNotfound.WithStatus(http.StatusNotFound)
+		}
 		log.WithError(err).Error("fail to delete user")
 		return t7Error.DbOperationFail.WithDetail(err.Error())
+	}
+
+	// the user row is gone, so a leftover role can't be used to log in; just log it
+	if _, err := s.core.DeleteUser(userId); err != nil {
+		log.WithError(err).Error("fail to delete user from casbin")
+	}
+	if err := s.cache.DeleteUserActivationCode(ctx, userId); err != nil {
+		log.WithError(err).Warn("fail to delete activation code")
 	}
 
 	return nil
@@ -135,9 +156,4 @@ func (s *service) GetUserStatus(ctx context.Context, userId string) authV1.Accou
 	}
 
 	return data.Status
-}
-
-func (s *service) ActiveUser(ctx context.Context, userId string) error {
-	// TODO
-	return nil
 }

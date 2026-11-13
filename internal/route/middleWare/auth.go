@@ -82,7 +82,21 @@ func (m *Controller) AuthToken(c *gin.Context) {
 		return
 	}
 
-	if claims.Status == int(authV1.AccountStatus_blocked) {
+	// account status can change after the token was issued (activated, blocked, deleted),
+	// so read the current value instead of trusting the claim
+	status := m.authSvc.GetUserStatus(c, claims.UserId)
+	if status < 0 {
+		log.With("userId", claims.UserId).Warn("user not found for token")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		c.Abort()
+		return
+	}
+
+	if status == authV1.AccountStatus_blocked {
 		log.With("userId", claims.UserId).Info("blocked account")
 		c.JSON(t7Error.BlockedAccount.GetStatus(), types.HttpRespBase{
 			RequestId: c.GetHeader(HeaderRequestId),
@@ -95,7 +109,7 @@ func (m *Controller) AuthToken(c *gin.Context) {
 
 	c.Set(UserId, claims.UserId)
 	c.Set(Role, claims.Role)
-	c.Set(Status, claims.Status)
+	c.Set(Status, int(status))
 
 	log.With("userId", claims.UserId).Debug("user token authorized")
 	c.Next()
