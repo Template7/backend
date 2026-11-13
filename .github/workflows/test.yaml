@@ -35,7 +35,7 @@ jobs:
 
       - name: Generated code is up to date (wire, swagger)
         run: |
-          go run github.com/google/wire/cmd/wire@v0.6.0 gen ./cmd
+          go run github.com/google/wire/cmd/wire@v0.7.0 gen ./cmd
           go run github.com/swaggo/swag/cmd/swag@v1.16.4 init -g ./cmd/main.go -q
           git diff --exit-code -- cmd/wire_gen.go docs/ || {
             echo "::error::generated code is stale, run 'make generate' and commit the result"

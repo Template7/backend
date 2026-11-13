@@ -11,7 +11,7 @@ RUN go mod download
 
 # regenerate swagger document and dependency injection (pinned tool versions)
 RUN go run github.com/swaggo/swag/cmd/swag@v1.16.4 init -g ./cmd/main.go -q
-RUN go run github.com/google/wire/cmd/wire@v0.6.0 gen ./cmd
+RUN go run github.com/google/wire/cmd/wire@v0.7.0 gen ./cmd
 
 RUN go build -ldflags="-X 'github.com/Template7/backend/internal.CommitHash=$COMMIT_HASH'" -o $PROJECT ./cmd
 

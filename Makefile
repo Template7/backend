@@ -1,7 +1,7 @@
 .PHONY: build generate wire swagger test lint vulncheck check run image all
 
 # tool versions (keep in sync with .github/workflows/test.yaml and build/Dockerfile)
-WIRE          = go run github.com/google/wire/cmd/wire@v0.6.0
+WIRE          = go run github.com/google/wire/cmd/wire@v0.7.0
 SWAG          = go run github.com/swaggo/swag/cmd/swag@v1.16.4
 GOLANGCI_LINT = go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0
 GOVULNCHECK   = go run golang.org/x/vuln/cmd/govulncheck@v1.9.0
