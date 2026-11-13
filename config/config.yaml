@@ -12,7 +12,7 @@ db:
     host: 127.0.0.1
     port: 33306
     username: admin
-    password: password
+    password: ""
     connection:
       min: 4
       max: 8
@@ -21,11 +21,12 @@ db:
     host: 127.0.0.1
     port: 37017
     username:
-    password:
+    password: ""
 
 cache:
   host: "localhost:36379"
-  password:
+  password: ""
 
 auth:
   rbacModelPath: "./config/rbac_model.conf"
+  jwtSecret: "" # set via T7_AUTH_JWTSECRET (min 32 chars)

@@ -8,32 +8,37 @@ import (
 	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/gorm-adapter/v3"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"net/http"
 )
 
 const (
-	jwtSign = "45519f46c06c8340a34f9a32982860c1a8d6bb57eaeb338b7f0119062b8a3b67"
+	minJwtSecretLen = 32
 )
 
 type UserTokenClaims struct {
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 	UserId string `json:"userId"`
 	Role   string `json:"role"`
 	Status int    `json:"status"`
 }
 
 type service struct {
-	core   *casbin.Enforcer
-	db     db.Client
-	dbCore *gorm.DB
-	cache  cache.Interface
-	log    *logger.Logger
+	core      *casbin.Enforcer
+	jwtSecret []byte
+	db        db.Client
+	dbCore    *gorm.DB
+	cache     cache.Interface
+	log       *logger.Logger
 }
 
 func New(db db.Client, dbCore *gorm.DB, cache cache.Interface, log *logger.Logger, cfg *config.Config) Auth {
+	if len(cfg.Auth.JwtSecret) < minJwtSecretLen {
+		log.With("minLength", minJwtSecretLen).Panic("jwt secret missing or too short, set auth.jwtSecret / T7_AUTH_JWTSECRET")
+	}
+
 	adapter, err := gormadapter.NewAdapterByDB(dbCore)
 	if err != nil {
 		log.WithError(err).Panic("fail to new mysql adapter")
@@ -59,10 +64,11 @@ func New(db db.Client, dbCore *gorm.DB, cache cache.Interface, log *logger.Logge
 	})
 
 	s := service{
-		core:  e,
-		db:    db,
-		cache: cache,
-		log:   log.WithService("auth"),
+		core:      e,
+		jwtSecret: []byte(cfg.Auth.JwtSecret),
+		db:        db,
+		cache:     cache,
+		log:       log.WithService("auth"),
 	}
 	s.loadDefaultPolicies()
 

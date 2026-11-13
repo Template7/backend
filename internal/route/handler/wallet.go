@@ -212,7 +212,19 @@ func (w *WalletController) Transfer(c *gin.Context) {
 		return
 	}
 
-	if err := w.service.Transfer(c, req.FromWalletId, req.ToWalletId, walletV1.Currency(walletV1.Currency_value[req.Currency]), req.Amount, req.Note); err != nil {
+	userId := c.GetString(middleware.UserId)
+	if userId == "" {
+		log.Warn("no user id from the previous middleware")
+		c.JSON(http.StatusUnauthorized, types.HttpRespBase{
+			RequestId: c.GetHeader(middleware.HeaderRequestId),
+			Code:      int(t7Error.InvalidToken.Code),
+			Message:   t7Error.InvalidToken.Message,
+		})
+		c.Abort()
+		return
+	}
+
+	if err := w.service.Transfer(c, userId, req.FromWalletId, req.ToWalletId, walletV1.Currency(walletV1.Currency_value[req.Currency]), req.Amount, req.Note); err != nil {
 		defer c.Abort()
 		log.WithError(err).Error("fail to transfer")
 		t7Err, ok := t7Error.ToT7Error(err)

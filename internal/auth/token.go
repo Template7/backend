@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/Template7/backend/internal/t7Error"
 	v1 "github.com/Template7/protobuf/gen/proto/template7/auth"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 	"time"
 )
@@ -14,8 +14,8 @@ func (s *service) ParseToken(ctx context.Context, token string) (data *UserToken
 	log.Debug("parse token")
 
 	tk, err := jwt.ParseWithClaims(token, &UserTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(jwtSign), nil
-	})
+		return s.jwtSecret, nil
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}), jwt.WithExpirationRequired())
 	if err != nil {
 		log.WithError(err).Error("fail to parse token")
 		return nil, t7Error.InvalidToken.WithDetail(err.Error())
@@ -36,8 +36,9 @@ func (s *service) genUserToken(ctx context.Context, userId string, role v1.Role)
 	log.Debug("gen user token")
 
 	utc := UserTokenClaims{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(userTokenTtl).Unix(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(userTokenTtl)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 		UserId: userId,
 		Role:   role.String(),
@@ -45,7 +46,7 @@ func (s *service) genUserToken(ctx context.Context, userId string, role v1.Role)
 	}
 
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, &utc)
-	tokenString, signErr := tokenClaims.SignedString([]byte(jwtSign))
+	tokenString, signErr := tokenClaims.SignedString(s.jwtSecret)
 	if signErr != nil {
 		log.WithError(signErr).Error("fail to sign jwt")
 		return "", t7Error.TokenSignFail.WithDetailAndStatus(signErr.Error(), http.StatusInternalServerError)
