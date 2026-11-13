@@ -62,8 +62,8 @@ func TestTransfer_RejectsWalletNotOwnedByCaller(t *testing.T) {
 	err := s.Transfer(context.Background(), "alice", "wallet-bob", "wallet-alice", v1.Currency_usd, 100, "")
 
 	t7Err, ok := t7Error.ToT7Error(err)
-	if !ok || t7Err.Code != t7Error.WalletNotFound.Code || t7Err.GetStatus() != http.StatusForbidden {
-		t.Fatalf("want WalletNotFound/403, got %v", err)
+	if !ok || t7Err.Code != t7Error.WalletNotFound.Code || t7Err.GetStatus() != http.StatusNotFound {
+		t.Fatalf("want WalletNotFound/404, got %v", err)
 	}
 	if f.transferCalls != 0 {
 		t.Fatalf("db.Transfer must not be called, got %d calls", f.transferCalls)

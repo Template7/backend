@@ -45,6 +45,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
+                "description": "Creates the user with a default wallet and returns a one-time activation code (valid 24h).",
                 "produces": [
                     "application/json"
                 ],
@@ -111,8 +112,57 @@ const docTemplate = `{
                             "$ref": "#/definitions/types.HttpRespBase"
                         }
                     },
+                    "404": {
+                        "description": "user not found",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpRespError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/v1/users/{userId}/activate": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "V1",
+                    "User"
+                ],
+                "summary": "Activate user",
+                "parameters": [
+                    {
+                        "description": "Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpActivateUserReq"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpActivateUserResp"
+                        }
+                    },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "invalid or expired activation code",
                         "schema": {
                             "$ref": "#/definitions/types.HttpRespError"
                         }
@@ -150,6 +200,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpRespError"
+                        }
+                    },
+                    "401": {
+                        "description": "invalid user name or password",
                         "schema": {
                             "$ref": "#/definitions/types.HttpRespError"
                         }
@@ -191,7 +247,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "invalid body or insufficient balance",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpRespError"
+                        }
+                    },
+                    "404": {
+                        "description": "source wallet not found or not owned by the caller",
                         "schema": {
                             "$ref": "#/definitions/types.HttpRespError"
                         }
@@ -327,8 +389,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/types.HttpGetWalletResp"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "404": {
+                        "description": "wallet not found",
                         "schema": {
                             "$ref": "#/definitions/types.HttpRespError"
                         }
@@ -519,7 +581,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "invalid body or insufficient balance",
                         "schema": {
                             "$ref": "#/definitions/types.HttpRespError"
                         }
@@ -539,6 +601,42 @@ const docTemplate = `{
                 "timestamp": {
                     "type": "string",
                     "example": "2021-07-24T20:01:25.874565+08:00"
+                }
+            }
+        },
+        "types.HttpActivateUserReq": {
+            "type": "object",
+            "properties": {
+                "activationCode": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.HttpActivateUserResp": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 3000
+                },
+                "data": {
+                    "$ref": "#/definitions/types.HttpActivateUserRespData"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "requestId": {
+                    "type": "string",
+                    "example": "b8974256-1f17-477f-8638-c7ebbac656d7"
+                }
+            }
+        },
+        "types.HttpActivateUserRespData": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean"
                 }
             }
         },

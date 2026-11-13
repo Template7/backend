@@ -8,6 +8,30 @@ definitions:
         example: "2021-07-24T20:01:25.874565+08:00"
         type: string
     type: object
+  types.HttpActivateUserReq:
+    properties:
+      activationCode:
+        type: string
+    type: object
+  types.HttpActivateUserResp:
+    properties:
+      code:
+        example: 3000
+        type: integer
+      data:
+        $ref: '#/definitions/types.HttpActivateUserRespData'
+      message:
+        example: ok
+        type: string
+      requestId:
+        example: b8974256-1f17-477f-8638-c7ebbac656d7
+        type: string
+    type: object
+  types.HttpActivateUserRespData:
+    properties:
+      success:
+        type: boolean
+    type: object
   types.HttpCreateUserReq:
     properties:
       email:
@@ -362,6 +386,8 @@ paths:
       - Hello
   /admin/v1/user:
     post:
+      description: Creates the user with a default wallet and returns a one-time activation
+        code (valid 24h).
       parameters:
       - description: Request
         in: body
@@ -401,13 +427,44 @@ paths:
           description: Response
           schema:
             $ref: '#/definitions/types.HttpRespBase'
-        "400":
-          description: Bad Request
+        "404":
+          description: user not found
           schema:
             $ref: '#/definitions/types.HttpRespError'
       security:
       - BearerAuth: []
       summary: Delete user
+      tags:
+      - V1
+      - User
+  /admin/v1/users/{userId}/activate:
+    post:
+      parameters:
+      - description: Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.HttpActivateUserReq'
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Response
+          schema:
+            $ref: '#/definitions/types.HttpActivateUserResp'
+        "400":
+          description: invalid or expired activation code
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
+      security:
+      - BearerAuth: []
+      summary: Activate user
       tags:
       - V1
       - User
@@ -431,6 +488,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/types.HttpRespError'
+        "401":
+          description: invalid user name or password
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
       summary: Native login
       tags:
       - V1
@@ -452,7 +513,11 @@ paths:
           schema:
             $ref: '#/definitions/types.HttpRespBase'
         "400":
-          description: Bad Request
+          description: invalid body or insufficient balance
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
+        "404":
+          description: source wallet not found or not owned by the caller
           schema:
             $ref: '#/definitions/types.HttpRespError'
       security:
@@ -536,8 +601,8 @@ paths:
           description: Response
           schema:
             $ref: '#/definitions/types.HttpGetWalletResp'
-        "400":
-          description: Bad Request
+        "404":
+          description: wallet not found
           schema:
             $ref: '#/definitions/types.HttpRespError'
       security:
@@ -659,7 +724,7 @@ paths:
           schema:
             $ref: '#/definitions/types.HttpRespBase'
         "400":
-          description: Bad Request
+          description: invalid body or insufficient balance
           schema:
             $ref: '#/definitions/types.HttpRespError'
       security:

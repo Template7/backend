@@ -10,7 +10,6 @@ import (
 	userV1 "github.com/Template7/protobuf/gen/proto/template7/user"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"net/http"
 )
 
 func (s *service) CreateUser(ctx context.Context, req *userV1.CreateUserRequest) (string, error) {
@@ -107,7 +106,7 @@ func (s *service) DeleteUser(ctx context.Context, userId string) error {
 	if err := s.db.DeleteUser(ctx, userId); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			log.Info("user not found")
-			return t7Error.UserNotfound.WithStatus(http.StatusNotFound)
+			return t7Error.UserNotfound
 		}
 		log.WithError(err).Error("fail to delete user")
 		return t7Error.DbOperationFail.WithDetail(err.Error())

@@ -3,11 +3,9 @@ package handler
 import (
 	"github.com/Template7/backend/api/types"
 	"github.com/Template7/backend/internal/auth"
-	middleware "github.com/Template7/backend/internal/route/middleWare"
-	"github.com/Template7/backend/internal/t7Error"
+	"github.com/Template7/backend/internal/route/response"
 	"github.com/Template7/common/logger"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type AuthController struct {
@@ -30,50 +28,22 @@ func NewAuthController(service auth.Auth, log *logger.Logger) *AuthController {
 // @produce json
 // @Success 200 {object} types.HttpLoginResp "Response"
 // @failure 400 {object} types.HttpRespError
+// @failure 401 {object} types.HttpRespError "invalid user name or password"
 // @Router /api/v1/login/native [post]
 func (a *AuthController) NativeLogin(c *gin.Context) {
-	log := a.log.WithContext(c)
-	log.Debug("handle native login")
-
 	var req types.HttpLoginReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		log.WithError(err).Warn("invalid body")
-		c.JSON(http.StatusBadRequest, types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Error.InvalidBody.Code),
-			Message:   t7Error.InvalidBody.Message,
-		})
+		response.BadRequest(c, err.Error())
 		return
 	}
 
 	token, err := a.service.Login(c, req.Username, req.Password)
 	if err != nil {
-		defer c.Abort()
-		t7Err, ok := t7Error.ToT7Error(err)
-		if !ok {
-			log.WithError(err).Error("unknown error")
-			c.JSON(http.StatusInternalServerError, types.HttpRespBase{
-				RequestId: c.GetHeader(middleware.HeaderRequestId),
-				Code:      int(t7Error.Unknown.Code),
-				Message:   t7Error.Unknown.Message,
-			})
-			return
-		}
-		c.JSON(t7Err.GetStatus(), types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      int(t7Err.Code),
-			Message:   t7Err.Message,
-		})
+		response.Error(c, err)
 		return
 	}
 
-	lr := types.HttpLoginResp{
-		HttpRespBase: types.HttpRespBase{
-			RequestId: c.GetHeader(middleware.HeaderRequestId),
-			Code:      types.HttpRespCodeOk,
-			Message:   types.HttpRespMsgOk,
-		},
-	}
-	lr.Data.Token = token
-	c.JSON(http.StatusOK, lr)
+	resp := types.HttpLoginResp{HttpRespBase: response.Ok(c)}
+	resp.Data.Token = token
+	response.JSON(c, resp)
 }

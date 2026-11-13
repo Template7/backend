@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Template7/backend/api/types"
+	"github.com/Template7/backend/internal/route/response"
 	"github.com/Template7/backend/internal/t7Error"
 	"github.com/gin-gonic/gin"
 	"net"
@@ -43,7 +44,7 @@ func (m *Controller) RecoverMiddleware(c *gin.Context) {
 			return
 		}
 		c.AbortWithStatusJSON(http.StatusInternalServerError, types.HttpRespBase{
-			RequestId: c.GetHeader(HeaderRequestId),
+			RequestId: response.RequestId(c),
 			Code:      int(t7Error.Unknown.Code),
 			Message:   t7Error.Unknown.Message,
 		})

@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/Template7/backend/internal/config"
 	"github.com/Template7/backend/internal/route/handler"
-	middleware "github.com/Template7/backend/internal/route/middleWare"
+	"github.com/Template7/backend/internal/route/middleware"
 	"github.com/Template7/common/logger"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -54,7 +54,7 @@ func (a *App) SetupRoutes() *gin.Engine {
 
 	// admin
 	adminV1 := a.route.Group("/admin/v1", a.middlewareController.AuthToken, a.middlewareController.Permission)
-	adminV1.POST("/user", a.userController.CreateUser, a.userController.HandleActivationCode)
+	adminV1.POST("/user", a.userController.CreateUser)
 	adminV1.DELETE("/users/:userId", a.userController.DeleteUser)
 	adminV1.POST("/users/:userId/activate", a.userController.ActivateUser)
 

@@ -36,7 +36,7 @@ func New(sqlCore *gorm.DB, mongoCore *mongo.Client, log *logger.Logger) Client {
 	// sql
 	c.sql.core = sqlCore
 
-	c.log.Info("config initialized")
+	c.log.Info("db client initialized")
 	return c
 }
 
