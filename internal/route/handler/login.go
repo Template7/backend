@@ -29,6 +29,7 @@ func NewAuthController(service auth.Auth, log *logger.Logger) *AuthController {
 // @Success 200 {object} types.HttpLoginResp "Response"
 // @failure 400 {object} types.HttpRespError
 // @failure 401 {object} types.HttpRespError "invalid user name or password"
+// @failure 429 {object} types.HttpRespError "too many failed attempts, try again later"
 // @Router /api/v1/login/native [post]
 func (a *AuthController) NativeLogin(c *gin.Context) {
 	var req types.HttpLoginReq
@@ -37,7 +38,7 @@ func (a *AuthController) NativeLogin(c *gin.Context) {
 		return
 	}
 
-	token, err := a.service.Login(c.Request.Context(), req.Username, req.Password)
+	token, err := a.service.Login(c.Request.Context(), req.Username, req.Password, c.ClientIP())
 	if err != nil {
 		response.Error(c, err)
 		return

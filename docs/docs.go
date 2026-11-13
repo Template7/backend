@@ -209,6 +209,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/types.HttpRespError"
                         }
+                    },
+                    "429": {
+                        "description": "too many failed attempts, try again later",
+                        "schema": {
+                            "$ref": "#/definitions/types.HttpRespError"
+                        }
                     }
                 }
             }

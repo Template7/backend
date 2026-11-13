@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"sync"
+	"time"
 
 	"github.com/Template7/backend/internal/cache"
 )
@@ -13,14 +14,20 @@ import (
 var ErrMiss = errors.New("cache miss")
 
 type Memory struct {
-	mu    sync.Mutex
-	codes map[string]string
+	mu       sync.Mutex
+	codes    map[string]string
+	failures map[string]counter
+}
+
+type counter struct {
+	n       int64
+	expires time.Time
 }
 
 var _ cache.Interface = (*Memory)(nil)
 
 func New() *Memory {
-	return &Memory{codes: map[string]string{}}
+	return &Memory{codes: map[string]string{}, failures: map[string]counter{}}
 }
 
 func (m *Memory) SetUserActivationCode(_ context.Context, userId string, code string) error {
@@ -53,4 +60,33 @@ func (m *Memory) Has(userId string) bool {
 	defer m.mu.Unlock()
 	_, ok := m.codes[userId]
 	return ok
+}
+
+func (m *Memory) IncrLoginFailures(_ context.Context, key string, window time.Duration) (int64, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	c := m.failures[key]
+	if c.n == 0 || time.Now().After(c.expires) {
+		c = counter{expires: time.Now().Add(window)}
+	}
+	c.n++
+	m.failures[key] = c
+	return c.n, nil
+}
+
+func (m *Memory) GetLoginFailures(_ context.Context, key string) (int64, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	c := m.failures[key]
+	if time.Now().After(c.expires) {
+		return 0, nil
+	}
+	return c.n, nil
+}
+
+func (m *Memory) ResetLoginFailures(_ context.Context, key string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	delete(m.failures, key)
+	return nil
 }

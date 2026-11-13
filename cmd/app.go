@@ -1,10 +1,15 @@
 package main
 
 import (
+	"context"
+	"strings"
+
+	"github.com/Template7/backend/internal/auth"
 	"github.com/Template7/backend/internal/config"
 	"github.com/Template7/backend/internal/route/handler"
 	"github.com/Template7/backend/internal/route/middleware"
 	"github.com/Template7/common/logger"
+	authV1 "github.com/Template7/protobuf/gen/proto/template7/auth"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -16,12 +21,18 @@ type App struct {
 	userController       *handler.UserController
 	walletController     *handler.WalletController
 	middlewareController *middleware.Controller
+	authService          auth.Auth
 	config               *config.Config
 	Log                  *logger.Logger
 }
 
 func (a *App) SetupRoutes() *gin.Engine {
 	a.route = gin.New()
+	// only believe X-Forwarded-For from configured proxies, so c.ClientIP()
+	// (used for login limits and logs) can't be spoofed by clients
+	if err := a.route.SetTrustedProxies(a.config.Service.TrustedProxies); err != nil {
+		a.Log.WithError(err).Panic("invalid service.trustedProxies")
+	}
 	a.route.Use(a.middlewareController.Request, a.middlewareController.RecoverMiddleware)
 
 	a.route.GET("", handler.HelloPage)
@@ -62,7 +73,25 @@ func (a *App) SetupRoutes() *gin.Engine {
 		a.route.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 
+	// the user role may call every authenticated /api/v1 route; admins pass every
+	// check (checkAdmin in config/rbac_model.conf). Policies follow the routes above.
+	if err := a.authService.SyncRolePolicies(context.Background(), authV1.Role_user, userRules(a.route.Routes())); err != nil {
+		a.Log.WithError(err).Panic("fail to sync RBAC policies")
+	}
+
 	return a.route
+}
+
+// userRules lists the routes the user role may call: everything under /api/v1
+// except the public login routes.
+func userRules(routes gin.RoutesInfo) []auth.Rule {
+	var rules []auth.Rule
+	for _, r := range routes {
+		if strings.HasPrefix(r.Path, "/api/v1/") && !strings.HasPrefix(r.Path, "/api/v1/login/") {
+			rules = append(rules, auth.Rule{Path: r.Path, Method: r.Method})
+		}
+	}
+	return rules
 }
 
 func NewApp(
@@ -70,6 +99,7 @@ func NewApp(
 	userController *handler.UserController,
 	walletController *handler.WalletController,
 	middlewareController *middleware.Controller,
+	authService auth.Auth,
 	config *config.Config,
 	log *logger.Logger) *App {
 	return &App{
@@ -77,6 +107,7 @@ func NewApp(
 		userController:       userController,
 		walletController:     walletController,
 		middlewareController: middlewareController,
+		authService:          authService,
 		config:               config,
 		Log:                  log.WithService("app"),
 	}

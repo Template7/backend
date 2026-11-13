@@ -18,6 +18,9 @@ type Config struct {
 	Env     string
 	Service struct {
 		Port int
+		// TrustedProxies are the proxy/load balancer addresses (IPs or CIDRs) whose
+		// X-Forwarded-For header is believed. Empty: use the connection's address.
+		TrustedProxies []string
 	}
 	Log struct {
 		Format string // json(default) | console
@@ -26,6 +29,13 @@ type Config struct {
 	Auth struct {
 		RbacModelPath string
 		JwtSecret     string
+		Login         struct {
+			// failed logins allowed per username / per client IP within the window;
+			// 0 uses the default
+			MaxFailuresPerUser int
+			MaxFailuresPerIp   int
+			WindowMinutes      int
+		}
 	}
 	Db struct {
 		Sql struct {

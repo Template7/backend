@@ -492,6 +492,10 @@ paths:
           description: invalid user name or password
           schema:
             $ref: '#/definitions/types.HttpRespError'
+        "429":
+          description: too many failed attempts, try again later
+          schema:
+            $ref: '#/definitions/types.HttpRespError'
       summary: Native login
       tags:
       - V1

@@ -14,8 +14,9 @@ const (
 )
 
 type Auth interface {
-	// Login checks the credentials and returns a signed token.
-	Login(ctx context.Context, username string, password string) (token string, err error)
+	// Login checks the credentials and returns a signed token. Failed attempts are
+	// limited per username and per clientIp (may be empty).
+	Login(ctx context.Context, username string, password string, clientIp string) (token string, err error)
 	ParseToken(ctx context.Context, token string) (*UserTokenClaims, error)
 	// CheckPermission reports whether role sub may do act on obj (path, method).
 	CheckPermission(ctx context.Context, sub, obj, act string) bool
@@ -23,4 +24,7 @@ type Auth interface {
 	GetUserRole(ctx context.Context, userId string) (v1.Role, error)
 	AddUserRole(ctx context.Context, userId string, role v1.Role) error
 	DeleteUserRoles(ctx context.Context, userId string) error
+
+	// SyncRolePolicies makes the stored RBAC policies of role exactly rules.
+	SyncRolePolicies(ctx context.Context, role v1.Role, rules []Rule) error
 }

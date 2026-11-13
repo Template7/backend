@@ -29,15 +29,15 @@ func InitializeApp() *App {
 	logger := internal.ProvideLogger(configConfig)
 	gormDB := internal.ProvideSqlCore(configConfig, logger)
 	client := db.New(gormDB, logger)
-	authAuth := auth.New(client, gormDB, logger, configConfig)
-	authController := handler.NewAuthController(authAuth, logger)
 	redisClient := internal.ProvideCacheCore(configConfig, logger)
 	cacheInterface := cache.New(redisClient, logger)
+	authAuth := auth.New(client, gormDB, cacheInterface, logger, configConfig)
+	authController := handler.NewAuthController(authAuth, logger)
 	service := user.New(authAuth, client, cacheInterface, logger)
 	userController := handler.NewUserController(service, logger)
 	walletService := wallet.New(client, logger)
 	walletController := handler.NewWalletController(walletService, logger)
 	controller := middleware.New(service, authAuth, logger)
-	app := NewApp(authController, userController, walletController, controller, configConfig, logger)
+	app := NewApp(authController, userController, walletController, controller, authAuth, configConfig, logger)
 	return app
 }
